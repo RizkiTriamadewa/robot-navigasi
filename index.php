@@ -140,7 +140,7 @@ sort($availableMonths);
                     <button onclick="saveData()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-[0_4px_10px_rgba(22,163,74,0.3)] transition-all">
                         <i class="fa-solid fa-floppy-disk"></i> Simpan
                     </button>
-                    <button onclick="generatePDF()" id="btn-print" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl transition-all opacity-50 cursor-not-allowed">
+                    <button onclick="generatePDF()" id="btn-print" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl transition-all opacity-50 cursor-not-allowed">
                         <i class="fa-solid fa-file-pdf"></i> PDF
                     </button>
                 </div>
@@ -374,13 +374,13 @@ sort($availableMonths);
     function markUnsaved() {
         isDataSaved = false;
         btnPrint.classList.add('opacity-50', 'cursor-not-allowed');
-        btnPrint.classList.remove('hover:bg-blue-500', 'shadow-[0_4px_10px_rgba(37,99,235,0.3)]');
+        btnPrint.classList.remove('hover:bg-red-500', 'shadow-[0_4px_10px_rgba(220,38,38,0.3)]');
     }
 
     function markSaved() {
         isDataSaved = true;
         btnPrint.classList.remove('opacity-50', 'cursor-not-allowed');
-        btnPrint.classList.add('hover:bg-blue-500', 'shadow-[0_4px_10px_rgba(37,99,235,0.3)]');
+        btnPrint.classList.add('hover:bg-red-500', 'shadow-[0_4px_10px_rgba(220,38,38,0.3)]');
     }
 
     if(isDataSaved) markSaved();
