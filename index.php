@@ -7,6 +7,7 @@ $todayData = $query->fetch_assoc();
 
 $initDistance = $todayData ? $todayData['distance_m'] : 0;
 $initWaterUsed = $todayData ? $todayData['water_used_ml'] : 0;
+$initBattery = ($todayData && isset($todayData['battery_percent'])) ? $todayData['battery_percent'] : 100;
 $initPath = $todayData && $todayData['path_data'] ? $todayData['path_data'] : "[]";
 
 // Ambil SELURUH data riwayat untuk tabel
@@ -45,7 +46,7 @@ sort($availableMonths);
         .panel { transition: background-color 0.3s, border-color 0.3s; }
         .btn-control:active { transform: scale(0.95); }
         
-        /* Custom Scroll & Load Animation Setup */
+        /* Animasi Scroll */
         .reveal { 
             opacity: 0; 
             transform: translateY(30px); 
@@ -59,15 +60,13 @@ sort($availableMonths);
         .delay-200 { transition-delay: 200ms; }
         .delay-300 { transition-delay: 300ms; }
         
-        /* Custom Select Styling */
-        .custom-select-wrapper { position: relative; display: inline-block; }
-        .custom-select {
-            appearance: none; -webkit-appearance: none; -moz-appearance: none;
-            padding-right: 2.5rem;
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
-        .custom-select-arrow {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            pointer-events: none; color: #6b7280;
+        select::-ms-expand {
+            display: none;
         }
     </style>
 </head>
@@ -108,12 +107,14 @@ sort($availableMonths);
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">Controls</h2>
-                    <div class="custom-select-wrapper shadow-sm rounded-lg">
-                        <select id="mode-select" class="custom-select bg-gray-50 border border-gray-200 text-gray-700 font-medium text-sm px-4 py-2 rounded-lg outline-none cursor-pointer hover:bg-gray-100 focus:border-teal-400 focus:ring-2 focus:ring-teal-100 transition dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:hover:bg-slate-600 dark:focus:ring-teal-900">
+                    <div class="relative inline-block">
+                        <select id="mode-select" class="block w-full bg-gray-50 border border-gray-200 text-gray-700 font-medium text-sm pl-4 pr-10 py-2 rounded-lg outline-none cursor-pointer hover:bg-gray-100 focus:border-teal-400 focus:ring-2 focus:ring-teal-100 transition shadow-sm dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:hover:bg-slate-600 dark:focus:ring-teal-900">
                             <option value="manual">Manual Mode</option>
                             <option value="auto">Auto Mode</option>
                         </select>
-                        <i class="fa-solid fa-chevron-down custom-select-arrow dark:text-gray-300"></i>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-300">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
                     </div>
                 </div>
 
@@ -128,6 +129,10 @@ sort($availableMonths);
             </div>
             
             <div class="space-y-3">
+                <button onclick="confirmRefresh()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl shadow-[0_4px_10px_rgba(51,65,85,0.3)] transition-all dark:bg-slate-600 dark:hover:bg-slate-500">
+                    <i class="fa-solid fa-rotate mr-2"></i> Refresh Halaman
+                </button>
+                
                 <button onclick="sprayWater()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 rounded-xl shadow-[0_4px_10px_rgba(13,148,136,0.3)] transition-all">
                     <i class="fa-solid fa-droplet mr-2"></i> Semprot Air (50ml)
                 </button>
@@ -135,7 +140,7 @@ sort($availableMonths);
                     <button onclick="saveData()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-[0_4px_10px_rgba(22,163,74,0.3)] transition-all">
                         <i class="fa-solid fa-floppy-disk"></i> Simpan
                     </button>
-                    <button onclick="generatePDF()" id="btn-print" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_4px_10px_rgba(37,99,235,0.3)] opacity-50 cursor-not-allowed">
+                    <button onclick="generatePDF()" id="btn-print" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl transition-all opacity-50 cursor-not-allowed">
                         <i class="fa-solid fa-file-pdf"></i> PDF
                     </button>
                 </div>
@@ -189,18 +194,20 @@ sort($availableMonths);
             </h2>
             
             <div class="flex space-x-3">
-                <div class="custom-select-wrapper border border-gray-300 rounded-lg dark:border-slate-600">
-                    <select id="filter-year" onchange="filterTable()" class="custom-select bg-gray-50 text-gray-700 text-sm px-4 py-2 rounded-lg outline-none cursor-pointer dark:bg-slate-700 dark:text-white">
+                <div class="relative inline-block border border-gray-300 rounded-lg dark:border-slate-600">
+                    <select id="filter-year" onchange="filterTable()" class="block w-full bg-gray-50 text-gray-700 text-sm pl-4 pr-9 py-2 rounded-lg outline-none cursor-pointer dark:bg-slate-700 dark:text-white hover:bg-gray-100 transition shadow-sm">
                         <option value="all">Semua Tahun</option>
                         <?php foreach($availableYears as $y): ?>
                             <option value="<?= $y ?>"><?= $y ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <i class="fa-solid fa-chevron-down custom-select-arrow dark:text-gray-300 text-xs"></i>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-300">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
                 
-                <div class="custom-select-wrapper border border-gray-300 rounded-lg dark:border-slate-600">
-                    <select id="filter-month" onchange="filterTable()" class="custom-select bg-gray-50 text-gray-700 text-sm px-4 py-2 rounded-lg outline-none cursor-pointer dark:bg-slate-700 dark:text-white">
+                <div class="relative inline-block border border-gray-300 rounded-lg dark:border-slate-600">
+                    <select id="filter-month" onchange="filterTable()" class="block w-full bg-gray-50 text-gray-700 text-sm pl-4 pr-9 py-2 rounded-lg outline-none cursor-pointer dark:bg-slate-700 dark:text-white hover:bg-gray-100 transition shadow-sm">
                         <option value="all">Semua Bulan</option>
                         <option value="01">Januari</option>
                         <option value="02">Februari</option>
@@ -215,7 +222,9 @@ sort($availableMonths);
                         <option value="11">November</option>
                         <option value="12">Desember</option>
                     </select>
-                    <i class="fa-solid fa-chevron-down custom-select-arrow dark:text-gray-300 text-xs"></i>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-300">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -225,6 +234,7 @@ sort($availableMonths);
                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-slate-800 dark:text-gray-400">
                     <tr>
                         <th class="px-6 py-4 rounded-tl-xl">Tanggal</th>
+                        <th class="px-6 py-4">Baterai Akhir</th>
                         <th class="px-6 py-4">Total Jarak (m)</th>
                         <th class="px-6 py-4">Air Dikeluarkan (ml)</th>
                         <th class="px-6 py-4 rounded-tr-xl">Sisa Tangki Air (ml)</th>
@@ -233,7 +243,7 @@ sort($availableMonths);
                 <tbody id="history-table-body" class="divide-y divide-gray-200 dark:divide-slate-700">
                     <?php if(empty($historyData)): ?>
                         <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-500">Belum ada data riwayat yang tersimpan.</td>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">Belum ada data riwayat yang tersimpan.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach($historyData as $row): 
@@ -241,14 +251,20 @@ sort($availableMonths);
                             $year = date('Y', $time);
                             $month = date('m', $time);
                             $sisaAir = 2000 - $row['water_used_ml'];
+                            $btr = isset($row['battery_percent']) ? number_format($row['battery_percent'], 1) : 100.0;
                         ?>
                         <tr class="bg-white hover:bg-gray-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors" data-year="<?= $year ?>" data-month="<?= $month ?>">
                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                 <?= date('d F Y', $time) ?>
                             </td>
-                            <td class="px-6 py-4"><?= number_format($row['distance_m'], 1) ?></td>
-                            <td class="px-6 py-4"><span class="px-2 py-1 bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded-md"><?= $row['water_used_ml'] ?></span></td>
-                            <td class="px-6 py-4"><span class="px-2 py-1 bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400 rounded-md"><?= max(0, $sisaAir) ?></span></td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-md font-medium">
+                                    <i class="fa-solid fa-bolt text-[10px] mr-1"></i><?= $btr ?>%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded-md font-medium"><?= number_format($row['distance_m'], 1) ?></span></td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded-md font-medium"><?= $row['water_used_ml'] ?></span></td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400 rounded-md font-medium"><?= max(0, $sisaAir) ?></span></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -256,10 +272,9 @@ sort($availableMonths);
             </table>
         </div>
     </div>
-
 </div>
 
-<div id="pdf-wrapper" style="display: none; position: absolute; top: 0; left: 0; width: 100%; z-index: 9999; background: white; padding: 10px;">
+<div id="pdf-wrapper" style="display: none; position: absolute; top: 0; left: -9999px; width: 100%; z-index: -1; background: white; padding: 10px;">
     <div id="pdf-report-template" class="mx-auto w-[700px] bg-white text-black p-8 font-sans border border-gray-200">
         <div class="border-b-2 border-gray-800 pb-4 mb-6 flex justify-between items-end">
             <div>
@@ -268,7 +283,7 @@ sort($availableMonths);
             </div>
             <div class="text-right">
                 <p class="font-bold">Dicetak Pada:</p>
-                <p id="pdf-datetime" class="text-sm"><?= date('d F Y') ?></p>
+                <p id="pdf-datetime" class="text-sm"></p>
             </div>
         </div>
         
@@ -293,14 +308,14 @@ sort($availableMonths);
         </table>
 
         <h3 class="font-bold text-lg mb-3">Peta Jalur Robot Keseluruhan (Full Track Map)</h3>
-        <div class="border border-gray-400 p-2 flex justify-center bg-gray-50 rounded">
+        <div class="border border-gray-400 p-2 flex justify-center bg-gray-50 rounded" style="page-break-inside: avoid;">
             <img id="pdf-map-image" src="" alt="Map Track" style="max-width: 100%; height: auto;">
         </div>
     </div>
 </div>
 
 <script>
-    // --- ANIMASI SCROLL (INTERSECTION OBSERVER) ---
+    // --- Observer untuk Animasi UI ---
     document.addEventListener("DOMContentLoaded", function() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -315,11 +330,11 @@ sort($availableMonths);
         });
     });
 
-    // --- SETUP TANGGAL ---
+    // --- Setup Tanggal Header ---
     const nowInit = new Date();
     document.getElementById('header-date').innerText = nowInit.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
-    // --- DARK MODE LOGIC ---
+    // --- Dark Mode Logic ---
     const htmlTag = document.documentElement;
     const themeIcon = document.getElementById('theme-icon');
     
@@ -341,13 +356,13 @@ sort($availableMonths);
         drawMap();
     }
 
-    // --- INISIALISASI DATA ---
+    // --- Inisialisasi Data Robot ---
     let maxWater = 2000;
     let robotData = {
         distance: <?= $initDistance ?>,
         waterUsed: <?= $initWaterUsed ?>,
         waterRemaining: maxWater - <?= $initWaterUsed ?>,
-        battery: 100,
+        battery: <?= $initBattery ?>,
         path: <?= $initPath ?> 
     };
 
@@ -370,7 +385,7 @@ sort($availableMonths);
 
     if(isDataSaved) markSaved();
 
-    // --- SETUP CANVAS MAP ---
+    // --- Setup Canvas Main UI ---
     const canvas = document.getElementById('minimap');
     const ctx = canvas.getContext('2d');
     
@@ -391,6 +406,7 @@ sort($availableMonths);
         drawMap();
     }
 
+    // --- Draw Main Map (Camera Follow) ---
     function drawMap() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let isDark = htmlTag.classList.contains('dark');
@@ -418,7 +434,7 @@ sort($availableMonths);
             for (let i = 1; i < robotData.path.length; i++) {
                 ctx.lineTo(robotData.path[i].x, robotData.path[i].y);
             }
-            ctx.strokeStyle = '#0d9488'; // Teal lebih pekat
+            ctx.strokeStyle = '#0d9488'; 
             ctx.lineWidth = 4;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
@@ -434,7 +450,7 @@ sort($availableMonths);
         ctx.restore();
     }
 
-    // --- ACTIONS ---
+    // --- Action Controls ---
     function moveRobot(direction) {
         if(document.getElementById('mode-select').value === 'auto') {
             Swal.fire({ icon: 'warning', title: 'Mode Auto Aktif', text: 'Ubah ke Manual Mode untuk menggunakan kontrol arah.' });
@@ -498,7 +514,7 @@ sort($availableMonths);
             if(data.status === 'success') {
                 markSaved(); 
                 Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Data harian berhasil diperbarui di database.', timer: 1500, showConfirmButton: false }).then(() => {
-                    location.reload(); // Refresh agar tabel history terupdate
+                    location.reload(); 
                 });
             } else {
                 Swal.fire({ icon: 'error', title: 'Gagal!', text: 'Terjadi kesalahan saat menyimpan data.' });
@@ -535,6 +551,28 @@ sort($availableMonths);
         });
     }
 
+    // --- FUNGSI VALIDASI TOMBOL REFRESH ---
+    function confirmRefresh() {
+        if (!isDataSaved) {
+            Swal.fire({
+                title: 'Data Belum Disimpan!',
+                text: "Kamu memiliki progres yang belum tersimpan. Yakin ingin me-refresh halaman? (Progres akan hilang)",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Refresh!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+        } else {
+            location.reload();
+        }
+    }
+
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowUp') { event.preventDefault(); moveRobot('up'); }
         else if (event.key === 'ArrowDown') { event.preventDefault(); moveRobot('down'); }
@@ -542,7 +580,6 @@ sort($availableMonths);
         else if (event.key === 'ArrowRight') { event.preventDefault(); moveRobot('right'); }
     });
 
-    // --- FILTER TABEL LOGIC ---
     function filterTable() {
         let selectedYear = document.getElementById('filter-year').value;
         let selectedMonth = document.getElementById('filter-month').value;
@@ -564,83 +601,138 @@ sort($availableMonths);
             }
         });
 
-        // Hapus info "tidak ada data" sebelumnya jika ada
         let emptyInfo = document.getElementById('empty-filter-info');
         if(emptyInfo) emptyInfo.remove();
 
-        // Munculkan notifikasi baris kosong jika filter tidak membuahkan hasil
         if(visibleCount === 0 && rows.length > 0) {
             let tr = document.createElement('tr');
             tr.id = 'empty-filter-info';
-            tr.innerHTML = '<td colspan="4" class="px-6 py-8 text-center text-gray-500">Tidak ada riwayat pada bulan/tahun yang dipilih.</td>';
+            tr.innerHTML = '<td colspan="5" class="px-6 py-8 text-center text-gray-500">Tidak ada riwayat pada bulan/tahun yang dipilih.</td>';
             document.getElementById('history-table-body').appendChild(tr);
         }
     }
 
-    // --- PDF LOGIC (Sama persis tidak diubah agar tetap bagus) ---
+    // --- Generate PDF map (Full Canvas Size) ---
     function getFullMapBase64() {
         if (robotData.path.length === 0) return canvas.toDataURL("image/png");
+
         let minX = robotData.path[0].x, maxX = robotData.path[0].x;
         let minY = robotData.path[0].y, maxY = robotData.path[0].y;
         for(let p of robotData.path) {
-            if(p.x < minX) minX = p.x; if(p.x > maxX) maxX = p.x;
-            if(p.y < minY) minY = p.y; if(p.y > maxY) maxY = p.y;
+            if(p.x < minX) minX = p.x;
+            if(p.x > maxX) maxX = p.x;
+            if(p.y < minY) minY = p.y;
+            if(p.y > maxY) maxY = p.y;
         }
 
-        let pad = 60; let w = (maxX - minX) + pad * 2; let h = (maxY - minY) + pad * 2;
-        w = Math.max(w, 700); h = Math.max(h, 350);
+        let pad = 60;
+        let w = (maxX - minX) + pad * 2;
+        let h = (maxY - minY) + pad * 2;
 
-        let offCanvas = document.createElement('canvas'); offCanvas.width = w; offCanvas.height = h;
+        w = Math.max(w, 700);
+        h = Math.max(h, 350);
+
+        let offCanvas = document.createElement('canvas');
+        offCanvas.width = w;
+        offCanvas.height = h;
         let octx = offCanvas.getContext('2d');
-        octx.fillStyle = '#f8fafc'; octx.fillRect(0, 0, w, h);
-        octx.strokeStyle = '#e2e8f0'; octx.lineWidth = 1;
+
+        octx.fillStyle = '#f8fafc';
+        octx.fillRect(0, 0, w, h);
+
+        octx.strokeStyle = '#e5e7eb';
+        octx.lineWidth = 1;
         for(let i=0; i<=w; i+=40) { octx.beginPath(); octx.moveTo(i,0); octx.lineTo(i,h); octx.stroke(); }
         for(let i=0; i<=h; i+=40) { octx.beginPath(); octx.moveTo(0,i); octx.lineTo(w,i); octx.stroke(); }
 
-        let cx = (w - (maxX - minX)) / 2 - minX; let cy = (h - (maxY - minY)) / 2 - minY;
-        octx.save(); octx.translate(cx, cy);
+        let cx = (w - (maxX - minX)) / 2 - minX;
+        let cy = (h - (maxY - minY)) / 2 - minY;
+
+        octx.save();
+        octx.translate(cx, cy);
 
         if(robotData.path.length > 1) {
-            octx.beginPath(); octx.moveTo(robotData.path[0].x, robotData.path[0].y);
-            for (let i = 1; i < robotData.path.length; i++) octx.lineTo(robotData.path[i].x, robotData.path[i].y);
-            octx.strokeStyle = '#0d9488'; octx.lineWidth = 4; octx.lineJoin = 'round'; octx.lineCap = 'round'; octx.stroke();
+            octx.beginPath();
+            octx.moveTo(robotData.path[0].x, robotData.path[0].y);
+            for (let i = 1; i < robotData.path.length; i++) {
+                octx.lineTo(robotData.path[i].x, robotData.path[i].y);
+            }
+            octx.strokeStyle = '#0d9488'; 
+            octx.lineWidth = 4;
+            octx.lineJoin = 'round';
+            octx.lineCap = 'round';
+            octx.stroke();
         }
 
-        octx.fillStyle = '#1e293b'; octx.shadowColor = '#0d9488'; octx.shadowBlur = 10;
-        octx.fillRect(rx - 10, ry - 10, 20, 20); octx.restore();
+        octx.fillStyle = '#1e293b';
+        octx.shadowColor = '#0d9488';
+        octx.shadowBlur = 10;
+        octx.fillRect(rx - 10, ry - 10, 20, 20);
+
+        octx.restore();
         
         return offCanvas.toDataURL("image/png");
     }
 
+    // --- Cetak PDF ---
     function generatePDF() {
         if(!isDataSaved) {
-            Swal.fire({ icon: 'warning', title: 'Data Belum Disimpan!', text: 'Harap klik "Simpan Data" terlebih dahulu.' }); return;
+            Swal.fire({
+                icon: 'warning',
+                title: 'Data Belum Disimpan!',
+                text: 'Harap klik tombol "Simpan Data" terlebih dahulu sebelum mencetak laporan.'
+            });
+            return;
         }
 
         let printTime = new Date();
-        let fullDateTime = printTime.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ' - ' + printTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+        let dateOpts = { day: '2-digit', month: 'short', year: 'numeric' };
+        let timeOpts = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        let fullDateTime = printTime.toLocaleDateString('id-ID', dateOpts) + ' - ' + printTime.toLocaleTimeString('id-ID', timeOpts) + ' WIB';
+        
         document.getElementById('pdf-datetime').innerText = fullDateTime;
         document.getElementById('pdf-battery').innerText = robotData.battery.toFixed(1) + "%";
         document.getElementById('pdf-distance').innerText = robotData.distance.toFixed(1);
         document.getElementById('pdf-water-used').innerText = robotData.waterUsed;
         document.getElementById('pdf-water-rem').innerText = robotData.waterRemaining;
         
-        const pdfWrapper = document.getElementById('pdf-wrapper'); pdfWrapper.style.display = 'block';
+        const pdfWrapper = document.getElementById('pdf-wrapper');
+        pdfWrapper.style.display = 'block';
+
         let pdfMapImage = document.getElementById('pdf-map-image');
         
-        Swal.fire({ title: 'Menyiapkan Laporan...', text: 'Merender peta keseluruhan...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+        Swal.fire({
+            title: 'Menyiapkan Laporan...',
+            text: 'Merender peta keseluruhan...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading() }
+        });
 
         pdfMapImage.onload = function() {
             const element = document.getElementById('pdf-report-template');
-            const opt = { margin: 0.3, filename: 'Laporan_NavX_' + new Date().toISOString().slice(0,10) + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            
+            const opt = {
+                margin:       0.4,
+                filename:     'Laporan_NavX_' + new Date().toISOString().slice(0,10) + '.pdf',
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
             html2pdf().set(opt).from(element).save().then(() => {
-                pdfWrapper.style.display = 'none'; Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Laporan PDF berhasil di-download.' });
+                pdfWrapper.style.display = 'none'; 
+                Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Laporan PDF berhasil di-download.' });
             });
         };
+        
         pdfMapImage.src = getFullMapBase64(); 
     }
 
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+    // Jam Berjalan di Header Dashboard
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
+    }, 1000);
+
     updateUI();
 </script>
 

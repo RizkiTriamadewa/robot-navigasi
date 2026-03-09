@@ -15,24 +15,22 @@ $data = json_decode($input_data, true);
 if ($data) {
     $date = date('Y-m-d');
     $distance = floatval($data['distance']);
-    // FIXED: Mengubah 'water_used' menjadi 'waterUsed' agar sama dengan variabel JavaScript
     $water_used = floatval($data['waterUsed']); 
+    $battery = floatval($data['battery']); 
     $path_data = $conn->real_escape_string(json_encode($data['path']));
 
-    // Cek apakah data hari ini sudah ada
     $check = $conn->query("SELECT id FROM daily_logs WHERE log_date = '$date'");
     
     if ($check->num_rows > 0) {
-        // Update data hari ini
         $sql = "UPDATE daily_logs SET 
                 distance_m = $distance, 
                 water_used_ml = $water_used, 
+                battery_percent = $battery,
                 path_data = '$path_data' 
                 WHERE log_date = '$date'";
     } else {
-        // Insert data baru untuk hari ini
-        $sql = "INSERT INTO daily_logs (log_date, distance_m, water_used_ml, path_data) 
-                VALUES ('$date', $distance, $water_used, '$path_data')";
+        $sql = "INSERT INTO daily_logs (log_date, distance_m, water_used_ml, battery_percent, path_data) 
+                VALUES ('$date', $distance, $water_used, $battery, '$path_data')";
     }
 
     if ($conn->query($sql) === TRUE) {
