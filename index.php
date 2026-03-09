@@ -47,27 +47,33 @@ sort($availableMonths);
         .btn-control:active { transform: scale(0.95); }
         
         /* Animasi Scroll */
-        .reveal { 
-            opacity: 0; 
-            transform: translateY(30px); 
-            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); 
-        }
-        .reveal.active { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
         .delay-100 { transition-delay: 100ms; }
         .delay-200 { transition-delay: 200ms; }
         .delay-300 { transition-delay: 300ms; }
         
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        select::-ms-expand { display: none; }
+
+        /* Efek TV Static dummy Camera */
+        .tv-static {
+            background-image: repeating-radial-gradient(
+                circle at 17% 32%,
+                rgba(255,255,255,0.05),
+                rgba(255,255,255,0.05) 1px,
+                rgba(0,0,0,0.1) 1px,
+                rgba(0,0,0,0.1) 2px
+            );
+            background-size: 100px 100px;
+            animation: staticAnim 0.2s infinite linear;
         }
-        select::-ms-expand {
-            display: none;
+        @keyframes staticAnim {
+            0% { background-position: 0 0; }
+            100% { background-position: 10px 100px; }
         }
+        .blinking-record { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8 font-sans bg-gray-100 text-gray-800 dark:bg-[#1a1e29] dark:text-[#a0aec0]">
@@ -89,9 +95,34 @@ sort($availableMonths);
         </div>
     </div>
 
+    <div class="reveal delay-100 panel rounded-xl p-4 flex flex-col bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] w-full">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase"><i class="fa-solid fa-video mr-2"></i> Live FPV Camera</h2>
+            <span class="text-xs font-bold text-red-500 blinking-record flex items-center">
+                <span class="w-2 h-2 rounded-full bg-red-500 mr-1 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span> REC
+            </span>
+        </div>
+        
+        <div class="relative flex-grow bg-gray-900 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-800 flex items-center justify-center min-h-[350px] md:min-h-[450px] shadow-inner tv-static">
+            <div class="absolute inset-0 pointer-events-none border-[rgba(20,184,166,0.3)] border-2 m-4 rounded-lg"></div>
+            <div class="absolute top-1/2 left-0 w-full h-[1px] bg-teal-500/30 pointer-events-none"></div>
+            <div class="absolute left-1/2 top-0 h-full w-[1px] bg-teal-500/30 pointer-events-none"></div>
+            
+            <div class="absolute top-6 right-6 text-teal-500 text-xs font-mono font-bold tracking-widest bg-black/50 px-2 py-1 rounded">
+                CAM_BAT: 98%
+            </div>
+            
+            <div class="text-center z-10 bg-black/60 px-6 py-4 rounded-xl backdrop-blur-sm border border-gray-700">
+                <i class="fa-solid fa-satellite-dish text-4xl text-gray-400 mb-3 animate-pulse"></i>
+                <p class="text-gray-300 font-mono text-sm tracking-widest">WAITING FOR VIDEO STREAM...</p>
+                <p class="text-teal-500 font-mono text-xs mt-2">IP: 192.168.1.100:8080</p>
+            </div>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <div class="reveal delay-100 lg:col-span-2 panel rounded-xl p-4 flex flex-col bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
+        <div class="reveal delay-200 lg:col-span-2 panel rounded-xl p-4 flex flex-col bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">Map & Tracking (Auto-Follow Camera)</h2>
                 <button onclick="resetData()" class="text-xs bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition shadow-sm">
@@ -149,7 +180,7 @@ sort($availableMonths);
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="reveal delay-100 panel p-5 rounded-2xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left space-y-3 md:space-y-0 md:space-x-4 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
+        <div class="reveal delay-300 panel p-5 rounded-2xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left space-y-3 md:space-y-0 md:space-x-4 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
             <div class="w-14 h-14 flex items-center justify-center rounded-2xl bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 shrink-0">
                 <i class="fa-solid fa-battery-three-quarters text-2xl"></i>
             </div>
@@ -158,7 +189,7 @@ sort($availableMonths);
                 <div class="text-2xl font-extrabold text-gray-900 dark:text-white" id="val-battery">100%</div>
             </div>
         </div>
-        <div class="reveal delay-200 panel p-5 rounded-2xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left space-y-3 md:space-y-0 md:space-x-4 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
+        <div class="reveal delay-300 panel p-5 rounded-2xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left space-y-3 md:space-y-0 md:space-x-4 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
             <div class="w-14 h-14 flex items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 shrink-0">
                 <i class="fa-solid fa-route text-2xl"></i>
             </div>
@@ -274,7 +305,7 @@ sort($availableMonths);
     </div>
 </div>
 
-<div id="pdf-wrapper" style="display: none; position: absolute; top: 0; left: -9999px; width: 100%; z-index: -1; background: white; padding: 10px;">
+<div id="pdf-wrapper" style="display: none; position: absolute; top: 0; left: 0; width: 100%; z-index: -9999; background: white; padding: 10px;">
     <div id="pdf-report-template" class="mx-auto w-[700px] bg-white text-black p-8 font-sans border border-gray-200">
         <div class="border-b-2 border-gray-800 pb-4 mb-6 flex justify-between items-end">
             <div>
@@ -315,7 +346,6 @@ sort($availableMonths);
 </div>
 
 <script>
-    // --- Observer untuk Animasi UI ---
     document.addEventListener("DOMContentLoaded", function() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -330,11 +360,9 @@ sort($availableMonths);
         });
     });
 
-    // --- Setup Tanggal Header ---
     const nowInit = new Date();
     document.getElementById('header-date').innerText = nowInit.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
-    // --- Dark Mode Logic ---
     const htmlTag = document.documentElement;
     const themeIcon = document.getElementById('theme-icon');
     
@@ -356,7 +384,6 @@ sort($availableMonths);
         drawMap();
     }
 
-    // --- Inisialisasi Data Robot ---
     let maxWater = 2000;
     let robotData = {
         distance: <?= $initDistance ?>,
@@ -385,7 +412,6 @@ sort($availableMonths);
 
     if(isDataSaved) markSaved();
 
-    // --- Setup Canvas Main UI ---
     const canvas = document.getElementById('minimap');
     const ctx = canvas.getContext('2d');
     
@@ -406,7 +432,6 @@ sort($availableMonths);
         drawMap();
     }
 
-    // --- Draw Main Map (Camera Follow) ---
     function drawMap() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let isDark = htmlTag.classList.contains('dark');
@@ -450,7 +475,6 @@ sort($availableMonths);
         ctx.restore();
     }
 
-    // --- Action Controls ---
     function moveRobot(direction) {
         if(document.getElementById('mode-select').value === 'auto') {
             Swal.fire({ icon: 'warning', title: 'Mode Auto Aktif', text: 'Ubah ke Manual Mode untuk menggunakan kontrol arah.' });
@@ -551,7 +575,6 @@ sort($availableMonths);
         });
     }
 
-    // --- FUNGSI VALIDASI TOMBOL REFRESH ---
     function confirmRefresh() {
         if (!isDataSaved) {
             Swal.fire({
@@ -612,7 +635,6 @@ sort($availableMonths);
         }
     }
 
-    // --- Generate PDF map (Full Canvas Size) ---
     function getFullMapBase64() {
         if (robotData.path.length === 0) return canvas.toDataURL("image/png");
 
@@ -674,7 +696,6 @@ sort($availableMonths);
         return offCanvas.toDataURL("image/png");
     }
 
-    // --- Cetak PDF ---
     function generatePDF() {
         if(!isDataSaved) {
             Swal.fire({
@@ -708,6 +729,10 @@ sort($availableMonths);
             didOpen: () => { Swal.showLoading() }
         });
 
+        // PERBAIKAN UTAMA: Menyimpan posisi scroll saat ini, lalu naik ke atas.
+        let currentScrollY = window.scrollY;
+        window.scrollTo(0, 0);
+
         pdfMapImage.onload = function() {
             const element = document.getElementById('pdf-report-template');
             
@@ -715,12 +740,21 @@ sort($availableMonths);
                 margin:       0.4,
                 filename:     'Laporan_NavX_' + new Date().toISOString().slice(0,10) + '.pdf',
                 image:        { type: 'jpeg', quality: 1.0 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    scrollY: 0 // Pastikan canvas merender dari paling atas halaman
+                },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
                 pdfWrapper.style.display = 'none'; 
+                
+                // Kembalikan posisi scroll ke tempat semula
+                window.scrollTo(0, currentScrollY);
+                
                 Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Laporan PDF berhasil di-download.' });
             });
         };
@@ -728,7 +762,6 @@ sort($availableMonths);
         pdfMapImage.src = getFullMapBase64(); 
     }
 
-    // Jam Berjalan di Header Dashboard
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
     }, 1000);
