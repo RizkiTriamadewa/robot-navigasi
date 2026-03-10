@@ -14,33 +14,38 @@ $data = json_decode($input_data, true);
 
 if ($data) {
     $date = date('Y-m-d');
-    $distance = floatval($data['distance']);
-    $water_used = floatval($data['waterUsed']); 
-    $battery = floatval($data['battery']); 
-    $path_data = $conn->real_escape_string(json_encode($data['path']));
+    $distance = $data['distance'];
+    $waterUsed = $data['waterUsed'];
+    $battery = $data['battery'];
+    
+    // Ubah array path dan sprayPoints menjadi string JSON
+    $pathData = json_encode($data['path']);
+    $sprayData = json_encode($data['sprayPoints']); // <--- TAMBAHAN BARU
 
+    // Cek apakah data hari ini sudah ada
     $check = $conn->query("SELECT id FROM daily_logs WHERE log_date = '$date'");
     
     if ($check->num_rows > 0) {
-        $sql = "UPDATE daily_logs SET 
-                distance_m = $distance, 
-                water_used_ml = $water_used, 
-                battery_percent = $battery,
-                path_data = '$path_data' 
-                WHERE log_date = '$date'";
+        // Jika sudah ada, lakukan UPDATE (Tambahkan spray_data di sini)
+        $query = "UPDATE daily_logs SET 
+                    distance_m = '$distance', 
+                    water_used_ml = '$waterUsed', 
+                    battery_percent = '$battery', 
+                    path_data = '$pathData',
+                    spray_data = '$sprayData' 
+                  WHERE log_date = '$date'";
     } else {
-        $sql = "INSERT INTO daily_logs (log_date, distance_m, water_used_ml, battery_percent, path_data) 
-                VALUES ('$date', $distance, $water_used, $battery, '$path_data')";
+        // Jika belum ada, lakukan INSERT (Tambahkan spray_data di sini)
+        $query = "INSERT INTO daily_logs (log_date, distance_m, water_used_ml, battery_percent, path_data, spray_data) 
+                  VALUES ('$date', '$distance', '$waterUsed', '$battery', '$pathData', '$sprayData')";
     }
 
-    if ($conn->query($sql) === TRUE) {
-        echo json_encode(["status" => "success", "message" => "Data harian tersimpan"]);
+    if ($conn->query($query) === TRUE) {
+        echo json_encode(['status' => 'success']);
     } else {
-        echo json_encode(["status" => "error", "message" => $conn->error]);
+        echo json_encode(['status' => 'error', 'message' => $conn->error]);
     }
 } else {
-    echo json_encode(["status" => "error", "message" => "Tidak ada data yang diterima dari client"]);
+    echo json_encode(['status' => 'error', 'message' => 'No data received']);
 }
-
-$conn->close();
 ?>

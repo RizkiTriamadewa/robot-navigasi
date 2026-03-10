@@ -9,6 +9,8 @@ $initDistance = $todayData ? $todayData['distance_m'] : 0;
 $initWaterUsed = $todayData ? $todayData['water_used_ml'] : 0;
 $initBattery = ($todayData && isset($todayData['battery_percent'])) ? $todayData['battery_percent'] : 100;
 $initPath = $todayData && $todayData['path_data'] ? $todayData['path_data'] : "[]";
+// Tambahan: Siapkan variabel untuk data semprotan air jika nanti ditambahkan ke database
+$initSpray = ($todayData && isset($todayData['spray_data'])) ? $todayData['spray_data'] : "[]";
 
 // Ambil SELURUH data riwayat untuk tabel
 $historyQuery = $conn->query("SELECT * FROM daily_logs ORDER BY log_date DESC");
@@ -32,12 +34,13 @@ sort($availableMonths);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot NAV-X Dashboard</title>
+    <title>Robot Navigasi Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class' }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://img.icons8.com/fluency/48/navigation.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
@@ -390,7 +393,8 @@ sort($availableMonths);
         waterUsed: <?= $initWaterUsed ?>,
         waterRemaining: maxWater - <?= $initWaterUsed ?>,
         battery: <?= $initBattery ?>,
-        path: <?= $initPath ?> 
+        path: <?= $initPath ?>,
+        sprayPoints: <?= $initSpray ?> // Tambahan titik semprotan
     };
 
     if(robotData.waterRemaining < 0) robotData.waterRemaining = 0;
@@ -453,6 +457,7 @@ sort($availableMonths);
         for(let i = startX; i <= endX; i += 40) { ctx.beginPath(); ctx.moveTo(i, startY); ctx.lineTo(i, endY); ctx.stroke(); }
         for(let i = startY; i <= endY; i += 40) { ctx.beginPath(); ctx.moveTo(startX, i); ctx.lineTo(endX, i); ctx.stroke(); }
 
+        // Gambar Garis Path
         if (robotData.path.length > 1) {
             ctx.beginPath();
             ctx.moveTo(robotData.path[0].x, robotData.path[0].y);
@@ -466,6 +471,20 @@ sort($availableMonths);
             ctx.stroke();
         }
 
+        // Gambar Titik Semprotan (Biru)
+        if (robotData.sprayPoints && robotData.sprayPoints.length > 0) {
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.9)'; // Biru
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'white';
+            for (let pt of robotData.sprayPoints) {
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        // Gambar Posisi Robot (Kotak)
         ctx.fillStyle = isDark ? '#ffffff' : '#1e293b';
         ctx.shadowColor = '#0d9488';
         ctx.shadowBlur = 10;
@@ -500,8 +519,13 @@ sort($availableMonths);
         if(robotData.waterRemaining >= 50) {
             robotData.waterUsed += 50;
             robotData.waterRemaining -= 50;
+            
+            // Catat titik semprotan
+            robotData.sprayPoints.push({x: rx, y: ry});
+            
             updateUI();
             
+            // Animasi efek air
             let camX = rx - canvas.width / 2;
             let camY = ry - canvas.height / 2;
             ctx.save();
@@ -568,6 +592,7 @@ sort($availableMonths);
                 robotData.battery = 100;
                 rx = 400; ry = 200;
                 robotData.path = [{x: rx, y: ry}];
+                robotData.sprayPoints = []; // Reset juga titik semprotan
                 updateUI();
                 markUnsaved(); 
                 Swal.fire('Di-reset!', 'Map berhasil dibersihkan. Silakan klik Simpan Data.', 'success');
@@ -673,6 +698,7 @@ sort($availableMonths);
         octx.save();
         octx.translate(cx, cy);
 
+        // Gambar Path di PDF
         if(robotData.path.length > 1) {
             octx.beginPath();
             octx.moveTo(robotData.path[0].x, robotData.path[0].y);
@@ -686,6 +712,20 @@ sort($availableMonths);
             octx.stroke();
         }
 
+        // Gambar Titik Semprotan di PDF
+        if (robotData.sprayPoints && robotData.sprayPoints.length > 0) {
+            octx.fillStyle = 'rgba(59, 130, 246, 0.9)'; // Biru
+            octx.lineWidth = 1.5;
+            octx.strokeStyle = 'white';
+            for (let pt of robotData.sprayPoints) {
+                octx.beginPath();
+                octx.arc(pt.x, pt.y, 6, 0, 2 * Math.PI);
+                octx.fill();
+                octx.stroke();
+            }
+        }
+
+        // Gambar Robot di PDF
         octx.fillStyle = '#1e293b';
         octx.shadowColor = '#0d9488';
         octx.shadowBlur = 10;
@@ -729,7 +769,6 @@ sort($availableMonths);
             didOpen: () => { Swal.showLoading() }
         });
 
-        // PERBAIKAN UTAMA: Menyimpan posisi scroll saat ini, lalu naik ke atas.
         let currentScrollY = window.scrollY;
         window.scrollTo(0, 0);
 
@@ -744,7 +783,7 @@ sort($availableMonths);
                     scale: 2, 
                     useCORS: true, 
                     logging: false,
-                    scrollY: 0 // Pastikan canvas merender dari paling atas halaman
+                    scrollY: 0
                 },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
@@ -752,7 +791,6 @@ sort($availableMonths);
             html2pdf().set(opt).from(element).save().then(() => {
                 pdfWrapper.style.display = 'none'; 
                 
-                // Kembalikan posisi scroll ke tempat semula
                 window.scrollTo(0, currentScrollY);
                 
                 Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Laporan PDF berhasil di-download.' });
