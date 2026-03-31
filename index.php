@@ -41,6 +41,10 @@ sort($availableMonths);
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="https://img.icons8.com/fluency/48/navigation.png" type="image/png">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
@@ -128,9 +132,14 @@ sort($availableMonths);
         <div class="reveal delay-200 lg:col-span-2 panel rounded-xl p-4 flex flex-col bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">Map & Tracking (Auto-Follow Camera)</h2>
-                <button onclick="resetData()" class="text-xs bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition shadow-sm">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> Reset Map
-                </button>
+                <div class="flex items-center space-x-3">
+                    <span id="gps-status" class="text-xs font-bold px-2 py-1 rounded bg-gray-200 text-gray-600 dark:bg-slate-700 dark:text-gray-400">
+                        GPS OFFLINE
+                    </span>
+                    <button onclick="resetData()" class="text-xs bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Reset Map
+                    </button>
+                </div>
             </div>
             <div class="relative flex-grow bg-[#f8fafc] dark:bg-slate-800 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 h-80 lg:h-auto flex items-center justify-center shadow-inner">
                 <canvas id="minimap" width="800" height="400" class="w-full h-full"></canvas>
@@ -144,7 +153,7 @@ sort($availableMonths);
                     <div class="relative inline-block">
                         <select id="mode-select" class="block w-full bg-gray-50 border border-gray-200 text-gray-700 font-medium text-sm pl-4 pr-10 py-2 rounded-lg outline-none cursor-pointer hover:bg-gray-100 focus:border-teal-400 focus:ring-2 focus:ring-teal-100 transition shadow-sm dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:hover:bg-slate-600 dark:focus:ring-teal-900">
                             <option value="manual">Manual Mode</option>
-                            <option value="auto">Auto Mode</option>
+                            <option value="auto">Auto Mode (GPS)</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-300">
                             <i class="fa-solid fa-chevron-down text-xs"></i>
@@ -349,6 +358,91 @@ sort($availableMonths);
 </div>
 
 <script>
+    // --- KONFIGURASI FIREBASE ---
+    // 1. URL SUDAH DISESUAIKAN DENGAN SCREENSHOT DATABASE KAMU
+    const firebaseConfig = {
+        databaseURL: "https://nav-track-36e9f-default-rtdb.firebaseio.com" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    let lastLat = null;
+    let lastLng = null;
+    const PIXELS_PER_METER = 10; // Skala gambar: 1 meter dunia nyata = 10 pixel di canvas
+
+    // Rumus Haversine untuk menghitung jarak akurat dalam hitungan Meter
+    function calculateGPSDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // Radius Bumi dalam meter
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // Dengarkan perubahan koordinat di Firebase secara realtime
+    database.ref('navx_robot/location').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const gpsStatusBadge = document.getElementById('gps-status');
+
+        // 2. BERSIHKAN TANDA KUTIP DARI KODULAR AGAR TERBACA SEBAGAI "ON" atau "OFF"
+        let currentStatus = "";
+        if (data && data.status) {
+            currentStatus = data.status.replace(/['"]+/g, ''); 
+        }
+
+        if (data && currentStatus === "ON") {
+            gpsStatusBadge.innerText = "GPS ONLINE (TRACKING)";
+            gpsStatusBadge.className = "text-xs font-bold px-2 py-1 rounded bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 animate-pulse";
+            
+            // HANYA UPDATE JIKA MODE "AUTO" DIPILIH
+            if (document.getElementById('mode-select').value === 'auto') {
+                let currentLat = parseFloat(data.lat);
+                let currentLng = parseFloat(data.lng);
+
+                // Jika ini data pertama kali yang masuk, jadikan titik nol referensi
+                if (lastLat === null || lastLng === null) {
+                    lastLat = currentLat;
+                    lastLng = currentLng;
+                    return; 
+                }
+
+                let distInMeters = calculateGPSDistance(lastLat, lastLng, currentLat, currentLng);
+
+                // Filter Anti-Noise: Hanya update jika HP bergeser minimal 0.5 meter
+                if (distInMeters >= 0.5) {
+                    
+                    // Konversi GPS derajat ke meter flat (Equirectangular approximation)
+                    let deltaY_m = (lastLat - currentLat) * 111320; 
+                    let deltaX_m = (currentLng - lastLng) * 111320 * Math.cos(lastLat * Math.PI / 180);
+
+                    // Konversi meter ke koordinat piksel canvas (rx, ry)
+                    rx += (deltaX_m * PIXELS_PER_METER);
+                    ry += (deltaY_m * PIXELS_PER_METER);
+
+                    robotData.distance += distInMeters;
+                    robotData.path.push({x: rx, y: ry});
+                    if(robotData.battery > 0) robotData.battery -= 0.05;
+
+                    lastLat = currentLat;
+                    lastLng = currentLng;
+
+                    updateUI();
+                    markUnsaved();
+                }
+            }
+        } else {
+            gpsStatusBadge.innerText = "GPS OFFLINE";
+            gpsStatusBadge.className = "text-xs font-bold px-2 py-1 rounded bg-gray-200 text-gray-600 dark:bg-slate-700 dark:text-gray-400";
+            // Reset titik acuan ketika switch dimatikan agar pergerakan tidak melompat ketika dinyalakan lagi
+            lastLat = null;
+            lastLng = null;
+        }
+    });
+    
+    // --- KODE LAMA WEB DASHBOARD ---
     document.addEventListener("DOMContentLoaded", function() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -496,7 +590,7 @@ sort($availableMonths);
 
     function moveRobot(direction) {
         if(document.getElementById('mode-select').value === 'auto') {
-            Swal.fire({ icon: 'warning', title: 'Mode Auto Aktif', text: 'Ubah ke Manual Mode untuk menggunakan kontrol arah.' });
+            Swal.fire({ icon: 'warning', title: 'Auto Mode (GPS) Aktif', text: 'Ubah ke Manual Mode untuk menggunakan kontrol arah secara manual.' });
             return;
         }
         
@@ -592,7 +686,7 @@ sort($availableMonths);
                 robotData.battery = 100;
                 rx = 400; ry = 200;
                 robotData.path = [{x: rx, y: ry}];
-                robotData.sprayPoints = []; // Reset juga titik semprotan
+                robotData.sprayPoints = []; 
                 updateUI();
                 markUnsaved(); 
                 Swal.fire('Di-reset!', 'Map berhasil dibersihkan. Silakan klik Simpan Data.', 'success');
