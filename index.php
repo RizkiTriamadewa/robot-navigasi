@@ -129,6 +129,7 @@ sort($availableMonths);
     <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 min-h-0">
         
         <div class="flex flex-col gap-2 min-h-0 h-full">
+            
             <div class="flex-1 flex flex-col panel rounded-lg p-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] min-h-0">
                 <div class="flex-none flex justify-between items-center mb-1">
                     <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase"><i class="fa-solid fa-video mr-1"></i> Live FPV</h2>
@@ -156,42 +157,60 @@ sort($availableMonths);
                 </div>
             </div>
 
-            <div class="flex-none panel rounded-lg p-2.5 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
-                <div class="flex justify-between items-center mb-2.5">
+            <div class="flex-1 flex flex-col panel rounded-lg p-3 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] min-h-0">
+                <div class="flex-none flex flex-wrap justify-between items-center mb-2 gap-1">
                     <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Controls</h2>
                     
-                    <div class="relative inline-block border border-gray-200 dark:border-slate-600 rounded">
-                        <select id="mode-select" class="bg-gray-50 text-gray-700 text-[10px] pl-2 pr-6 py-1 rounded outline-none cursor-pointer hover:bg-gray-100 dark:bg-slate-700 dark:text-white appearance-none w-full">
-                            <option value="manual">Manual</option>
-                            <option value="auto">Auto (GPS)</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-gray-500 dark:text-gray-400">
-                            <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    <div class="flex gap-1.5 items-center">
+                        <div class="relative inline-block border border-gray-200 dark:border-slate-600 rounded">
+                            <select id="autosave-select" onchange="updateIdleSetting(true)" class="bg-gray-50 text-gray-700 text-[9px] pl-2 pr-5 py-1 rounded outline-none cursor-pointer hover:bg-gray-100 dark:bg-slate-700 dark:text-white appearance-none w-full">
+                                <option value="0">Auto Save: OFF</option>
+                                <option value="30000">Idle 30 Detik</option>
+                                <option value="60000">Idle 1 Menit</option>
+                                <option value="180000">Idle 3 Menit</option>
+                                <option value="300000">Idle 5 Menit</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-gray-500 dark:text-gray-400">
+                                <i class="fa-solid fa-chevron-down text-[7px]"></i>
+                            </div>
+                        </div>
+                        <div class="relative inline-block border border-gray-200 dark:border-slate-600 rounded">
+                            <select id="mode-select" class="bg-gray-50 text-gray-700 text-[9px] pl-2 pr-5 py-1 rounded outline-none cursor-pointer hover:bg-gray-100 dark:bg-slate-700 dark:text-white appearance-none w-full">
+                                <option value="manual">Manual</option>
+                                <option value="auto">Auto (GPS)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-gray-500 dark:text-gray-400">
+                                <i class="fa-solid fa-chevron-down text-[7px]"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="flex flex-row items-center gap-3">
-                    <div class="flex-none flex flex-col items-center gap-0.5 p-1.5 bg-[#f8fafc] dark:bg-[#1a1e29]/50 rounded border border-gray-100 dark:border-slate-700/50 shadow-sm">
-                        <button onclick="moveRobot('up')" class="btn-control w-7 h-7 rounded shrink-0 flex items-center justify-center text-[11px] bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-up"></i></button>
-                        <div class="flex gap-0.5">
-                            <button onclick="moveRobot('left')" class="btn-control w-7 h-7 rounded shrink-0 flex items-center justify-center text-[11px] bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-left"></i></button>
-                            <button onclick="moveRobot('down')" class="btn-control w-7 h-7 rounded shrink-0 flex items-center justify-center text-[11px] bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-down"></i></button>
-                            <button onclick="moveRobot('right')" class="btn-control w-7 h-7 rounded shrink-0 flex items-center justify-center text-[11px] bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-right"></i></button>
+                <div class="flex-1 flex flex-row items-center justify-center gap-4 sm:gap-6 min-h-0 h-full">
+                    
+                    <div class="flex-none flex flex-col items-center gap-1.5 p-3 bg-[#f8fafc] dark:bg-[#1a1e29]/50 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm">
+                        <button onclick="moveRobot('up')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-up"></i></button>
+                        <div class="flex gap-1.5">
+                            <button onclick="moveRobot('left')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button onclick="moveRobot('down')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-down"></i></button>
+                            <button onclick="moveRobot('right')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-right"></i></button>
                         </div>
                     </div>
                     
-                    <div class="flex-1 grid grid-cols-3 gap-2">
-                        <button onclick="sprayWater()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 px-1 rounded shadow-sm transition-all flex flex-row justify-center items-center gap-1.5 text-[9px] sm:text-[10px]">
-                            <i class="fa-solid fa-droplet text-[11px]"></i> Semprot
+                    <div class="flex-1 flex flex-col gap-2 h-full py-1">
+                        <button onclick="sprayWater()" class="flex-1 min-h-0 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-sm transition-all flex flex-col justify-center items-center gap-1.5 text-xs sm:text-sm">
+                            <i class="fa-solid fa-droplet text-2xl sm:text-3xl mb-1"></i> Semprot
                         </button>
-                        <button onclick="saveData()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-1 rounded shadow-sm transition-all flex flex-row justify-center items-center gap-1.5 text-[9px] sm:text-[10px]">
-                            <i class="fa-solid fa-floppy-disk text-[11px]"></i> Simpan
-                        </button>
-                        <button onclick="resetData()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 py-2 px-1 rounded transition shadow-sm flex flex-row justify-center items-center gap-1.5 text-[9px] sm:text-[10px]">
-                            <i class="fa-solid fa-rotate-right text-[11px]"></i> Reset Map
-                        </button>
+                        <div class="flex-1 min-h-0 flex gap-2">
+                            <button onclick="saveData(false)" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-sm transition-all flex flex-col justify-center items-center gap-1 text-[10px] sm:text-xs">
+                                <i class="fa-solid fa-floppy-disk text-lg sm:text-xl mb-0.5"></i> Simpan
+                            </button>
+                            <button onclick="resetData()" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 rounded-xl transition shadow-sm flex flex-col justify-center items-center gap-1 text-[10px] sm:text-xs">
+                                <i class="fa-solid fa-rotate-right text-lg sm:text-xl mb-0.5"></i> Reset
+                            </button>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -200,7 +219,7 @@ sort($availableMonths);
             <div class="flex-none flex justify-between items-center mb-1">
                 <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Map & Tracking</h2>
                 <div class="flex gap-2 items-center">
-                    <span class="text-[8px] text-gray-400 italic">Tahan & Gambar rute untuk otomatis</span>
+                    <span class="text-[8px] text-gray-400 italic">Tahan & Gambar rute</span>
                     <span id="gps-status" class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 dark:bg-slate-700 dark:text-gray-400">GPS OFFLINE</span>
                 </div>
             </div>
@@ -214,14 +233,14 @@ sort($availableMonths);
 
 <div id="tab-riwayat" class="tab-content flex-1 flex-col space-y-2 overflow-hidden min-h-0">
     <div class="panel h-full flex flex-col p-3 rounded-lg bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
-        <div class="flex-none flex justify-between items-center mb-2">
-            <h2 class="text-sm font-bold text-gray-900 dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-500"></i> Riwayat</h2>
+        <div class="flex-none flex justify-between items-center mb-3">
+            <h2 class="text-sm md:text-base font-bold text-gray-900 dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-500"></i> Riwayat Sesi</h2>
             <div class="flex space-x-2">
-                <select id="filter-year" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-[10px] px-2 py-1 rounded border dark:bg-slate-700 dark:text-white">
+                <select id="filter-year" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
                     <option value="all">Semua Thn</option>
                     <?php foreach($availableYears as $y): ?><option value="<?= $y ?>"><?= $y ?></option><?php endforeach; ?>
                 </select>
-                <select id="filter-month" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-[10px] px-2 py-1 rounded border dark:bg-slate-700 dark:text-white">
+                <select id="filter-month" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
                     <option value="all">Semua Bln</option>
                     <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option>
                     <option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option>
@@ -230,20 +249,20 @@ sort($availableMonths);
             </div>
         </div>
 
-        <div class="flex-1 overflow-auto rounded border border-gray-200 dark:border-slate-700 relative">
-            <table class="w-full text-[10px] text-left text-gray-600 dark:text-gray-300">
-                <thead class="sticky top-0 bg-gray-100 dark:bg-slate-800 z-10 shadow-sm">
+        <div class="flex-1 overflow-auto rounded-lg border border-gray-200 dark:border-slate-700 relative shadow-inner bg-[#f8fafc] dark:bg-slate-800/50">
+            <table class="w-full text-xs sm:text-sm text-left text-gray-600 dark:text-gray-300">
+                <thead class="sticky top-0 bg-gray-200 dark:bg-slate-900 z-10 shadow-sm uppercase tracking-wider font-semibold text-[10px] sm:text-xs">
                     <tr>
-                        <th class="px-2 py-2">Waktu (Sesi)</th>
-                        <th class="px-2 py-2">Baterai</th>
-                        <th class="px-2 py-2">Jarak</th>
-                        <th class="px-2 py-2">Air Keluar</th>
-                        <th class="px-2 py-2">Sisa Air</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Waktu (Sesi)</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Baterai</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Jarak</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Air Keluar</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Sisa Air</th>
                     </tr>
                 </thead>
-                <tbody id="history-table-body" class="divide-y divide-gray-200 dark:divide-slate-700">
+                <tbody id="history-table-body" class="divide-y divide-gray-200 dark:divide-slate-700/80">
                     <?php if(empty($historyData)): ?>
-                        <tr><td colspan="5" class="p-4 text-center text-gray-500">Belum ada riwayat.</td></tr>
+                        <tr><td colspan="5" class="p-6 text-center text-gray-500 font-medium italic">Belum ada riwayat terekam.</td></tr>
                     <?php else: ?>
                         <?php foreach($historyData as $row): 
                             $time = strtotime($row['log_date']);
@@ -252,12 +271,12 @@ sort($availableMonths);
                             $sisaAir = 2000 - $row['water_used_ml'];
                             $btr = isset($row['battery_percent']) ? number_format($row['battery_percent'], 1) : 100.0;
                         ?>
-                        <tr class="bg-white hover:bg-gray-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors" data-year="<?= $year ?>" data-month="<?= $month ?>">
-                            <td class="px-2 py-2 font-medium"><?= date('d M Y - H:i', $time) ?></td>
-                            <td class="px-2 py-2 text-green-600"><?= $btr ?>%</td>
-                            <td class="px-2 py-2 text-teal-600"><?= number_format($row['distance_m'], 1) ?>m</td>
-                            <td class="px-2 py-2"><?= $row['water_used_ml'] ?>ml</td>
-                            <td class="px-2 py-2 text-cyan-600"><?= max(0, $sisaAir) ?>ml</td>
+                        <tr class="bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors" data-year="<?= $year ?>" data-month="<?= $month ?>">
+                            <td class="px-3 py-3 whitespace-nowrap font-semibold text-gray-800 dark:text-gray-200"><?= date('d M Y - H:i', $time) ?></td>
+                            <td class="px-3 py-3 whitespace-nowrap font-bold text-green-600 dark:text-green-400"><?= $btr ?>%</td>
+                            <td class="px-3 py-3 whitespace-nowrap font-bold text-teal-600 dark:text-teal-400"><?= number_format($row['distance_m'], 1) ?>m</td>
+                            <td class="px-3 py-3 whitespace-nowrap font-medium"><?= $row['water_used_ml'] ?>ml</td>
+                            <td class="px-3 py-3 whitespace-nowrap font-bold text-cyan-600 dark:text-cyan-400"><?= max(0, $sisaAir) ?>ml</td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -348,24 +367,20 @@ sort($availableMonths);
         const video = document.getElementById('webcam-video');
         if(!video.srcObject) return Swal.fire('Error', 'Kamera belum aktif!', 'error');
 
-        // Buat canvas sementara untuk menggambar frame video
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
 
-        // Balik (Mirror) gambar di canvas agar hasilnya persis dengan yang dilihat di layar
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Download gambar
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
         a.download = `NavX_Snapshot_${Date.now()}.png`;
         a.click();
         
-        // Animasi flash
         video.style.opacity = 0;
         setTimeout(() => video.style.opacity = 1, 150);
     }
@@ -456,7 +471,6 @@ sort($availableMonths);
         const data = snapshot.val();
         const gpsBadge = document.getElementById('gps-status');
 
-        // PERBAIKAN: Logika string GPS dikembalikan persis seperti kode lama Anda
         let currentStatus = "";
         if (data && data.status) {
             currentStatus = data.status.replace(/['"]+/g, ''); 
@@ -513,15 +527,89 @@ sort($availableMonths);
         drawMap();
     }
 
-    // --- STATE DATA ---
+    // --- STATE DATA & AUTO-SAVE LOGIC ---
     let maxWater = 2000;
     let robotData = { distance: <?= $initDistance ?>, waterUsed: <?= $initWaterUsed ?>, waterRemaining: maxWater - <?= $initWaterUsed ?>, battery: <?= $initBattery ?>, path: <?= $initPath ?>, sprayPoints: <?= $initSpray ?> };
     if(robotData.waterRemaining < 0) robotData.waterRemaining = 0;
+    
     let isDataSaved = true;
+    let idleSettingMs = 0;
+    let idleTimerId = null;
 
-    function markUnsaved() { isDataSaved = false; document.getElementById('btn-print').classList.add('opacity-50', 'cursor-not-allowed'); document.getElementById('print-warning').style.display = 'block'; }
-    function markSaved() { isDataSaved = true; document.getElementById('btn-print').classList.remove('opacity-50', 'cursor-not-allowed'); document.getElementById('print-warning').style.display = 'none'; }
+    // FUNGSI INIT SETTING AGAR SESUAI SAAT HALAMAN DI-RELOAD
+    function updateIdleSetting(showToast = false) {
+        let val = document.getElementById('autosave-select').value;
+        idleSettingMs = parseInt(val);
+        
+        if(showToast && idleSettingMs > 0) {
+            Swal.fire({
+                toast: true, position: 'top-end', icon: 'info',
+                title: `Auto Save: ${idleSettingMs / 60000} Menit`,
+                text: 'Akan aktif ketika ada data baru.',
+                showConfirmButton: false, timer: 2000
+            });
+        }
+        resetIdleTimer();
+    }
+
+    // FUNGSI MEMUNCULKAN POPUP SWEET ALERT KETIKA IDLE
+    function promptAutoSave() {
+        Swal.fire({
+            title: 'Waktu Idle Tercapai',
+            text: 'Terdapat data sesi yang belum disimpan. Apakah Anda ingin menyimpannya sekarang?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#0f766e', // teal
+            cancelButtonColor: '#ef4444', // merah
+            confirmButtonText: '<i class="fa-solid fa-floppy-disk"></i> Ya, Simpan',
+            cancelButtonText: '<i class="fa-solid fa-xmark"></i> Tidak',
+            allowOutsideClick: false, // Memaksa user untuk memilih
+            allowEscapeKey: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                saveData(true); // Kirim parameter 'true' agar tidak reload keseluruhan page
+            } else {
+                // Jika user pilih "Tidak", kita biarkan datanya tetap unsaved,
+                // dan reset ulang timernya agar nanti muncul notifikasi lagi.
+                resetIdleTimer();
+            }
+        });
+    }
+
+    function resetIdleTimer() {
+        if (idleTimerId) { clearTimeout(idleTimerId); idleTimerId = null; }
+        // MULAI MENGHITUNG MUNDUR JIKA: Waktu diset > 0 DAN data statusnya "Belum Disimpan"
+        if (idleSettingMs > 0 && !isDataSaved) {
+            idleTimerId = setTimeout(() => {
+                promptAutoSave();
+            }, idleSettingMs);
+        }
+    }
+
+    function markUnsaved() { 
+        isDataSaved = false; 
+        document.getElementById('btn-print').classList.add('opacity-50', 'cursor-not-allowed'); 
+        document.getElementById('print-warning').style.display = 'block'; 
+        resetIdleTimer(); // Restart perhitungan timer dari awal setiap ada aktivitas baru
+    }
+
+    function markSaved() { 
+        isDataSaved = true; 
+        document.getElementById('btn-print').classList.remove('opacity-50', 'cursor-not-allowed'); 
+        document.getElementById('print-warning').style.display = 'none'; 
+        if (idleTimerId) { clearTimeout(idleTimerId); idleTimerId = null; }
+    }
+
     if(isDataSaved) markSaved();
+
+    // Event listener sebelum menutup tab / memuat ulang (Mencegah data hilang secara tidak sengaja)
+    window.addEventListener('beforeunload', function (e) {
+        if (!isDataSaved) {
+            e.preventDefault();
+            e.returnValue = ''; 
+            return ''; 
+        }
+    });
 
     // --- MAP RENDER & DRAWING ---
     const canvas = document.getElementById('minimap');
@@ -541,7 +629,6 @@ sort($availableMonths);
     function resizeAndDrawMap() { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; drawMap(); }
     window.addEventListener('resize', resizeAndDrawMap);
 
-    // FUNGSI DRAW GARIS KE TARGET
     let isDrawingPath = false;
     let tempDrawPath = [];
     let pathInterval = null;
@@ -639,14 +726,28 @@ sort($availableMonths);
         } else Swal.fire({ icon: 'error', title: 'Tangki Kosong!' });
     }
 
-    function saveData() {
+    // UPDATE: Memisahkan UI ketika disimpan dari Notif Auto vs Tombol Manual
+    function saveData(isAutoPrompt = false) {
         Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+
         fetch('api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(robotData) })
         .then(res => res.json())
         .then(data => {
-            if(data.status === 'success') { markSaved(); Swal.fire({ icon: 'success', title: 'Tersimpan!', timer: 1000, showConfirmButton: false }).then(()=>location.reload()); }
-            else Swal.fire('Gagal!', 'Kesalahan server', 'error');
-        }).catch(err => Swal.fire('Error!', 'Gagal koneksi', 'error'));
+            if(data.status === 'success') { 
+                markSaved(); 
+                if (isAutoPrompt) {
+                    // Jika user klik "Ya, Simpan" dari pop up Idle, jangan reload halamannya
+                    Swal.fire({ icon: 'success', title: 'Berhasil Disimpan!', showConfirmButton: false, timer: 1500 });
+                } else {
+                    // Jika user klik tombol "Simpan" biasa secara manual, kita reload
+                    Swal.fire({ icon: 'success', title: 'Tersimpan!', timer: 1000, showConfirmButton: false }).then(()=>location.reload()); 
+                }
+            } else {
+                Swal.fire('Gagal!', 'Terjadi kesalahan di server', 'error');
+            }
+        }).catch(err => {
+            Swal.fire('Error!', 'Gagal koneksi ke server', 'error');
+        });
     }
 
     function resetData() {
@@ -710,6 +811,8 @@ sort($availableMonths);
         img.src = getFullMapBase64();
     }
 
+    // Inisialisasi awal saat halaman dimuat
+    updateIdleSetting(false);
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
     startWebcam(); initBatteryStatus(); setTimeout(resizeAndDrawMap, 100); updateUI();
 </script>
