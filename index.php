@@ -137,7 +137,7 @@ sort($availableMonths);
                     <div class="flex items-center gap-1.5">
                         <button onclick="takePhoto()" class="text-[9px] font-bold text-white bg-blue-500 hover:bg-blue-600 px-2 py-0.5 rounded transition flex items-center gap-1">
                             <i class="fa-solid fa-camera"></i> FOTO
-                        </button>
+                        </button>                   
                         <button id="btn-record" onclick="toggleRecording()" class="text-[9px] font-bold text-white bg-gray-400 hover:bg-red-500 px-2 py-0.5 rounded transition flex items-center gap-1">
                             <span id="record-dot" class="w-1.5 h-1.5 rounded-full bg-white"></span> <span id="record-text">REKAM 30s</span>
                         </button>
