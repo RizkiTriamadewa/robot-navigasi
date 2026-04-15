@@ -132,12 +132,15 @@ sort($availableMonths);
             
             <div class="flex-1 flex flex-col panel rounded-lg p-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] min-h-0">
                 <div class="flex-none flex justify-between items-center mb-1">
-                    <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase"><i class="fa-solid fa-video mr-1"></i> Live FPV</h2>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase"><i class="fa-solid fa-video mr-1"></i> Live FPV</h2>
+                        <select id="camera-select" onchange="switchCamera(this.value)" class="bg-gray-50 text-gray-700 text-[8px] px-1 py-0.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none cursor-pointer max-w-[100px]"></select>
+                    </div>
                     
                     <div class="flex items-center gap-1.5">
                         <button onclick="takePhoto()" class="text-[9px] font-bold text-white bg-blue-500 hover:bg-blue-600 px-2 py-0.5 rounded transition flex items-center gap-1">
                             <i class="fa-solid fa-camera"></i> FOTO
-                        </button>                   
+                        </button>                  
                         <button id="btn-record" onclick="toggleRecording()" class="text-[9px] font-bold text-white bg-gray-400 hover:bg-red-500 px-2 py-0.5 rounded transition flex items-center gap-1">
                             <span id="record-dot" class="w-1.5 h-1.5 rounded-full bg-white"></span> <span id="record-text">REKAM 30s</span>
                         </button>
@@ -351,14 +354,78 @@ sort($availableMonths);
     let isRecording = false;
 
     // --- CAMERA ---
-    async function startWebcam() {
+    let currentStream = null; // Menyimpan stream kamera yang sedang aktif
+
+    async function getCameras() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            // Pancing izin kamera pertama kali agar nama/label perangkat bisa terbaca
+            const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            
+            // Ambil daftar semua media devices
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            // Filter hanya device bertipe kamera (videoinput)
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            const cameraSelect = document.getElementById('camera-select');
+            cameraSelect.innerHTML = ''; // Bersihkan opsi sebelumnya
+            
+            if (videoDevices.length === 0) {
+                cameraSelect.innerHTML = '<option value="">Tidak ada kamera</option>';
+                return;
+            }
+
+            // Masukkan list kamera ke dropdown
+            videoDevices.forEach((camera, index) => {
+                const option = document.createElement('option');
+                option.value = camera.deviceId;
+                // Gunakan label bawaan dari USB/PC, jika kosong beri nama Kamera 1, 2, dst
+                option.text = camera.label || `Kamera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
+
+            // Matikan stream awal pancingan, lalu jalankan kamera yang dipilih pertama
+            initialStream.getTracks().forEach(track => track.stop());
+            if (videoDevices.length > 0) {
+                startWebcam(videoDevices[0].deviceId);
+            }
+        } catch (err) {
+            console.error('Error in getCameras:', err);
+            const statusText = document.getElementById('cam-status-text');
+            statusText.style.display = 'block';
+            statusText.querySelector('p').innerText = "AKSES KAMERA DITOLAK";
+            statusText.querySelector('p').classList.replace('text-gray-300', 'text-red-500');
+        }
+    }
+
+    async function startWebcam(deviceId = null) {
+        // Jika sebelumnya ada kamera yang menyala, matikan dulu agar tidak bentrok
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+
+        // Atur constraint untuk menggunakan Device ID spesifik
+        const constraints = {
+            video: deviceId ? { deviceId: { exact: deviceId } } : true
+        };
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            currentStream = stream; // Simpan ke variabel global
             document.getElementById('webcam-video').srcObject = stream;
             document.getElementById('cam-status-text').style.display = 'none';
         } catch (err) {
-            document.getElementById('cam-status-text').querySelector('p').innerText = "AKSES KAMERA DITOLAK";
-            document.getElementById('cam-status-text').querySelector('p').classList.replace('text-gray-300', 'text-red-500');
+            console.error('Error in startWebcam:', err);
+            const statusText = document.getElementById('cam-status-text');
+            statusText.style.display = 'block';
+            statusText.querySelector('p').innerText = "GAGAL MEMUAT KAMERA";
+            statusText.querySelector('p').classList.replace('text-gray-300', 'text-red-500');
+        }
+    }
+
+    // Dipanggil saat user mengganti pilihan di dropdown UI
+    function switchCamera(deviceId) {
+        if (deviceId) {
+            startWebcam(deviceId);
         }
     }
 
@@ -814,7 +881,7 @@ sort($availableMonths);
     // Inisialisasi awal saat halaman dimuat
     updateIdleSetting(false);
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
-    startWebcam(); initBatteryStatus(); setTimeout(resizeAndDrawMap, 100); updateUI();
+    getCameras(); initBatteryStatus(); setTimeout(resizeAndDrawMap, 100); updateUI();
 </script>
 </body>
 </html>
