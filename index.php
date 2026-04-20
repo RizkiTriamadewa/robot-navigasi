@@ -5,6 +5,7 @@ require 'db.php';
 $query = $conn->query("SELECT * FROM daily_logs ORDER BY log_date DESC LIMIT 1");
 $todayData = $query->fetch_assoc();
 
+$initId = $todayData ? $todayData['id'] : 0; // Mengambil ID untuk sesi saat ini
 $initDistance = $todayData ? $todayData['distance_m'] : 0;
 $initWaterUsed = $todayData ? $todayData['water_used_ml'] : 0;
 $initBattery = ($todayData && isset($todayData['battery_percent'])) ? $todayData['battery_percent'] : 100;
@@ -209,7 +210,7 @@ sort($availableMonths);
                                 <i class="fa-solid fa-floppy-disk text-lg sm:text-xl mb-0.5"></i> Simpan
                             </button>
                             <button onclick="resetData()" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 rounded-xl transition shadow-sm flex flex-col justify-center items-center gap-1 text-[10px] sm:text-xs">
-                                <i class="fa-solid fa-rotate-right text-lg sm:text-xl mb-0.5"></i> Reset
+                                <i class="fa-solid fa-rotate-right text-lg sm:text-xl mb-0.5"></i> Sesi Baru
                             </button>
                         </div>
                     </div>
@@ -354,36 +355,28 @@ sort($availableMonths);
     let isRecording = false;
 
     // --- CAMERA ---
-    let currentStream = null; // Menyimpan stream kamera yang sedang aktif
+    let currentStream = null; 
 
     async function getCameras() {
         try {
-            // Pancing izin kamera pertama kali agar nama/label perangkat bisa terbaca
             const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            
-            // Ambil daftar semua media devices
             const devices = await navigator.mediaDevices.enumerateDevices();
-            // Filter hanya device bertipe kamera (videoinput)
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            
             const cameraSelect = document.getElementById('camera-select');
-            cameraSelect.innerHTML = ''; // Bersihkan opsi sebelumnya
+            cameraSelect.innerHTML = ''; 
             
             if (videoDevices.length === 0) {
                 cameraSelect.innerHTML = '<option value="">Tidak ada kamera</option>';
                 return;
             }
 
-            // Masukkan list kamera ke dropdown
             videoDevices.forEach((camera, index) => {
                 const option = document.createElement('option');
                 option.value = camera.deviceId;
-                // Gunakan label bawaan dari USB/PC, jika kosong beri nama Kamera 1, 2, dst
                 option.text = camera.label || `Kamera ${index + 1}`;
                 cameraSelect.appendChild(option);
             });
 
-            // Matikan stream awal pancingan, lalu jalankan kamera yang dipilih pertama
             initialStream.getTracks().forEach(track => track.stop());
             if (videoDevices.length > 0) {
                 startWebcam(videoDevices[0].deviceId);
@@ -398,19 +391,13 @@ sort($availableMonths);
     }
 
     async function startWebcam(deviceId = null) {
-        // Jika sebelumnya ada kamera yang menyala, matikan dulu agar tidak bentrok
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-        }
+        if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); }
 
-        // Atur constraint untuk menggunakan Device ID spesifik
-        const constraints = {
-            video: deviceId ? { deviceId: { exact: deviceId } } : true
-        };
+        const constraints = { video: deviceId ? { deviceId: { exact: deviceId } } : true };
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            currentStream = stream; // Simpan ke variabel global
+            currentStream = stream;
             document.getElementById('webcam-video').srcObject = stream;
             document.getElementById('cam-status-text').style.display = 'none';
         } catch (err) {
@@ -422,12 +409,7 @@ sort($availableMonths);
         }
     }
 
-    // Dipanggil saat user mengganti pilihan di dropdown UI
-    function switchCamera(deviceId) {
-        if (deviceId) {
-            startWebcam(deviceId);
-        }
-    }
+    function switchCamera(deviceId) { if (deviceId) startWebcam(deviceId); }
 
     // --- FUNGSI AMBIL FOTO ---
     function takePhoto() {
@@ -439,8 +421,7 @@ sort($availableMonths);
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
 
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
+        ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         const a = document.createElement('a');
@@ -453,10 +434,7 @@ sort($availableMonths);
     }
 
     // --- FUNGSI RECORD 30 DETIK ---
-    function toggleRecording() {
-        if(isRecording) stopRecording();
-        else startRecordingCycle();
-    }
+    function toggleRecording() { if(isRecording) stopRecording(); else startRecordingCycle(); }
 
     function startRecordingCycle() {
         const stream = document.getElementById('webcam-video').srcObject;
@@ -486,7 +464,6 @@ sort($availableMonths);
         };
         
         mediaRecorder.start();
-        
         recordInterval = setTimeout(() => {
             if(mediaRecorder.state === 'recording') mediaRecorder.stop();
         }, 30000);
@@ -539,9 +516,7 @@ sort($availableMonths);
         const gpsBadge = document.getElementById('gps-status');
 
         let currentStatus = "";
-        if (data && data.status) {
-            currentStatus = data.status.replace(/['"]+/g, ''); 
-        }
+        if (data && data.status) currentStatus = data.status.replace(/['"]+/g, ''); 
 
         if (data && currentStatus === "ON") {
             gpsBadge.innerText = "GPS ONLINE (TRACKING)";
@@ -596,68 +571,55 @@ sort($availableMonths);
 
     // --- STATE DATA & AUTO-SAVE LOGIC ---
     let maxWater = 2000;
-    let robotData = { distance: <?= $initDistance ?>, waterUsed: <?= $initWaterUsed ?>, waterRemaining: maxWater - <?= $initWaterUsed ?>, battery: <?= $initBattery ?>, path: <?= $initPath ?>, sprayPoints: <?= $initSpray ?> };
+    // UPDATE PENTING: Sertakan ID ke dalam robotData.
+    let robotData = { 
+        id: <?= $initId ?>, 
+        distance: <?= $initDistance ?>, 
+        waterUsed: <?= $initWaterUsed ?>, 
+        waterRemaining: maxWater - <?= $initWaterUsed ?>, 
+        battery: <?= $initBattery ?>, 
+        path: <?= $initPath ?>, 
+        sprayPoints: <?= $initSpray ?> 
+    };
     if(robotData.waterRemaining < 0) robotData.waterRemaining = 0;
     
     let isDataSaved = true;
     let idleSettingMs = 0;
     let idleTimerId = null;
 
-    // FUNGSI INIT SETTING AGAR SESUAI SAAT HALAMAN DI-RELOAD
     function updateIdleSetting(showToast = false) {
         let val = document.getElementById('autosave-select').value;
         idleSettingMs = parseInt(val);
-        
         if(showToast && idleSettingMs > 0) {
-            Swal.fire({
-                toast: true, position: 'top-end', icon: 'info',
-                title: `Auto Save: ${idleSettingMs / 60000} Menit`,
-                text: 'Akan aktif ketika ada data baru.',
-                showConfirmButton: false, timer: 2000
-            });
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: `Auto Save: ${idleSettingMs / 60000} Menit`, text: 'Akan aktif ketika ada data baru.', showConfirmButton: false, timer: 2000 });
         }
         resetIdleTimer();
     }
 
-    // FUNGSI MEMUNCULKAN POPUP SWEET ALERT KETIKA IDLE
     function promptAutoSave() {
         Swal.fire({
             title: 'Waktu Idle Tercapai',
             text: 'Terdapat data sesi yang belum disimpan. Apakah Anda ingin menyimpannya sekarang?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#0f766e', // teal
-            cancelButtonColor: '#ef4444', // merah
+            icon: 'question', showCancelButton: true, confirmButtonColor: '#0f766e', cancelButtonColor: '#ef4444',
             confirmButtonText: '<i class="fa-solid fa-floppy-disk"></i> Ya, Simpan',
             cancelButtonText: '<i class="fa-solid fa-xmark"></i> Tidak',
-            allowOutsideClick: false, // Memaksa user untuk memilih
-            allowEscapeKey: false
+            allowOutsideClick: false, allowEscapeKey: false
         }).then((result) => {
-            if (result.isConfirmed) {
-                saveData(true); // Kirim parameter 'true' agar tidak reload keseluruhan page
-            } else {
-                // Jika user pilih "Tidak", kita biarkan datanya tetap unsaved,
-                // dan reset ulang timernya agar nanti muncul notifikasi lagi.
-                resetIdleTimer();
-            }
+            if (result.isConfirmed) saveData(true); 
+            else resetIdleTimer();
         });
     }
 
     function resetIdleTimer() {
         if (idleTimerId) { clearTimeout(idleTimerId); idleTimerId = null; }
-        // MULAI MENGHITUNG MUNDUR JIKA: Waktu diset > 0 DAN data statusnya "Belum Disimpan"
-        if (idleSettingMs > 0 && !isDataSaved) {
-            idleTimerId = setTimeout(() => {
-                promptAutoSave();
-            }, idleSettingMs);
-        }
+        if (idleSettingMs > 0 && !isDataSaved) idleTimerId = setTimeout(promptAutoSave, idleSettingMs);
     }
 
     function markUnsaved() { 
         isDataSaved = false; 
         document.getElementById('btn-print').classList.add('opacity-50', 'cursor-not-allowed'); 
         document.getElementById('print-warning').style.display = 'block'; 
-        resetIdleTimer(); // Restart perhitungan timer dari awal setiap ada aktivitas baru
+        resetIdleTimer(); 
     }
 
     function markSaved() { 
@@ -669,13 +631,8 @@ sort($availableMonths);
 
     if(isDataSaved) markSaved();
 
-    // Event listener sebelum menutup tab / memuat ulang (Mencegah data hilang secara tidak sengaja)
     window.addEventListener('beforeunload', function (e) {
-        if (!isDataSaved) {
-            e.preventDefault();
-            e.returnValue = ''; 
-            return ''; 
-        }
+        if (!isDataSaved) { e.preventDefault(); e.returnValue = ''; return ''; }
     });
 
     // --- MAP RENDER & DRAWING ---
@@ -793,7 +750,7 @@ sort($availableMonths);
         } else Swal.fire({ icon: 'error', title: 'Tangki Kosong!' });
     }
 
-    // UPDATE: Memisahkan UI ketika disimpan dari Notif Auto vs Tombol Manual
+    // UPDATE PENTING: Update fungsi simpan agar bisa menangani pembuatan sesi baru
     function saveData(isAutoPrompt = false) {
         Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
 
@@ -801,12 +758,11 @@ sort($availableMonths);
         .then(res => res.json())
         .then(data => {
             if(data.status === 'success') { 
+                if(data.new_id) robotData.id = data.new_id; // Setel ID jika ini sesi baru!
                 markSaved(); 
                 if (isAutoPrompt) {
-                    // Jika user klik "Ya, Simpan" dari pop up Idle, jangan reload halamannya
                     Swal.fire({ icon: 'success', title: 'Berhasil Disimpan!', showConfirmButton: false, timer: 1500 });
                 } else {
-                    // Jika user klik tombol "Simpan" biasa secara manual, kita reload
                     Swal.fire({ icon: 'success', title: 'Tersimpan!', timer: 1000, showConfirmButton: false }).then(()=>location.reload()); 
                 }
             } else {
@@ -817,9 +773,11 @@ sort($availableMonths);
         });
     }
 
+    // UPDATE PENTING: Reset sekarang akan menjadikan ini sesi baru!
     function resetData() {
-        Swal.fire({ title: 'Reset Map?', text: "Jangan lupa klik Simpan setelah reset.", icon: 'warning', showCancelButton: true, confirmButtonText: 'Reset!' }).then(r => {
+        Swal.fire({ title: 'Sesi Baru?', text: "Peta akan di-reset dan data akan disimpan sebagai sesi terpisah (Maksimal 5/hari).", icon: 'warning', showCancelButton: true, confirmButtonText: 'Mulai Sesi Baru' }).then(r => {
             if (r.isConfirmed) {
+                robotData.id = 0; // Kunci penting: atur ID jadi 0 agar menjadi INSERT baru di database
                 robotData.distance = 0; robotData.waterUsed = 0; robotData.waterRemaining = maxWater; rx=400; ry=200;
                 robotData.path = [{x: rx, y: ry}]; robotData.sprayPoints = []; updateUI(); markUnsaved();
             }
@@ -878,7 +836,6 @@ sort($availableMonths);
         img.src = getFullMapBase64();
     }
 
-    // Inisialisasi awal saat halaman dimuat
     updateIdleSetting(false);
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
     getCameras(); initBatteryStatus(); setTimeout(resizeAndDrawMap, 100); updateUI();

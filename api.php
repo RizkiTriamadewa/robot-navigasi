@@ -13,37 +13,59 @@ $input_data = file_get_contents("php://input");
 $data = json_decode($input_data, true);
 
 if ($data) {
-    $date = date('Y-m-d');
-    $distance = $data['distance'];
-    $waterUsed = $data['waterUsed'];
-    $battery = $data['battery'];
+    // Ambil data dengan fallback default
+    $id = isset($data['id']) ? intval($data['id']) : 0;
+    $distance = floatval($data['distance']);
+    $waterUsed = floatval($data['waterUsed']);
+    $battery = floatval($data['battery']);
     
-    // Ubah array path dan sprayPoints menjadi string JSON
+    // Ubah array menjadi string JSON
     $pathData = json_encode($data['path']);
-    $sprayData = json_encode($data['sprayPoints']); // <--- TAMBAHAN BARU
+    $sprayData = json_encode($data['sprayPoints']);
 
-    // Cek apakah data hari ini sudah ada
-    $check = $conn->query("SELECT id FROM daily_logs WHERE log_date = '$date'");
-    
-    if ($check->num_rows > 0) {
-        // Jika sudah ada, lakukan UPDATE (Tambahkan spray_data di sini)
-        $query = "UPDATE daily_logs SET 
-                    distance_m = '$distance', 
-                    water_used_ml = '$waterUsed', 
-                    battery_percent = '$battery', 
-                    path_data = '$pathData',
-                    spray_data = '$sprayData' 
-                  WHERE log_date = '$date'";
-    } else {
-        // Jika belum ada, lakukan INSERT (Tambahkan spray_data di sini)
-        $query = "INSERT INTO daily_logs (log_date, distance_m, water_used_ml, battery_percent, path_data, spray_data) 
-                  VALUES ('$date', '$distance', '$waterUsed', '$battery', '$pathData', '$sprayData')";
-    }
+    if ($id > 0) {
+        // ==========================================
+        // 1. UPDATE SESI (Jika tombol "Simpan" ditekan pada sesi yang sedang berjalan)
+        // ==========================================
+        $stmt = $conn->prepare("UPDATE daily_logs SET distance_m=?, water_used_ml=?, battery_percent=?, path_data=?, spray_data=? WHERE id=?");
+        $stmt->bind_param("dddssi", $distance, $waterUsed, $battery, $pathData, $sprayData, $id);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal update: ' . $stmt->error]);
+        }
+        $stmt->close();
 
-    if ($conn->query($query) === TRUE) {
-        echo json_encode(['status' => 'success']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => $conn->error]);
+        // ==========================================
+        // 2. INSERT SESI BARU (Jika tombol "Sesi Baru" ditekan)
+        // ==========================================
+        $today = date('Y-m-d');
+        
+        // Cek jumlah data yang sudah tersimpan HARI INI
+        $checkQuery = $conn->query("SELECT id FROM daily_logs WHERE DATE(log_date) = '$today' ORDER BY log_date ASC");
+        
+        // Jika data hari ini sudah ada 5 (atau lebih)
+        if ($checkQuery->num_rows >= 5) {
+            // Hitung berapa banyak data terlama yang harus dihapus agar sisa 4, lalu kita insert 1 jadi pas 5
+            $limitToDelete = $checkQuery->num_rows - 4; 
+            $conn->query("DELETE FROM daily_logs WHERE DATE(log_date) = '$today' ORDER BY log_date ASC LIMIT $limitToDelete");
+        }
+
+        // Insert data baru menggunakan waktu jam & menit saat ini (NOW())
+        $stmt = $conn->prepare("INSERT INTO daily_logs (log_date, distance_m, water_used_ml, battery_percent, path_data, spray_data) VALUES (NOW(), ?, ?, ?, ?, ?)");
+        $stmt->bind_param("dddss", $distance, $waterUsed, $battery, $pathData, $sprayData);
+        
+        if ($stmt->execute()) {
+            // Ambil ID dari baris yang baru saja ditambahkan
+            $new_id = $conn->insert_id;
+            // Kirim ID baru kembali ke Javascript agar sesi ini langsung bisa di-update selanjutnya
+            echo json_encode(['status' => 'success', 'new_id' => $new_id]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal insert: ' . $stmt->error]);
+        }
+        $stmt->close();
     }
 } else {
     echo json_encode(['status' => 'error', 'message' => 'No data received']);
