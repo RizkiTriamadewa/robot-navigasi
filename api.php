@@ -1,73 +1,75 @@
 <?php
-// Matikan tampilan error HTML bawaan PHP agar tidak merusak format JSON
-error_reporting(0);
+// Sembunyikan error dari output HTML, tapi kita tangkap menggunakan try-catch
+error_reporting(E_ALL);
 ini_set('display_errors', 0);
+header('Content-Type: application/json');
 
 require 'db.php';
 
-// Pastikan response selalu dalam format JSON
-header('Content-Type: application/json');
+try {
+    $input_data = file_get_contents("php://input");
+    $data = json_decode($input_data, true);
 
-// Ambil data dari request POST (JSON)
-$input_data = file_get_contents("php://input");
-$data = json_decode($input_data, true);
+    if (!$data) {
+        throw new Exception('Data tidak valid atau kosong.');
+    }
 
-if ($data) {
-    // Ambil data dengan fallback default
+    // Ambil data dengan fallback 0 agar tidak error null
     $id = isset($data['id']) ? intval($data['id']) : 0;
-    $distance = floatval($data['distance']);
-    $waterUsed = floatval($data['waterUsed']);
-    $battery = floatval($data['battery']);
+    $distance = isset($data['distance']) ? floatval($data['distance']) : 0;
+    $waterUsed = isset($data['waterUsed']) ? floatval($data['waterUsed']) : 0;
+    $battery = isset($data['battery']) ? floatval($data['battery']) : 100;
     
-    // Ubah array menjadi string JSON
-    $pathData = json_encode($data['path']);
-    $sprayData = json_encode($data['sprayPoints']);
+    // Pastikan path dan spray menjadi string JSON
+    $pathData = isset($data['path']) ? json_encode($data['path']) : "[]";
+    $sprayData = isset($data['sprayPoints']) ? json_encode($data['sprayPoints']) : "[]";
+
+    $today = date('Y-m-d');
 
     if ($id > 0) {
         // ==========================================
-        // 1. UPDATE SESI (Jika tombol "Simpan" ditekan pada sesi yang sedang berjalan)
+        // 1. UPDATE SESI (Sesi yang sedang berjalan)
         // ==========================================
         $stmt = $conn->prepare("UPDATE daily_logs SET distance_m=?, water_used_ml=?, battery_percent=?, path_data=?, spray_data=? WHERE id=?");
+        if (!$stmt) throw new Exception("Gagal prepare update: " . $conn->error);
+        
         $stmt->bind_param("dddssi", $distance, $waterUsed, $battery, $pathData, $sprayData, $id);
         
         if ($stmt->execute()) {
-            echo json_encode(['status' => 'success']);
+            echo json_encode(['status' => 'success', 'id' => $id]);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Gagal update: ' . $stmt->error]);
+            throw new Exception("Gagal execute update: " . $stmt->error);
         }
         $stmt->close();
 
     } else {
         // ==========================================
-        // 2. INSERT SESI BARU (Jika tombol "Sesi Baru" ditekan)
+        // 2. INSERT SESI BARU (Maksimal 5 Per Hari)
         // ==========================================
-        $today = date('Y-m-d');
-        
-        // Cek jumlah data yang sudah tersimpan HARI INI
         $checkQuery = $conn->query("SELECT id FROM daily_logs WHERE DATE(log_date) = '$today' ORDER BY log_date ASC");
+        if (!$checkQuery) throw new Exception("Gagal check query: " . $conn->error);
         
-        // Jika data hari ini sudah ada 5 (atau lebih)
+        // Batasi 5 data per hari. Jika sudah 5, hapus data paling lama HARI INI
         if ($checkQuery->num_rows >= 5) {
-            // Hitung berapa banyak data terlama yang harus dihapus agar sisa 4, lalu kita insert 1 jadi pas 5
             $limitToDelete = $checkQuery->num_rows - 4; 
             $conn->query("DELETE FROM daily_logs WHERE DATE(log_date) = '$today' ORDER BY log_date ASC LIMIT $limitToDelete");
         }
 
-        // Insert data baru menggunakan waktu jam & menit saat ini (NOW())
         $stmt = $conn->prepare("INSERT INTO daily_logs (log_date, distance_m, water_used_ml, battery_percent, path_data, spray_data) VALUES (NOW(), ?, ?, ?, ?, ?)");
+        if (!$stmt) throw new Exception("Gagal prepare insert: " . $conn->error);
+        
         $stmt->bind_param("dddss", $distance, $waterUsed, $battery, $pathData, $sprayData);
         
         if ($stmt->execute()) {
-            // Ambil ID dari baris yang baru saja ditambahkan
             $new_id = $conn->insert_id;
-            // Kirim ID baru kembali ke Javascript agar sesi ini langsung bisa di-update selanjutnya
             echo json_encode(['status' => 'success', 'new_id' => $new_id]);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Gagal insert: ' . $stmt->error]);
+            throw new Exception("Gagal execute insert: " . $stmt->error);
         }
         $stmt->close();
     }
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'No data received']);
+
+} catch (Exception $e) {
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
 ?>

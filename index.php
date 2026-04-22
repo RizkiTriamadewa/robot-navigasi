@@ -593,6 +593,8 @@ sort($availableMonths);
     let isDataSaved = true;
     let idleSettingMs = 0;
     let idleTimerId = null;
+    let saveCount = 0;
+    const MAX_SAVES = 5;    
 
     function updateIdleSetting(showToast = false) {
         let val = document.getElementById('autosave-select').value;
@@ -759,18 +761,57 @@ sort($availableMonths);
 
     // UPDATE PENTING: Update fungsi simpan agar bisa menangani pembuatan sesi baru
     function saveData(isAutoPrompt = false) {
+        if (saveCount >= MAX_SAVES) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Batas Tercapai', 
+                text: `Kamu sudah menyimpan ${MAX_SAVES} data pada sesi ini. Silakan klik "Sesi Baru" jika ingin mulai merekam log baru.` 
+            });
+            return;
+        }
+
         Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
 
-        fetch('api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(robotData) })
+        // Salin robotData dan paksa id = 0 agar selalu menjadi INSERT (Data Baru) di database backend
+        let payload = { ...robotData };
+        payload.id = 0; 
+
+        fetch('api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(data => {
-            if(data.status === 'success') { 
-                if(data.new_id) robotData.id = data.new_id; // Setel ID jika ini sesi baru!
+            if(data.status === 'success') {
+                saveCount++; // Tambah jumlah simpanan
                 markSaved(); 
+                
+                // Generate waktu saat ini untuk tabel riwayat
+                let now = new Date();
+                let y = now.getFullYear();
+                let m = String(now.getMonth() + 1).padStart(2, '0');
+                let timeStr = now.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) + ' - ' + 
+                            now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+                
+                // Tambahkan data ke tabel riwayat secara instan (tanpa reload)
+                let tr = document.createElement('tr');
+                tr.className = "bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors";
+                tr.setAttribute('data-year', y);
+                tr.setAttribute('data-month', m);
+                tr.innerHTML = `
+                    <td class="px-3 py-3 whitespace-nowrap font-semibold text-gray-800 dark:text-gray-200">${timeStr}</td>
+                    <td class="px-3 py-3 whitespace-nowrap font-bold text-green-600 dark:text-green-400">${robotData.battery}%</td>
+                    <td class="px-3 py-3 whitespace-nowrap font-bold text-teal-600 dark:text-teal-400">${robotData.distance.toFixed(1)}m</td>
+                    <td class="px-3 py-3 whitespace-nowrap font-medium">${robotData.waterUsed}ml</td>
+                    <td class="px-3 py-3 whitespace-nowrap font-bold text-cyan-600 dark:text-cyan-400">${robotData.waterRemaining}ml</td>
+                `;
+                let tbody = document.getElementById('history-table-body');
+                
+                // Hapus teks "Belum ada riwayat terekam" jika itu baris pertama
+                if (tbody.querySelector('td[colspan="5"]')) tbody.innerHTML = ''; 
+                tbody.insertBefore(tr, tbody.firstChild);
+
                 if (isAutoPrompt) {
-                    Swal.fire({ icon: 'success', title: 'Berhasil Disimpan!', showConfirmButton: false, timer: 1500 });
+                    Swal.fire({ icon: 'success', title: 'Berhasil Disimpan!', text: `Log ke-${saveCount} dari ${MAX_SAVES}`, showConfirmButton: false, timer: 1500 });
                 } else {
-                    Swal.fire({ icon: 'success', title: 'Tersimpan!', timer: 1000, showConfirmButton: false }).then(()=>location.reload()); 
+                    Swal.fire({ icon: 'success', title: 'Tersimpan!', text: `Data log ke-${saveCount} berhasil ditambahkan.`, timer: 1500, showConfirmButton: false }); 
                 }
             } else {
                 Swal.fire('Gagal!', 'Terjadi kesalahan di server', 'error');
@@ -782,11 +823,26 @@ sort($availableMonths);
 
     // UPDATE PENTING: Reset sekarang akan menjadikan ini sesi baru!
     function resetData() {
-        Swal.fire({ title: 'Sesi Baru?', text: "Peta akan di-reset dan data akan disimpan sebagai sesi terpisah (Maksimal 5/hari).", icon: 'warning', showCancelButton: true, confirmButtonText: 'Mulai Sesi Baru' }).then(r => {
+        Swal.fire({ 
+            title: 'Sesi Baru?', 
+            text: `Peta navigasi akan di-reset dan kamu bisa mengirim hingga ${MAX_SAVES} data baru lagi.`, 
+            icon: 'warning', 
+            showCancelButton: true, 
+            confirmButtonText: 'Mulai Sesi Baru' 
+        }).then(r => {
             if (r.isConfirmed) {
-                robotData.id = 0; // Kunci penting: atur ID jadi 0 agar menjadi INSERT baru di database
-                robotData.distance = 0; robotData.waterUsed = 0; robotData.waterRemaining = maxWater; rx=400; ry=200;
-                robotData.path = [{x: rx, y: ry}]; robotData.sprayPoints = []; updateUI(); markUnsaved();
+                robotData.id = 0; 
+                robotData.distance = 0; 
+                robotData.waterUsed = 0; 
+                robotData.waterRemaining = maxWater; 
+                rx = 400; ry = 200;
+                robotData.path = [{x: rx, y: ry}]; 
+                robotData.sprayPoints = []; 
+                
+                saveCount = 0; // Reset counter simpanan ke 0
+                
+                updateUI(); 
+                markUnsaved();
             }
         });
     }
