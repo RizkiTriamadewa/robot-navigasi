@@ -190,14 +190,21 @@ sort($availableMonths);
                     </div>
                 </div>
                 
-                <div class="flex-1 flex flex-row items-center justify-center gap-4 sm:gap-6 min-h-0 h-full">
-                    
-                    <div class="flex-none flex flex-col items-center gap-1.5 p-3 bg-[#f8fafc] dark:bg-[#1a1e29]/50 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm">
-                        <button onclick="moveRobot('up')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-up"></i></button>
-                        <div class="flex gap-1.5">
-                            <button onclick="moveRobot('left')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-left"></i></button>
-                            <button onclick="moveRobot('down')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-down"></i></button>
-                            <button onclick="moveRobot('right')" class="btn-control w-12 h-12 md:w-14 md:h-14 rounded-xl shrink-0 flex items-center justify-center text-lg md:text-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]"><i class="fa-solid fa-chevron-right"></i></button>
+                <div class="flex-1 flex flex-row items-stretch justify-center gap-3 sm:gap-6 min-h-0 h-full">
+                    <div class="flex-1 flex flex-col items-center justify-center gap-2 md:gap-4 p-2 md:p-4 bg-[#f8fafc] dark:bg-[#1a1e29]/50 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm">
+                        <button onclick="moveRobot('up')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                            <i class="fa-solid fa-chevron-up"></i>
+                        </button>
+                        <div class="flex gap-2 md:gap-4">
+                            <button onclick="moveRobot('left')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button onclick="moveRobot('down')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <button onclick="moveRobot('right')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
                     
