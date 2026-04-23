@@ -246,16 +246,22 @@ sort($availableMonths);
     <div class="panel h-full flex flex-col p-3 rounded-lg bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
         <div class="flex-none flex justify-between items-center mb-3">
             <h2 class="text-sm md:text-base font-bold text-gray-900 dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-500"></i> Riwayat Sesi</h2>
-            <div class="flex space-x-2">
-                <select id="filter-year" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
-                    <option value="all">Semua Thn</option>
-                    <?php foreach($availableYears as $y): ?><option value="<?= $y ?>"><?= $y ?></option><?php endforeach; ?>
+            <div class="flex space-x-2 overflow-x-auto pb-1 md:pb-0">
+                <select id="filter-day" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
+                    <option value="all">Semua Hari</option>
+                    <?php for($i=1; $i<=31; $i++): $d = str_pad($i, 2, '0', STR_PAD_LEFT); ?>
+                        <option value="<?= $d ?>"><?= $d ?></option>
+                    <?php endfor; ?>
                 </select>
                 <select id="filter-month" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
                     <option value="all">Semua Bln</option>
                     <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option>
                     <option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option>
                     <option value="09">Sep</option><option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+                </select>
+                <select id="filter-year" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
+                    <option value="all">Semua Thn</option>
+                    <?php foreach($availableYears as $y): ?><option value="<?= $y ?>"><?= $y ?></option><?php endforeach; ?>
                 </select>
             </div>
         </div>
@@ -279,10 +285,11 @@ sort($availableMonths);
                             $time = strtotime($row['log_date']);
                             $year = date('Y', $time);
                             $month = date('m', $time);
+                            $day = date('d', $time);
                             $sisaAir = 2000 - $row['water_used_ml'];
                             $btr = isset($row['battery_percent']) ? number_format($row['battery_percent'], 1) : 100.0;
                         ?>
-                        <tr class="bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors" data-year="<?= $year ?>" data-month="<?= $month ?>">
+                        <tr class="bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors" data-year="<?= $year ?>" data-month="<?= $month ?>" data-day="<?= $day ?>">
                             <td class="px-3 py-3 whitespace-nowrap font-semibold text-gray-800 dark:text-gray-200"><?= date('d M Y - H:i', $time) ?></td>
                             <td class="px-3 py-3 whitespace-nowrap font-bold text-green-600 dark:text-green-400"><?= $btr ?>%</td>
                             <td class="px-3 py-3 whitespace-nowrap font-bold text-teal-600 dark:text-teal-400"><?= number_format($row['distance_m'], 1) ?>m</td>
@@ -787,14 +794,16 @@ sort($availableMonths);
                 let now = new Date();
                 let y = now.getFullYear();
                 let m = String(now.getMonth() + 1).padStart(2, '0');
+                let d = String(now.getDate()).padStart(2, '0');
                 let timeStr = now.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) + ' - ' + 
                             now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-                
+
                 // Tambahkan data ke tabel riwayat secara instan (tanpa reload)
                 let tr = document.createElement('tr');
                 tr.className = "bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors";
                 tr.setAttribute('data-year', y);
                 tr.setAttribute('data-month', m);
+                tr.setAttribute('data-day', d);
                 tr.innerHTML = `
                     <td class="px-3 py-3 whitespace-nowrap font-semibold text-gray-800 dark:text-gray-200">${timeStr}</td>
                     <td class="px-3 py-3 whitespace-nowrap font-bold text-green-600 dark:text-green-400">${robotData.battery}%</td>
@@ -856,10 +865,27 @@ sort($availableMonths);
     });
 
     function filterTable() {
-        let sy = document.getElementById('filter-year').value, sm = document.getElementById('filter-month').value;
+        let sy = document.getElementById('filter-year').value;
+        let sm = document.getElementById('filter-month').value;
+        let sd = document.getElementById('filter-day').value; // Ambil nilai hari
+
+        let visibleCount = 0;
+
         document.querySelectorAll('#history-table-body tr[data-year]').forEach(row => {
-            let ry = row.getAttribute('data-year'), rm = row.getAttribute('data-month');
-            row.style.display = ((sy==='all' || sy===ry) && (sm==='all' || sm===rm)) ? '' : 'none';
+            let ry = row.getAttribute('data-year');
+            let rm = row.getAttribute('data-month');
+            let rd = row.getAttribute('data-day');
+
+            let matchYear = (sy === 'all' || sy === ry);
+            let matchMonth = (sm === 'all' || sm === rm);
+            let matchDay = (sd === 'all' || sd === rd);
+
+            if (matchYear && matchMonth && matchDay) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
         });
     }
 
@@ -902,6 +928,25 @@ sort($availableMonths);
     updateIdleSetting(false);
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
     getCameras(); initBatteryStatus(); setTimeout(resizeAndDrawMap, 100); updateUI();
+
+    // Setel filter ke "Hari Ini" secara default saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', () => {
+        let now = new Date();
+        let currentY = now.getFullYear().toString();
+        let currentM = String(now.getMonth() + 1).padStart(2, '0');
+        let currentD = String(now.getDate()).padStart(2, '0');
+
+        let selYear = document.getElementById('filter-year');
+        
+        // Cek apakah tahun ini ada di opsi (menghindari error jika log kosong)
+        if (Array.from(selYear.options).some(opt => opt.value === currentY)) {
+            selYear.value = currentY;
+        }
+        document.getElementById('filter-month').value = currentM;
+        document.getElementById('filter-day').value = currentD;
+
+        filterTable(); // Jalankan filter
+    });
 </script>
 </body>
 </html>
