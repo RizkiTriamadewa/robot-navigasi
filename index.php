@@ -48,81 +48,305 @@ sort($availableMonths);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        /* FIT ONE PAGE CSS */
-        body, html { height: 100%; width: 100%; margin: 0; overflow: hidden; }
-        body { transition: background-color 0.3s, color 0.3s; }
-        .panel { transition: background-color 0.3s, border-color 0.3s; }
-        .btn-control:active { transform: scale(0.95); }
+        /* MODERN PREMIUM DESIGN */
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         
-        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-        select::-ms-expand { display: none; }
+        body, html { 
+            height: 100%; 
+            width: 100%; 
+            margin: 0; 
+            overflow: hidden; 
+        }
+        
+        body { 
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
+        }
+        
+        body.dark {
+            background: #0c4a6e;
+        }
 
-        .blinking-record { animation: blinker 1.5s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        /* MENCEGAH SWEETALERT MERUSAK LAYOUT FULLSCREEN */
+        body.swal2-height-auto, html.swal2-height-auto {
+            height: 100% !important;
+        }
         
-        .tab-content { display: none; }
-        .tab-content.active { display: flex; }
+        /* GLASSMORPHISM PANELS */
+        .panel { 
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .panel {
+            background: #232836 !important; /* Warna Solid Mencegah Glitch Transparan */
+            border: 1px solid rgba(148, 163, 184, 0.1) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* STAT CARDS WITH GRADIENT */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* CONTROL BUTTONS */
+        .btn-control {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-control:active { 
+            transform: scale(0.95);
+        }
+        
+        /* ACTION BUTTONS WITH GRADIENT */
+        .btn-action {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-action:active {
+            transform: translateY(0px);
+        }
+        
+        /* TAB BUTTONS */
+        .tab-btn {
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        /* TAB BIRU GELAP DI MODE DARK */
+        .dark .tab-btn.active {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important; 
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+        }
+        
+        /* MAP CANVAS */
+        #minimap {
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark #minimap {
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* SELECT DROPDOWN - PREMIUM STYLE */
+        select { 
+            -webkit-appearance: none; 
+            -moz-appearance: none; 
+            appearance: none;
+            background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 250, 251, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(209, 213, 219, 0.6) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            color: #1f2937 !important;
+        }
+        
+        .dark select {
+            background-image: linear-gradient(135deg, rgba(51, 65, 85, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border: 1.5px solid rgba(71, 85, 105, 0.6) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            color: #e5e7eb !important;
+        }
+        
+        /* Dropdown options styling */
+        select option {
+            background-color: #ffffff;
+            color: #1f2937;
+        }
+        
+        .dark select option {
+            background-color: #1e293b;
+            color: #e5e7eb;
+        }
+        
+        select::-ms-expand { display: none; }
+        
+        select:hover {
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            border-color: rgba(59, 130, 246, 0.4) !important;
+        }
+        
+        .dark select:hover {
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            border-color: rgba(59, 130, 246, 0.5) !important;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.6) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 6px 16px rgba(59, 130, 246, 0.2);
+        }
+        
+        .dark select:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 6px 16px rgba(59, 130, 246, 0.3);
+        }
+        
+        select:active {
+            transform: translateY(0px);
+        }
+        
+        /* Dropdown arrow icon styling */
+        select:hover + div i {
+            color: rgba(59, 130, 246, 0.8);
+        }
+        
+        /* TAB CONTENT */
+        .tab-content { 
+            display: none;
+            opacity: 0;
+        }
+        
+        .tab-content.active { 
+            display: flex;
+            animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+        
+        /* TABLE STYLING */
+        table thead {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+        
+        .dark table thead {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+        
+        table tbody tr:hover {
+            background-color: rgba(20, 184, 166, 0.05);
+        }
+        
+        .dark table tbody tr:hover {
+            background-color: rgba(20, 184, 166, 0.1);
+        }
+        
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+        }
+        
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col p-2 font-sans bg-gray-100 text-gray-800 dark:bg-[#1a1e29] dark:text-[#a0aec0]">
 
-<div class="flex-none flex justify-between items-center panel p-2 rounded-lg bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] mb-2 gap-2 h-14">
-    <h1 class="text-sm md:text-lg font-bold tracking-widest text-gray-900 dark:text-white flex items-center shrink-0">
-        <i class="fa-solid fa-robot text-teal-500 mr-2 text-xl"></i> NAV-X
+<div class="flex-none flex justify-between items-center panel p-3 rounded-xl bg-white border border-gray-200 shadow-lg mb-2 gap-3 h-16">
+    <h1 class="text-base md:text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-600 flex items-center shrink-0">
+        <i class="fa-solid fa-robot text-blue-500 mr-3 text-2xl md:text-3xl drop-shadow-lg"></i> NAV-X
     </h1>
     
-    <div class="flex space-x-1 bg-gray-100 dark:bg-[#1a1e29] p-1 rounded border border-gray-200 dark:border-slate-700 mx-auto">
-        <button onclick="switchTab('monitoring')" id="btn-tab-monitoring" class="px-3 py-1 rounded bg-white dark:bg-slate-600 shadow text-teal-600 dark:text-teal-400 font-bold text-xs transition-all">
-            <i class="fa-solid fa-display"></i> <span class="hidden md:inline ml-1">Monitoring</span>
+    <div class="flex space-x-1 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 p-1.5 rounded-xl border border-gray-200 dark:border-slate-700 mx-auto shadow-inner">
+        <button onclick="switchTab('monitoring')" id="btn-tab-monitoring" class="tab-btn active px-4 py-2 rounded-lg font-bold text-xs transition-all">
+            <i class="fa-solid fa-display mr-1"></i> <span class="hidden md:inline">Monitoring</span>
         </button>
-        <button onclick="switchTab('riwayat')" id="btn-tab-riwayat" class="px-3 py-1 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
-            <i class="fa-solid fa-clock-rotate-left"></i> <span class="hidden md:inline ml-1">Riwayat</span>
+        <button onclick="switchTab('riwayat')" id="btn-tab-riwayat" class="tab-btn px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-clock-rotate-left mr-1"></i> <span class="hidden md:inline">Riwayat</span>
         </button>
-        <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="px-3 py-1 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
-            <i class="fa-solid fa-file-pdf"></i> <span class="hidden md:inline ml-1">Laporan</span>
+        <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="tab-btn px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden md:inline">Laporan</span>
         </button>
     </div>
 
     <div class="flex items-center space-x-3 shrink-0">
-        <div class="text-[10px] md:text-xs hidden md:block text-gray-600 dark:text-gray-300">
-            <span id="clock" class="text-teal-500 font-mono font-bold">00:00:00</span>
+        <div class="text-[10px] md:text-xs hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800">
+            <i class="fa-solid fa-clock text-teal-500"></i>
+            <span id="clock" class="text-teal-600 dark:text-teal-400 font-mono font-bold">00:00:00</span>
         </div>
-        <button onclick="toggleTheme()" class="p-1.5 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-[#2a3040] dark:text-yellow-400 dark:hover:bg-[#3b4256] transition shadow-inner">
-            <i id="theme-icon" class="fa-solid fa-moon"></i>
+        <button onclick="toggleTheme()" class="p-2.5 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 dark:from-slate-700 dark:to-slate-800 dark:text-yellow-400 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all shadow-md hover:shadow-lg">
+            <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
         </button>
     </div>
 </div>
 
 <div id="tab-monitoring" class="tab-content active flex-1 flex-col space-y-2 min-h-0 overflow-hidden">
     
-    <div class="flex-none grid grid-cols-4 gap-2">
-        <div class="panel p-2 rounded-lg flex items-center space-x-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
-            <div class="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 shrink-0"><i class="fa-solid fa-battery-three-quarters text-[10px] md:text-sm"></i></div>
+    <div class="flex-none grid grid-cols-4 gap-3">
+        <!-- Card 1: Baterai -->
+        <div class="stat-card panel p-3 rounded-xl flex items-center space-x-3 bg-white border border-gray-200 shadow-lg">
+            <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl shrink-0 bg-teal-50 text-teal-600 dark:bg-transparent dark:text-teal-400 text-sm md:text-lg">
+                <i class="fa-solid fa-battery-three-quarters"></i>
+            </div>
             <div>
-                <div class="text-[8px] md:text-[10px] text-gray-500 leading-none mb-1">Battery</div>
-                <div class="text-xs md:text-sm font-extrabold text-gray-900 dark:text-white leading-none" id="val-battery">--%</div>
+                <div class="text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400 leading-none mb-1.5 font-semibold uppercase tracking-wide">Battery</div>
+                <div class="text-sm md:text-lg font-black text-gray-900 dark:text-white leading-none" id="val-battery">--%</div>
             </div>
         </div>
-        <div class="panel p-2 rounded-lg flex items-center space-x-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
-            <div class="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 shrink-0"><i class="fa-solid fa-route text-[10px] md:text-sm"></i></div>
+
+        <!-- Card 2: Jarak -->
+        <div class="stat-card panel p-3 rounded-xl flex items-center space-x-3 bg-white border border-gray-200 shadow-lg">
+            <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl shrink-0 bg-teal-50 text-teal-600 dark:bg-transparent dark:text-teal-400 text-sm md:text-lg">
+                <i class="fa-solid fa-route"></i>
+            </div>
             <div>
-                <div class="text-[8px] md:text-[10px] text-gray-500 leading-none mb-1">Jarak</div>
-                <div class="text-xs md:text-sm font-extrabold text-gray-900 dark:text-white leading-none"><span id="val-distance">0</span> m</div>
+                <div class="text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400 leading-none mb-1.5 font-semibold uppercase tracking-wide">Jarak</div>
+                <div class="text-sm md:text-lg font-black text-gray-900 dark:text-white leading-none"><span id="val-distance">0</span> m</div>
             </div>
         </div>
-        <div class="panel p-2 rounded-lg flex items-center space-x-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
-            <div class="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 shrink-0"><i class="fa-solid fa-faucet-drip text-[10px] md:text-sm"></i></div>
+
+        <!-- Card 3: Air Keluar -->
+        <div class="stat-card panel p-3 rounded-xl flex items-center space-x-3 bg-white border border-gray-200 shadow-lg">
+            <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl shrink-0 bg-teal-50 text-teal-600 dark:bg-transparent dark:text-teal-400 text-sm md:text-lg">
+                <i class="fa-solid fa-faucet-drip"></i>
+            </div>
             <div>
-                <div class="text-[8px] md:text-[10px] text-gray-500 leading-none mb-1">Air Keluar</div>
-                <div class="text-xs md:text-sm font-extrabold text-gray-900 dark:text-white leading-none"><span id="val-water-used">0</span> ml</div>
+                <div class="text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400 leading-none mb-1.5 font-semibold uppercase tracking-wide">Air Keluar</div>
+                <div class="text-sm md:text-lg font-black text-gray-900 dark:text-white leading-none"><span id="val-water-used">0</span> ml</div>
             </div>
         </div>
-        <div class="panel p-2 rounded-lg flex items-center space-x-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
-            <div class="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 shrink-0"><i class="fa-solid fa-prescription-bottle text-[10px] md:text-sm"></i></div>
+
+        <!-- Card 4: Sisa Tangki -->
+        <div class="stat-card panel p-3 rounded-xl flex items-center space-x-3 bg-white border border-gray-200 shadow-lg">
+            <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl shrink-0 bg-teal-50 text-teal-600 dark:bg-transparent dark:text-teal-400 text-sm md:text-lg">
+                <i class="fa-solid fa-prescription-bottle"></i>
+            </div>
             <div>
-                <div class="text-[8px] md:text-[10px] text-gray-500 leading-none mb-1">Sisa Tangki</div>
-                <div class="text-xs md:text-sm font-extrabold text-gray-900 dark:text-white leading-none"><span id="val-water-rem">2000</span> ml</div>
+                <div class="text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400 leading-none mb-1.5 font-semibold uppercase tracking-wide">Sisa Tangki</div>
+                <div class="text-sm md:text-lg font-black text-gray-900 dark:text-white leading-none"><span id="val-water-rem">2000</span> ml</div>
             </div>
         </div>
     </div>
@@ -131,59 +355,66 @@ sort($availableMonths);
         
         <div class="flex flex-col gap-2 min-h-0 h-full">
             
-            <div class="flex-1 flex flex-col panel rounded-lg p-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] min-h-0">
-                <div class="flex-none flex justify-between items-center mb-1">
+            <div class="flex-1 flex flex-col panel rounded-xl p-3 bg-white border border-gray-200 shadow-lg min-h-0">
+                <div class="flex-none flex justify-between items-center mb-2">
                     <div class="flex items-center gap-2">
-                        <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase"><i class="fa-solid fa-video mr-1"></i> Live FPV</h2>
-                        <select id="camera-select" onchange="switchCamera(this.value)" class="bg-gray-50 text-gray-700 text-[8px] px-1 py-0.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none cursor-pointer max-w-[100px]"></select>
+                        <h2 class="text-[11px] font-bold text-gray-600 dark:text-gray-300 tracking-widest uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-video text-blue-500"></i> Live FPV
+                        </h2>
+                        <div class="relative inline-block">
+                            <select id="camera-select" onchange="switchCamera(this.value)" class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-[9px] pl-2 pr-6 py-1.5 rounded-lg border border-gray-300 dark:from-slate-700 dark:to-slate-800 dark:border-slate-600 dark:text-white outline-none cursor-pointer max-w-[140px] font-semibold shadow-sm hover:shadow-md transition-all appearance-none"></select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-500 dark:text-gray-400">
+                                <i class="fa-solid fa-chevron-down text-[7px]"></i>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="takePhoto()" class="text-[9px] font-bold text-white bg-blue-500 hover:bg-blue-600 px-2 py-0.5 rounded transition flex items-center gap-1">
+                    <div class="flex items-center gap-2">
+                        <button onclick="takePhoto()" class="text-[10px] font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-800 dark:to-blue-900 dark:hover:from-blue-700 dark:hover:to-blue-800 px-3 py-1.5 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-1.5">
                             <i class="fa-solid fa-camera"></i> FOTO
                         </button>                  
-                        <button id="btn-record" onclick="toggleRecording()" class="text-[9px] font-bold text-white bg-gray-400 hover:bg-red-500 px-2 py-0.5 rounded transition flex items-center gap-1">
-                            <span id="record-dot" class="w-1.5 h-1.5 rounded-full bg-white"></span> <span id="record-text">REKAM 30s</span>
+                        <button id="btn-record" onclick="toggleRecording()" class="text-[10px] font-bold text-white bg-gradient-to-r from-gray-400 to-gray-500 hover:from-red-500 hover:to-red-600 px-3 py-1.5 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-1.5">
+                            <span id="record-dot" class="w-2 h-2 rounded-full bg-white shadow-sm"></span> <span id="record-text">REKAM 30s</span>
                         </button>
                     </div>
                 </div>
-                <div class="flex-1 relative bg-black rounded overflow-hidden border border-gray-300 dark:border-gray-800 flex items-center justify-center min-h-0">
+                <div class="flex-1 relative bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center min-h-0 shadow-inner">
                     <video id="webcam-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover scale-x-[-1] transition-opacity duration-100"></video>
                     
-                    <div class="absolute inset-0 pointer-events-none border-[rgba(20,184,166,0.3)] border m-2 rounded z-10"></div>
-                    <div class="absolute top-1/2 left-0 w-full h-[1px] bg-teal-500/30 pointer-events-none z-10"></div>
-                    <div class="absolute left-1/2 top-0 h-full w-[1px] bg-teal-500/30 pointer-events-none z-10"></div>
+                    <div class="absolute inset-0 pointer-events-none border-2 border-teal-500/40 m-3 rounded-lg z-10"></div>
+                    <div class="absolute top-1/2 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-teal-500/50 to-transparent pointer-events-none z-10"></div>
+                    <div class="absolute left-1/2 top-0 h-full w-[2px] bg-gradient-to-b from-transparent via-teal-500/50 to-transparent pointer-events-none z-10"></div>
                     
-                    <div id="cam-status-text" class="text-center z-20 bg-black/60 px-3 py-2 rounded-lg backdrop-blur-sm border border-gray-700">
-                        <i class="fa-solid fa-camera text-xl text-gray-400 mb-1 animate-pulse"></i>
-                        <p class="text-gray-300 font-mono text-[10px] tracking-widest">MEMINTA AKSES KAMERA...</p>
+                    <div id="cam-status-text" class="text-center z-20 bg-black/70 px-4 py-3 rounded-xl backdrop-blur-md border border-gray-600 shadow-2xl">
+                        <i class="fa-solid fa-camera text-2xl text-teal-400 mb-2 animate-pulse"></i>
+                        <p class="text-gray-200 font-mono text-[11px] tracking-widest font-semibold">MEMINTA AKSES KAMERA...</p>
                     </div>
                 </div>
             </div>
 
-            <div class="flex-1 flex flex-col panel rounded-lg p-3 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] min-h-0">
+            <div class="flex-1 flex flex-col panel rounded-lg p-3 bg-white border border-gray-200 shadow-sm min-h-0">
                 <div class="flex-none flex flex-wrap justify-between items-center mb-2 gap-1">
                     <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Controls</h2>
                     
                     <div class="flex gap-1.5 items-center">
-                        <div class="relative inline-block border border-gray-200 dark:border-slate-600 rounded">
-                            <select id="autosave-select" onchange="updateIdleSetting(true)" class="bg-gray-50 text-gray-700 text-[9px] pl-2 pr-5 py-1 rounded outline-none cursor-pointer hover:bg-gray-100 dark:bg-slate-700 dark:text-white appearance-none w-full">
+                        <div class="relative inline-block">
+                            <select id="autosave-select" onchange="updateIdleSetting(true)" class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-[9px] pl-2.5 pr-6 py-1.5 rounded-lg outline-none cursor-pointer hover:from-gray-100 hover:to-gray-200 dark:from-slate-700 dark:to-slate-800 dark:text-white dark:hover:from-slate-600 dark:hover:to-slate-700 appearance-none font-semibold shadow-sm hover:shadow-md transition-all border border-gray-300 dark:border-slate-600">
                                 <option value="0">Auto Save: OFF</option>
                                 <option value="30000">Idle 30 Detik</option>
                                 <option value="60000">Idle 1 Menit</option>
                                 <option value="180000">Idle 3 Menit</option>
                                 <option value="300000">Idle 5 Menit</option>
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-gray-500 dark:text-gray-400">
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-500 dark:text-gray-400">
                                 <i class="fa-solid fa-chevron-down text-[7px]"></i>
                             </div>
                         </div>
-                        <div class="relative inline-block border border-gray-200 dark:border-slate-600 rounded">
-                            <select id="mode-select" class="bg-gray-50 text-gray-700 text-[9px] pl-2 pr-5 py-1 rounded outline-none cursor-pointer hover:bg-gray-100 dark:bg-slate-700 dark:text-white appearance-none w-full">
+                        <div class="relative inline-block">
+                            <select id="mode-select" class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-[9px] pl-2.5 pr-6 py-1.5 rounded-lg outline-none cursor-pointer hover:from-gray-100 hover:to-gray-200 dark:from-slate-700 dark:to-slate-800 dark:text-white dark:hover:from-slate-600 dark:hover:to-slate-700 appearance-none font-semibold shadow-sm hover:shadow-md transition-all border border-gray-300 dark:border-slate-600">
                                 <option value="manual">Manual</option>
                                 <option value="auto">Auto (GPS)</option>
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-gray-500 dark:text-gray-400">
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-500 dark:text-gray-400">
                                 <i class="fa-solid fa-chevron-down text-[7px]"></i>
                             </div>
                         </div>
@@ -226,7 +457,7 @@ sort($availableMonths);
             </div>
         </div>
 
-        <div class="flex flex-col panel rounded-lg p-2 bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] min-h-0 h-full relative cursor-crosshair">
+        <div class="flex flex-col panel rounded-lg p-2 bg-white border border-gray-200 shadow-sm min-h-0 h-full relative cursor-crosshair">
             <div class="flex-none flex justify-between items-center mb-1">
                 <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Map & Tracking</h2>
                 <div class="flex gap-2 items-center">
@@ -243,26 +474,41 @@ sort($availableMonths);
 </div>
 
 <div id="tab-riwayat" class="tab-content flex-1 flex-col space-y-2 overflow-hidden min-h-0">
-    <div class="panel h-full flex flex-col p-3 rounded-lg bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446]">
+    <div class="panel h-full flex flex-col p-3 rounded-lg bg-white border border-gray-200 shadow-sm">
         <div class="flex-none flex justify-between items-center mb-3">
             <h2 class="text-sm md:text-base font-bold text-gray-900 dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-500"></i> Riwayat Sesi</h2>
             <div class="flex space-x-2 overflow-x-auto pb-1 md:pb-0">
-                <select id="filter-day" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
-                    <option value="all">Semua Hari</option>
-                    <?php for($i=1; $i<=31; $i++): $d = str_pad($i, 2, '0', STR_PAD_LEFT); ?>
-                        <option value="<?= $d ?>"><?= $d ?></option>
-                    <?php endfor; ?>
-                </select>
-                <select id="filter-month" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
-                    <option value="all">Semua Bln</option>
-                    <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option>
-                    <option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option>
-                    <option value="09">Sep</option><option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
-                </select>
-                <select id="filter-year" onchange="filterTable()" class="bg-gray-50 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-medium shadow-sm cursor-pointer outline-none hover:bg-gray-100 dark:hover:bg-slate-600">
-                    <option value="all">Semua Thn</option>
-                    <?php foreach($availableYears as $y): ?><option value="<?= $y ?>"><?= $y ?></option><?php endforeach; ?>
-                </select>
+                <div class="relative inline-block">
+                    <select id="filter-day" onchange="filterTable()" class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:from-slate-700 dark:to-slate-800 dark:border-slate-600 dark:text-white font-semibold shadow-sm cursor-pointer outline-none hover:from-gray-100 hover:to-gray-200 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all appearance-none">
+                        <option value="all">Semua Hari</option>
+                        <?php for($i=1; $i<=31; $i++): $d = str_pad($i, 2, '0', STR_PAD_LEFT); ?>
+                            <option value="<?= $d ?>"><?= $d ?></option>
+                        <?php endfor; ?>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
+                <div class="relative inline-block">
+                    <select id="filter-month" onchange="filterTable()" class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:from-slate-700 dark:to-slate-800 dark:border-slate-600 dark:text-white font-semibold shadow-sm cursor-pointer outline-none hover:from-gray-100 hover:to-gray-200 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all appearance-none">
+                        <option value="all">Semua Bln</option>
+                        <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option>
+                        <option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option>
+                        <option value="09">Sep</option><option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
+                <div class="relative inline-block">
+                    <select id="filter-year" onchange="filterTable()" class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:from-slate-700 dark:to-slate-800 dark:border-slate-600 dark:text-white font-semibold shadow-sm cursor-pointer outline-none hover:from-gray-100 hover:to-gray-200 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all appearance-none">
+                        <option value="all">Semua Thn</option>
+                        <?php foreach($availableYears as $y): ?><option value="<?= $y ?>"><?= $y ?></option><?php endforeach; ?>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -305,7 +551,7 @@ sort($availableMonths);
 </div>
 
 <div id="tab-laporan" class="tab-content flex-1 flex-col items-center justify-center min-h-0 overflow-y-auto">
-    <div class="panel w-full max-w-sm p-4 rounded-lg bg-white border border-gray-200 shadow-sm dark:bg-[#232836] dark:border-[#2d3446] text-center">
+    <div class="panel w-full max-w-sm p-4 rounded-lg bg-white border border-gray-200 shadow-sm text-center">
         <i class="fa-solid fa-file-pdf text-4xl text-red-500 mb-2"></i>
         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Cetak Laporan</h2>
         <p class="text-[10px] text-gray-600 dark:text-gray-400 mb-4">Merangkum jalur navigasi sesi saat ini.</p>
@@ -428,7 +674,7 @@ sort($availableMonths);
     // --- FUNGSI AMBIL FOTO ---
     function takePhoto() {
         const video = document.getElementById('webcam-video');
-        if(!video.srcObject) return Swal.fire('Error', 'Kamera belum aktif!', 'error');
+        if(!video.srcObject) return Swal.fire({icon: 'error', title: 'Error', text: 'Kamera belum aktif!', heightAuto: false});
 
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
@@ -452,7 +698,7 @@ sort($availableMonths);
 
     function startRecordingCycle() {
         const stream = document.getElementById('webcam-video').srcObject;
-        if(!stream) return Swal.fire('Error', 'Kamera belum aktif!', 'error');
+        if(!stream) return Swal.fire({icon: 'error', title: 'Error', text: 'Kamera belum aktif!', heightAuto: false});
         
         isRecording = true;
         const btnRec = document.getElementById('btn-record');
@@ -619,7 +865,8 @@ sort($availableMonths);
             icon: 'question', showCancelButton: true, confirmButtonColor: '#0f766e', cancelButtonColor: '#ef4444',
             confirmButtonText: '<i class="fa-solid fa-floppy-disk"></i> Ya, Simpan',
             cancelButtonText: '<i class="fa-solid fa-xmark"></i> Tidak',
-            allowOutsideClick: false, allowEscapeKey: false
+            allowOutsideClick: false, allowEscapeKey: false,
+            heightAuto: false // FIX LAYOUT
         }).then((result) => {
             if (result.isConfirmed) saveData(true); 
             else resetIdleTimer();
@@ -753,7 +1000,7 @@ sort($availableMonths);
     }
 
     function moveRobot(dir) {
-        if(document.getElementById('mode-select').value === 'auto') return Swal.fire({ icon: 'warning', text: 'Ubah ke Manual Mode untuk mengontrol manual.' });
+        if(document.getElementById('mode-select').value === 'auto') return Swal.fire({ icon: 'warning', text: 'Ubah ke Manual Mode untuk mengontrol manual.', heightAuto: false });
         if(pathInterval) clearInterval(pathInterval); 
         switch(dir) { case 'up': ry -= step; break; case 'down': ry += step; break; case 'left': rx -= step; break; case 'right': rx += step; break; }
         robotData.path.push({x: rx, y: ry}); robotData.distance += 0.15; updateUI(); markUnsaved();
@@ -762,8 +1009,8 @@ sort($availableMonths);
     function sprayWater() {
         if(robotData.waterRemaining >= 50) {
             robotData.waterUsed += 50; robotData.waterRemaining -= 50; robotData.sprayPoints.push({x: rx, y: ry});
-            updateUI(); markUnsaved(); Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Air disemprotkan.', showConfirmButton: false, timer: 1000 });
-        } else Swal.fire({ icon: 'error', title: 'Tangki Kosong!' });
+            updateUI(); markUnsaved(); Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Air disemprotkan.', showConfirmButton: false, timer: 1000, heightAuto: false });
+        } else Swal.fire({ icon: 'error', title: 'Tangki Kosong!', heightAuto: false });
     }
 
     // UPDATE PENTING: Update fungsi simpan agar bisa menangani pembuatan sesi baru
@@ -772,12 +1019,13 @@ sort($availableMonths);
             Swal.fire({ 
                 icon: 'warning', 
                 title: 'Batas Tercapai', 
-                text: `Kamu sudah menyimpan ${MAX_SAVES} data pada sesi ini. Silakan klik "Sesi Baru" jika ingin mulai merekam log baru.` 
+                text: `Kamu sudah menyimpan ${MAX_SAVES} data pada sesi ini. Silakan klik "Sesi Baru" jika ingin mulai merekam log baru.`,
+                heightAuto: false // FIX LAYOUT
             });
             return;
         }
 
-        Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, heightAuto: false });
 
         // Salin robotData dan paksa id = 0 agar selalu menjadi INSERT (Data Baru) di database backend
         let payload = { ...robotData };
@@ -818,15 +1066,15 @@ sort($availableMonths);
                 tbody.insertBefore(tr, tbody.firstChild);
 
                 if (isAutoPrompt) {
-                    Swal.fire({ icon: 'success', title: 'Berhasil Disimpan!', text: `Log ke-${saveCount} dari ${MAX_SAVES}`, showConfirmButton: false, timer: 1500 });
+                    Swal.fire({ icon: 'success', title: 'Berhasil Disimpan!', text: `Log ke-${saveCount} dari ${MAX_SAVES}`, showConfirmButton: false, timer: 1500, heightAuto: false });
                 } else {
-                    Swal.fire({ icon: 'success', title: 'Tersimpan!', text: `Data log ke-${saveCount} berhasil ditambahkan.`, timer: 1500, showConfirmButton: false }); 
+                    Swal.fire({ icon: 'success', title: 'Tersimpan!', text: `Data log ke-${saveCount} berhasil ditambahkan.`, timer: 1500, showConfirmButton: false, heightAuto: false }); 
                 }
             } else {
-                Swal.fire('Gagal!', 'Terjadi kesalahan di server', 'error');
+                Swal.fire({icon: 'error', title: 'Gagal!', text: 'Terjadi kesalahan di server', heightAuto: false});
             }
         }).catch(err => {
-            Swal.fire('Error!', 'Gagal koneksi ke server', 'error');
+            Swal.fire({icon: 'error', title: 'Error!', text: 'Gagal koneksi ke server', heightAuto: false});
         });
     }
 
@@ -837,7 +1085,8 @@ sort($availableMonths);
             text: `Peta navigasi akan di-reset dan kamu bisa mengirim hingga ${MAX_SAVES} data baru lagi.`, 
             icon: 'warning', 
             showCancelButton: true, 
-            confirmButtonText: 'Mulai Sesi Baru' 
+            confirmButtonText: 'Mulai Sesi Baru',
+            heightAuto: false // FIX LAYOUT
         }).then(r => {
             if (r.isConfirmed) {
                 robotData.id = 0; 
@@ -911,15 +1160,15 @@ sort($availableMonths);
     }
 
     function generatePDF() {
-        if(!isDataSaved) return Swal.fire({ icon: 'warning', text: 'Klik Simpan Data dulu!' });
+        if(!isDataSaved) return Swal.fire({ icon: 'warning', text: 'Klik Simpan Data dulu!', heightAuto: false });
         let pt = new Date(); document.getElementById('pdf-datetime').innerText = pt.toLocaleDateString('id-ID') + ' ' + pt.toLocaleTimeString('id-ID');
         document.getElementById('pdf-wrapper').style.display = 'block';
         let img = document.getElementById('pdf-map-image');
-        Swal.fire({ title: 'Menyiapkan PDF...', didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'Menyiapkan PDF...', didOpen: () => Swal.showLoading(), heightAuto: false });
         img.onload = () => {
             html2pdf().set({ margin: 0.4, filename: 'Laporan_NavX.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } })
             .from(document.getElementById('pdf-report-template')).save().then(() => {
-                document.getElementById('pdf-wrapper').style.display = 'none'; Swal.fire('Berhasil!', 'PDF di-download', 'success');
+                document.getElementById('pdf-wrapper').style.display = 'none'; Swal.fire({icon: 'success', title: 'Berhasil!', text: 'PDF di-download', heightAuto: false});
             });
         };
         img.src = getFullMapBase64();
