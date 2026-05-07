@@ -53,158 +53,186 @@ sort($availableMonths);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        /* MODERN PREMIUM DESIGN */
-        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        /* MODERN CLEAN DESIGN - CONSISTENT COLOR SCHEME */
+        * { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body, html { 
             height: 100%; 
             width: 100%; 
-            margin: 0; 
             overflow: hidden; 
         }
         
+        /* LIGHT MODE - Single Clean White/Gray Theme */
         body { 
-            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
+            background: #f8fafc;
+            color: #1e293b;
         }
         
+        /* DARK MODE - Single Consistent Dark Theme */
         body.dark {
-            background: #0c4a6e;
+            background: #0f172a;
+            color: #e2e8f0;
         }
 
-        /* MENCEGAH SWEETALERT MERUSAK LAYOUT FULLSCREEN */
+        /* MENCEGAH SWEETALERT MERUSAK LAYOUT */
         body.swal2-height-auto, html.swal2-height-auto {
             height: 100% !important;
         }
         
-        /* GLASSMORPHISM PANELS */
+        /* PANELS - Consistent Design */
         .panel { 
-            backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.95) !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
         
         .dark .panel {
-            background: #232836 !important; /* Warna Solid Mencegah Glitch Transparan */
-            border: 1px solid rgba(148, 163, 184, 0.1) !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
         
-        /* STAT CARDS WITH GRADIENT */
+        /* STAT CARDS */
         .stat-card {
             position: relative;
             overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dark .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
         
         /* CONTROL BUTTONS */
         .btn-control {
             position: relative;
             overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-control:hover {
+            transform: translateY(-1px);
         }
         
         .btn-control:active { 
-            transform: scale(0.95);
+            transform: scale(0.98);
         }
         
-        /* ACTION BUTTONS WITH GRADIENT */
+        /* ACTION BUTTONS */
         .btn-action {
-            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            background: #0ea5e9;
             position: relative;
             overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-action:hover {
+            background: #0284c7;
+        }
+        
+        .dark .btn-action {
+            background: #0284c7;
+        }
+        
+        .dark .btn-action:hover {
+            background: #0369a1;
         }
         
         .btn-action:active {
-            transform: translateY(0px);
+            transform: scale(0.98);
         }
         
-        /* TAB BUTTONS */
+        /* TAB BUTTONS - Consistent Blue */
         .tab-btn {
             position: relative;
+            transition: all 0.2s ease;
         }
         
         .tab-btn.active {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+            background: #0ea5e9 !important;
             color: white !important;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
         }
 
-        /* TAB BIRU GELAP DI MODE DARK */
         .dark .tab-btn.active {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important; 
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+            background: #0284c7 !important;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
         }
         
         /* MAP CANVAS */
         #minimap {
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: #f8fafc;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
         }
         
         .dark #minimap {
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+            background: #0f172a;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
-        /* SELECT DROPDOWN - PREMIUM STYLE */
+        /* SELECT DROPDOWN - Clean Style */
         select { 
             -webkit-appearance: none; 
             -moz-appearance: none; 
             appearance: none;
-            background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 250, 251, 0.9) 100%);
-            backdrop-filter: blur(10px);
-            border: 1.5px solid rgba(209, 213, 219, 0.6) !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            background: #ffffff;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             cursor: pointer;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            color: #1f2937 !important;
+            font-weight: 500;
+            color: #1e293b !important;
+            transition: all 0.2s ease;
         }
         
         .dark select {
-            background-image: linear-gradient(135deg, rgba(51, 65, 85, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
-            border: 1.5px solid rgba(71, 85, 105, 0.6) !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.05);
-            color: #e5e7eb !important;
+            background: #1e293b;
+            border: 1px solid #334155 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            color: #e2e8f0 !important;
         }
         
-        /* Dropdown options styling */
         select option {
             background-color: #ffffff;
-            color: #1f2937;
+            color: #1e293b;
         }
         
         .dark select option {
             background-color: #1e293b;
-            color: #e5e7eb;
+            color: #e2e8f0;
         }
         
         select::-ms-expand { display: none; }
         
         select:hover {
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-            border-color: rgba(59, 130, 246, 0.4) !important;
+            border-color: #0ea5e9 !important;
+            box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
         }
         
         .dark select:hover {
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.05);
-            border-color: rgba(59, 130, 246, 0.5) !important;
+            border-color: #0284c7 !important;
+            box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
         }
         
         select:focus {
             outline: none;
-            border-color: rgba(59, 130, 246, 0.6) !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 6px 16px rgba(59, 130, 246, 0.2);
+            border-color: #0ea5e9 !important;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
         }
         
         .dark select:focus {
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 6px 16px rgba(59, 130, 246, 0.3);
-        }
-        
-        select:active {
-            transform: translateY(0px);
-        }
-        
-        /* Dropdown arrow icon styling */
-        select:hover + div i {
-            color: rgba(59, 130, 246, 0.8);
+            border-color: #0284c7 !important;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
         }
         
         /* TAB CONTENT */
@@ -215,13 +243,13 @@ sort($availableMonths);
         
         .tab-content.active { 
             display: flex;
-            animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         
         @keyframes fadeInUp {
             from { 
                 opacity: 0; 
-                transform: translateY(20px);
+                transform: translateY(10px);
             }
             to { 
                 opacity: 1; 
@@ -229,47 +257,81 @@ sort($availableMonths);
             }
         }
         
-        /* TABLE STYLING */
+        /* TABLE STYLING - Consistent */
         table thead {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: #0ea5e9;
             color: white;
         }
         
         .dark table thead {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: #0284c7;
+        }
+        
+        table tbody tr {
+            transition: background-color 0.2s ease;
         }
         
         table tbody tr:hover {
-            background-color: rgba(20, 184, 166, 0.05);
+            background-color: #f1f5f9;
         }
         
         .dark table tbody tr:hover {
-            background-color: rgba(20, 184, 166, 0.1);
+            background-color: #334155;
         }
         
-        /* SCROLLBAR */
+        /* SCROLLBAR - Consistent */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
         
         ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
         }
         
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            border-radius: 10px;
+            background: #cbd5e1;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
         }
         
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+            background: #94a3b8;
         }
         
-        /* Smooth scroll behavior */
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* Smooth scroll */
         html {
             scroll-behavior: smooth;
+        }
+        
+        /* Consistent accent color throughout */
+        .text-teal-500, .text-teal-600 {
+            color: #0ea5e9 !important;
+        }
+        
+        .dark .text-teal-400, .dark .text-teal-500 {
+            color: #38bdf8 !important;
+        }
+        
+        .bg-teal-50 {
+            background-color: #f0f9ff !important;
+        }
+        
+        .dark .bg-teal-50 {
+            background-color: rgba(14, 165, 233, 0.1) !important;
         }
     </style>
 </head>
@@ -292,7 +354,13 @@ sort($availableMonths);
         </button>
     </div>
 
-    <div class="flex items-center space-x-3 shrink-0">
+    <div class="flex items-center space-x-2 shrink-0">
+        <a href="sensors.php" class="hidden lg:flex px-3 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold text-xs transition-all shadow-md hover:shadow-lg items-center gap-2">
+            <i class="fa-solid fa-microchip"></i> <span>Sensors</span>
+        </a>
+        <a href="logbook.php" class="hidden lg:flex px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold text-xs transition-all shadow-md hover:shadow-lg items-center gap-2">
+            <i class="fa-solid fa-book"></i> <span>Logbook</span>
+        </a>
         <div class="text-[10px] md:text-xs hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800">
             <i class="fa-solid fa-clock text-teal-500"></i>
             <span id="clock" class="text-teal-600 dark:text-teal-400 font-mono font-bold">00:00:00</span>
@@ -809,12 +877,13 @@ sort($availableMonths);
         ['monitoring', 'riwayat', 'laporan'].forEach(id => {
             document.getElementById('tab-' + id).classList.remove('active');
             let btn = document.getElementById('btn-tab-' + id);
-            btn.classList.remove('bg-white', 'dark:bg-slate-600', 'shadow', 'text-teal-600', 'dark:text-teal-400');
-            btn.classList.add('text-gray-600', 'dark:text-gray-400');
+            btn.classList.remove('active', 'tab-btn');
+            btn.classList.add('tab-btn', 'text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-slate-700');
         });
         document.getElementById('tab-' + tabId).classList.add('active');
         let activeBtn = document.getElementById('btn-tab-' + tabId);
-        activeBtn.classList.add('bg-white', 'dark:bg-slate-600', 'shadow', 'text-teal-600', 'dark:text-teal-400');
+        activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-slate-700');
+        activeBtn.classList.add('active');
         if(tabId === 'monitoring') setTimeout(resizeAndDrawMap, 50);
     }
 
