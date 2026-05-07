@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2026 at 06:58 AM
+-- Generation Time: May 07, 2026 at 09:46 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,29 @@ SET time_zone = "+00:00";
 --
 -- Database: `robot_dashboard`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_logs`
+--
+
+CREATE TABLE `activity_logs` (
+  `id` int(11) NOT NULL,
+  `type` varchar(20) NOT NULL DEFAULT 'info',
+  `message` varchar(255) NOT NULL,
+  `details` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `activity_logs`
+--
+
+INSERT INTO `activity_logs` (`id`, `type`, `message`, `details`, `created_at`) VALUES
+(1, 'info', 'Sistem dimulai', 'Robot navigation system initialized', '2026-05-07 07:05:24'),
+(2, 'success', 'GPS terhubung', 'GPS tracking aktif', '2026-05-07 07:05:24'),
+(3, 'info', 'Mode manual diaktifkan', 'User mengubah mode ke manual', '2026-05-07 07:05:24');
 
 -- --------------------------------------------------------
 
@@ -61,6 +84,14 @@ INSERT INTO `daily_logs` (`id`, `log_date`, `distance_m`, `water_used_ml`, `batt
 --
 
 --
+-- Indexes for table `activity_logs`
+--
+ALTER TABLE `activity_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `type` (`type`),
+  ADD KEY `created_at` (`created_at`);
+
+--
 -- Indexes for table `daily_logs`
 --
 ALTER TABLE `daily_logs`
@@ -69,6 +100,12 @@ ALTER TABLE `daily_logs`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `activity_logs`
+--
+ALTER TABLE `activity_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `daily_logs`

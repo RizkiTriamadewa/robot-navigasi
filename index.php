@@ -423,17 +423,17 @@ sort($availableMonths);
         <button onclick="switchTab('monitoring')" id="btn-tab-monitoring" class="tab-btn active px-3 py-2 rounded-lg font-bold text-xs transition-all">
             <i class="fa-solid fa-display mr-1"></i> <span class="hidden md:inline">Monitoring</span>
         </button>
-        <button onclick="switchTab('riwayat')" id="btn-tab-riwayat" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
-            <i class="fa-solid fa-clock-rotate-left mr-1"></i> <span class="hidden md:inline">Riwayat</span>
-        </button>
-        <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
-            <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden md:inline">Laporan</span>
-        </button>
         <button onclick="switchTab('sensors')" id="btn-tab-sensors" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
             <i class="fa-solid fa-microchip mr-1"></i> <span class="hidden md:inline">Sensors</span>
         </button>
         <button onclick="switchTab('logbook')" id="btn-tab-logbook" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
             <i class="fa-solid fa-book mr-1"></i> <span class="hidden md:inline">Logbook</span>
+        </button>
+        <button onclick="switchTab('riwayat')" id="btn-tab-riwayat" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-clock-rotate-left mr-1"></i> <span class="hidden md:inline">Riwayat</span>
+        </button>
+        <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden md:inline">Laporan</span>
         </button>
     </div>
 
@@ -849,13 +849,18 @@ sort($availableMonths);
             </div>
             
             <div class="flex flex-wrap gap-2">
-                <select id="logbook-filter-type" onchange="filterLogbookLogs()" class="bg-white text-gray-700 text-xs pl-3 pr-8 py-2 rounded-lg border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-semibold shadow-sm cursor-pointer outline-none">
-                    <option value="all">Semua Tipe</option>
-                    <option value="info">Info</option>
-                    <option value="success">Success</option>
-                    <option value="warning">Warning</option>
-                    <option value="error">Error</option>
-                </select>
+                <div class="relative inline-block">
+                    <select id="logbook-filter-type" onchange="filterLogbookLogs()" class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:from-slate-700 dark:to-slate-800 dark:border-slate-600 dark:text-white font-semibold shadow-sm cursor-pointer outline-none hover:from-gray-100 hover:to-gray-200 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all appearance-none">
+                        <option value="all">Semua Tipe</option>
+                        <option value="info">Info</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
                 
                 <button onclick="clearLogbookLogs()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold text-xs transition-all shadow-md hover:shadow-lg flex items-center gap-2">
                     <i class="fa-solid fa-trash"></i> Clear
@@ -1509,25 +1514,6 @@ sort($availableMonths);
     updateIdleSetting(false);
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
     getCameras(); initBatteryStatus(); setTimeout(resizeAndDrawMap, 100); updateUI();
-
-    // Setel filter ke "Hari Ini" secara default saat halaman dimuat
-    window.addEventListener('DOMContentLoaded', () => {
-        let now = new Date();
-        let currentY = now.getFullYear().toString();
-        let currentM = String(now.getMonth() + 1).padStart(2, '0');
-        let currentD = String(now.getDate()).padStart(2, '0');
-
-        let selYear = document.getElementById('filter-year');
-        
-        // Cek apakah tahun ini ada di opsi (menghindari error jika log kosong)
-        if (Array.from(selYear.options).some(opt => opt.value === currentY)) {
-            selYear.value = currentY;
-        }
-        document.getElementById('filter-month').value = currentM;
-        document.getElementById('filter-day').value = currentD;
-
-        filterTable(); // Jalankan filter
-    });
 
     // --- SENSORS TAB FUNCTIONS ---
     let sensorsInitialized = false;
