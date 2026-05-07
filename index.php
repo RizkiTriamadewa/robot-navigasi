@@ -333,6 +333,83 @@ sort($availableMonths);
         .dark .bg-teal-50 {
             background-color: rgba(14, 165, 233, 0.1) !important;
         }
+        
+        /* SENSOR CARDS */
+        .sensor-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .sensor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dark .sensor-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* STATUS INDICATORS */
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .status-online { background: #10b981; }
+        .status-offline { background: #ef4444; }
+        .status-warning { background: #f59e0b; }
+        
+        /* LIVE INDICATOR */
+        .live-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulseLive 2s infinite;
+        }
+        
+        @keyframes pulseLive {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+        }
+        
+        /* LOG ENTRY STYLES */
+        .log-entry {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .log-entry:hover {
+            border-left-color: #14b8a6;
+            background-color: rgba(20, 184, 166, 0.05);
+        }
+        
+        .dark .log-entry:hover {
+            background-color: rgba(20, 184, 166, 0.1);
+        }
+        
+        .log-info { border-left-color: #3b82f6; }
+        .log-success { border-left-color: #10b981; }
+        .log-warning { border-left-color: #f59e0b; }
+        .log-error { border-left-color: #ef4444; }
+        
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+        
+        .dark .badge-info { background: #1e3a8a; color: #93c5fd; }
+        .dark .badge-success { background: #064e3b; color: #6ee7b7; }
+        .dark .badge-warning { background: #78350f; color: #fcd34d; }
+        .dark .badge-error { background: #7f1d1d; color: #fca5a5; }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col p-2 font-sans bg-gray-100 text-gray-800 dark:bg-[#1a1e29] dark:text-[#a0aec0]">
@@ -343,30 +420,30 @@ sort($availableMonths);
     </h1>
     
     <div class="flex space-x-1 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 p-1.5 rounded-xl border border-gray-200 dark:border-slate-700 mx-auto shadow-inner">
-        <button onclick="switchTab('monitoring')" id="btn-tab-monitoring" class="tab-btn active px-4 py-2 rounded-lg font-bold text-xs transition-all">
+        <button onclick="switchTab('monitoring')" id="btn-tab-monitoring" class="tab-btn active px-3 py-2 rounded-lg font-bold text-xs transition-all">
             <i class="fa-solid fa-display mr-1"></i> <span class="hidden md:inline">Monitoring</span>
         </button>
-        <button onclick="switchTab('riwayat')" id="btn-tab-riwayat" class="tab-btn px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+        <button onclick="switchTab('riwayat')" id="btn-tab-riwayat" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
             <i class="fa-solid fa-clock-rotate-left mr-1"></i> <span class="hidden md:inline">Riwayat</span>
         </button>
-        <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="tab-btn px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+        <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
             <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden md:inline">Laporan</span>
+        </button>
+        <button onclick="switchTab('sensors')" id="btn-tab-sensors" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-microchip mr-1"></i> <span class="hidden md:inline">Sensors</span>
+        </button>
+        <button onclick="switchTab('logbook')" id="btn-tab-logbook" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-book mr-1"></i> <span class="hidden md:inline">Logbook</span>
         </button>
     </div>
 
     <div class="flex items-center space-x-2 shrink-0">
-        <a href="sensors.php" class="hidden lg:flex px-3 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold text-xs transition-all shadow-md hover:shadow-lg items-center gap-2">
-            <i class="fa-solid fa-microchip"></i> <span>Sensors</span>
-        </a>
-        <a href="logbook.php" class="hidden lg:flex px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold text-xs transition-all shadow-md hover:shadow-lg items-center gap-2">
-            <i class="fa-solid fa-book"></i> <span>Logbook</span>
-        </a>
-        <div class="text-[10px] md:text-xs hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800">
-            <i class="fa-solid fa-clock text-teal-500"></i>
+        <div class="text-[10px] md:text-xs hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800">
+            <i class="fa-solid fa-clock text-teal-500 text-sm"></i>
             <span id="clock" class="text-teal-600 dark:text-teal-400 font-mono font-bold">00:00:00</span>
         </div>
-        <button onclick="toggleTheme()" class="p-2.5 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 dark:from-slate-700 dark:to-slate-800 dark:text-yellow-400 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all shadow-md hover:shadow-lg">
-            <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+        <button onclick="toggleTheme()" class="px-3 py-2 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 dark:from-slate-700 dark:to-slate-800 dark:text-yellow-400 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all shadow-md hover:shadow-lg">
+            <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
         </button>
     </div>
 </div>
@@ -636,6 +713,190 @@ sort($availableMonths);
     </div>
 </div>
 
+<!-- TAB SENSORS -->
+<div id="tab-sensors" class="tab-content flex-1 flex-col space-y-3 min-h-0 overflow-hidden">
+    <div class="flex-1 overflow-y-auto space-y-3 min-h-0">
+        
+        <!-- Sensor Status Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            
+            <!-- Level Cairan -->
+            <div class="sensor-card panel p-4 rounded-xl bg-white border border-gray-200 shadow-lg">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                        <i class="fa-solid fa-flask text-2xl"></i>
+                    </div>
+                    <div class="status-indicator status-online"></div>
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Level Cairan</h3>
+                <div class="text-2xl font-black text-gray-900 dark:text-white" id="sensor-liquid-level">0%</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="sensor-liquid-ml">0 ml</div>
+            </div>
+            
+            <!-- Motion Detection -->
+            <div class="sensor-card panel p-4 rounded-xl bg-white border border-gray-200 shadow-lg">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
+                        <i class="fa-solid fa-person-running text-2xl"></i>
+                    </div>
+                    <div class="status-indicator status-offline" id="sensor-motion-status"></div>
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Motion Detection</h3>
+                <div class="text-2xl font-black text-gray-900 dark:text-white" id="sensor-motion-state">Idle</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Last: <span id="sensor-motion-time">--:--</span></div>
+            </div>
+            
+            <!-- Posisi (X, Y, Z) -->
+            <div class="sensor-card panel p-4 rounded-xl bg-white border border-gray-200 shadow-lg">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400">
+                        <i class="fa-solid fa-location-crosshairs text-2xl"></i>
+                    </div>
+                    <div class="status-indicator status-online"></div>
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Posisi (X, Y, Z)</h3>
+                <div class="text-sm font-bold text-gray-900 dark:text-white">
+                    X: <span id="sensor-pos-x">0</span> | Y: <span id="sensor-pos-y">0</span>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Z: <span id="sensor-pos-z">0</span> m</div>
+            </div>
+            
+            <!-- Speed -->
+            <div class="sensor-card panel p-4 rounded-xl bg-white border border-gray-200 shadow-lg">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">
+                        <i class="fa-solid fa-gauge-high text-2xl"></i>
+                    </div>
+                    <div class="status-indicator status-online"></div>
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Speed</h3>
+                <div class="text-2xl font-black text-gray-900 dark:text-white"><span id="sensor-speed-val">0.0</span> m/s</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Avg: <span id="sensor-speed-avg">0.0</span> m/s</div>
+            </div>
+            
+        </div>
+        
+        <!-- Mode & Koneksi Status -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            
+            <!-- Mode Monitor -->
+            <div class="panel p-4 rounded-xl bg-white border border-gray-200 shadow-lg">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
+                        <i class="fa-solid fa-sliders text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Mode Operasi</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Status mode robot saat ini</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Mode Aktif</div>
+                        <div class="text-lg font-black text-gray-900 dark:text-white" id="sensor-mode-active">Manual</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Status</div>
+                        <div class="text-lg font-black text-teal-600 dark:text-teal-400" id="sensor-mode-status">Active</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Koneksi Internet -->
+            <div class="panel p-4 rounded-xl bg-white border border-gray-200 shadow-lg">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400">
+                        <i class="fa-solid fa-wifi text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Koneksi Internet</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Status jaringan dan latency</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Status</div>
+                        <div class="text-sm font-black text-green-600 dark:text-green-400" id="sensor-net-status">Online</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Ping</div>
+                        <div class="text-sm font-black text-gray-900 dark:text-white"><span id="sensor-net-ping">--</span> ms</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Quality</div>
+                        <div class="text-sm font-black text-gray-900 dark:text-white" id="sensor-net-quality">Good</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+</div>
+
+<!-- TAB LOGBOOK -->
+<div id="tab-logbook" class="tab-content flex-1 flex-col min-h-0 overflow-hidden">
+    <div class="flex-1 flex flex-col panel rounded-xl p-4 bg-white border border-gray-200 shadow-lg overflow-hidden">
+        
+        <!-- Header & Filters -->
+        <div class="flex-none flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div class="live-indicator"></div>
+                    Activity Logs
+                </h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Real-time monitoring aktivitas robot</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-2">
+                <select id="logbook-filter-type" onchange="filterLogbookLogs()" class="bg-white text-gray-700 text-xs pl-3 pr-8 py-2 rounded-lg border border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-semibold shadow-sm cursor-pointer outline-none">
+                    <option value="all">Semua Tipe</option>
+                    <option value="info">Info</option>
+                    <option value="success">Success</option>
+                    <option value="warning">Warning</option>
+                    <option value="error">Error</option>
+                </select>
+                
+                <button onclick="clearLogbookLogs()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold text-xs transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-trash"></i> Clear
+                </button>
+                
+                <button onclick="exportLogbookLogs()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-xs transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="flex-none grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <div class="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-1">Total Logs</div>
+                <div class="text-2xl font-black text-blue-700 dark:text-blue-300" id="logbook-stat-total">0</div>
+            </div>
+            <div class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <div class="text-xs text-green-600 dark:text-green-400 font-semibold mb-1">Success</div>
+                <div class="text-2xl font-black text-green-700 dark:text-green-300" id="logbook-stat-success">0</div>
+            </div>
+            <div class="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                <div class="text-xs text-yellow-600 dark:text-yellow-400 font-semibold mb-1">Warnings</div>
+                <div class="text-2xl font-black text-yellow-700 dark:text-yellow-300" id="logbook-stat-warning">0</div>
+            </div>
+            <div class="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <div class="text-xs text-red-600 dark:text-red-400 font-semibold mb-1">Errors</div>
+                <div class="text-2xl font-black text-red-700 dark:text-red-300" id="logbook-stat-error">0</div>
+            </div>
+        </div>
+        
+        <!-- Log Entries -->
+        <div class="flex-1 overflow-y-auto space-y-2 bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+            <div id="logbook-container">
+                <!-- Logs will be inserted here -->
+            </div>
+        </div>
+        
+    </div>
+</div>
+
 <div id="pdf-wrapper" style="display: none; position: absolute; top: 0; left: 0; width: 100%; z-index: -9999; background: white; padding: 10px;">
     <div id="pdf-report-template" class="mx-auto w-[700px] bg-white text-black p-8 font-sans border border-gray-200">
         <div class="border-b-2 border-gray-800 pb-4 mb-6 flex justify-between items-end">
@@ -874,7 +1135,7 @@ sort($availableMonths);
 
     // --- TAB & UI LOGIC ---
     function switchTab(tabId) {
-        ['monitoring', 'riwayat', 'laporan'].forEach(id => {
+        ['monitoring', 'riwayat', 'laporan', 'sensors', 'logbook'].forEach(id => {
             document.getElementById('tab-' + id).classList.remove('active');
             let btn = document.getElementById('btn-tab-' + id);
             btn.classList.remove('active', 'tab-btn');
@@ -885,6 +1146,8 @@ sort($availableMonths);
         activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-slate-700');
         activeBtn.classList.add('active');
         if(tabId === 'monitoring') setTimeout(resizeAndDrawMap, 50);
+        if(tabId === 'sensors') initSensorsTab();
+        if(tabId === 'logbook') initLogbookTab();
     }
 
     const htmlTag = document.documentElement;
@@ -1265,6 +1528,243 @@ sort($availableMonths);
 
         filterTable(); // Jalankan filter
     });
+
+    // --- SENSORS TAB FUNCTIONS ---
+    let sensorsInitialized = false;
+    let sensorSpeedHistory = [];
+    let lastSensorPosX = 0, lastSensorPosY = 0, lastSensorPosZ = 0;
+    let lastSensorUpdateTime = Date.now();
+
+    function initSensorsTab() {
+        if (sensorsInitialized) return;
+        sensorsInitialized = true;
+        
+        // Listen to sensor data from Firebase
+        database.ref('navx_robot/sensors').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+            
+            // Liquid Level
+            if (data.liquid_level !== undefined) {
+                const level = parseFloat(data.liquid_level);
+                const ml = (level / 100) * 2000;
+                document.getElementById('sensor-liquid-level').innerText = level.toFixed(1) + '%';
+                document.getElementById('sensor-liquid-ml').innerText = ml.toFixed(0) + ' ml';
+            }
+            
+            // Motion Detection
+            if (data.motion !== undefined) {
+                const isMoving = data.motion === true || data.motion === 'true' || data.motion === 1;
+                document.getElementById('sensor-motion-state').innerText = isMoving ? 'Moving' : 'Idle';
+                const motionStatus = document.getElementById('sensor-motion-status');
+                motionStatus.className = 'status-indicator ' + (isMoving ? 'status-online' : 'status-offline');
+                document.getElementById('sensor-motion-time').innerText = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
+            }
+            
+            // Position
+            if (data.position) {
+                const posX = parseFloat(data.position.x) || 0;
+                const posY = parseFloat(data.position.y) || 0;
+                const posZ = parseFloat(data.position.z) || 0;
+                
+                document.getElementById('sensor-pos-x').innerText = posX.toFixed(2);
+                document.getElementById('sensor-pos-y').innerText = posY.toFixed(2);
+                document.getElementById('sensor-pos-z').innerText = posZ.toFixed(2);
+                
+                // Calculate speed
+                const now = Date.now();
+                const timeDiff = (now - lastSensorUpdateTime) / 1000;
+                
+                if (timeDiff > 0 && (lastSensorPosX !== 0 || lastSensorPosY !== 0)) {
+                    const dx = posX - lastSensorPosX;
+                    const dy = posY - lastSensorPosY;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+                    const speed = distance / timeDiff;
+                    
+                    document.getElementById('sensor-speed-val').innerText = speed.toFixed(2);
+                    sensorSpeedHistory.push(speed);
+                    if (sensorSpeedHistory.length > 20) sensorSpeedHistory.shift();
+                    
+                    const avgSpeed = sensorSpeedHistory.reduce((a, b) => a + b, 0) / sensorSpeedHistory.length;
+                    document.getElementById('sensor-speed-avg').innerText = avgSpeed.toFixed(2);
+                }
+                
+                lastSensorPosX = posX;
+                lastSensorPosY = posY;
+                lastSensorPosZ = posZ;
+                lastSensorUpdateTime = now;
+            }
+        });
+        
+        // Mode Monitor
+        database.ref('navx_robot/mode').on('value', (snapshot) => {
+            const mode = snapshot.val();
+            if (mode) {
+                document.getElementById('sensor-mode-active').innerText = mode.type || 'Manual';
+                document.getElementById('sensor-mode-status').innerText = mode.status || 'Active';
+            }
+        });
+        
+        // Network Monitor
+        checkSensorNetworkStatus();
+        setInterval(checkSensorNetworkStatus, 5000);
+    }
+
+    function checkSensorNetworkStatus() {
+        const online = navigator.onLine;
+        document.getElementById('sensor-net-status').innerText = online ? 'Online' : 'Offline';
+        document.getElementById('sensor-net-status').className = online ? 
+            'text-sm font-black text-green-600 dark:text-green-400' : 
+            'text-sm font-black text-red-600 dark:text-red-400';
+        
+        if (online) {
+            const startTime = Date.now();
+            fetch('https://www.google.com/favicon.ico', { mode: 'no-cors' })
+                .then(() => {
+                    const ping = Date.now() - startTime;
+                    document.getElementById('sensor-net-ping').innerText = ping;
+                    
+                    let quality = 'Good';
+                    if (ping > 200) quality = 'Fair';
+                    if (ping > 500) quality = 'Poor';
+                    document.getElementById('sensor-net-quality').innerText = quality;
+                })
+                .catch(() => {
+                    document.getElementById('sensor-net-ping').innerText = '--';
+                    document.getElementById('sensor-net-quality').innerText = 'Error';
+                });
+        } else {
+            document.getElementById('sensor-net-ping').innerText = '--';
+            document.getElementById('sensor-net-quality').innerText = 'Offline';
+        }
+    }
+
+    // --- LOGBOOK TAB FUNCTIONS ---
+    let logbookInitialized = false;
+    let allLogbookLogs = [];
+    
+    const logbookIcons = {
+        info: 'fa-circle-info',
+        success: 'fa-circle-check',
+        warning: 'fa-triangle-exclamation',
+        error: 'fa-circle-xmark'
+    };
+
+    function initLogbookTab() {
+        if (logbookInitialized) return;
+        logbookInitialized = true;
+        
+        // Add initial sample logs
+        addLogbookLog('info', 'Sistem dimulai', 'Logbook monitoring aktif');
+        addLogbookLog('success', 'Koneksi Firebase berhasil', 'Real-time sync enabled');
+        
+        // Listen to robot events
+        database.ref('navx_robot/events').on('value', (snapshot) => {
+            const event = snapshot.val();
+            if (!event) return;
+            
+            if (event.type === 'movement') {
+                addLogbookLog('info', 'Robot bergerak', `Arah: ${event.direction || 'unknown'}`);
+            } else if (event.type === 'spray') {
+                addLogbookLog('success', 'Air disemprotkan', `Volume: ${event.volume || 50}ml`);
+            } else if (event.type === 'battery_low') {
+                addLogbookLog('warning', 'Baterai rendah', `Level: ${event.level || 0}%`);
+            } else if (event.type === 'error') {
+                addLogbookLog('error', 'Terjadi kesalahan', event.message || 'Unknown error');
+            } else if (event.type === 'gps_connected') {
+                addLogbookLog('success', 'GPS terhubung', 'Tracking aktif');
+            } else if (event.type === 'gps_disconnected') {
+                addLogbookLog('warning', 'GPS terputus', 'Tracking tidak aktif');
+            }
+        });
+    }
+
+    function addLogbookLog(type, message, details = '') {
+        const timestamp = new Date();
+        const log = {
+            id: Date.now(),
+            type: type,
+            message: message,
+            details: details,
+            timestamp: timestamp.toISOString(),
+            timeStr: timestamp.toLocaleString('id-ID')
+        };
+        
+        allLogbookLogs.unshift(log);
+        if (allLogbookLogs.length > 500) allLogbookLogs.pop();
+        
+        renderLogbookLogs();
+        updateLogbookStats();
+    }
+
+    function renderLogbookLogs() {
+        const container = document.getElementById('logbook-container');
+        const filterType = document.getElementById('logbook-filter-type').value;
+        
+        const filteredLogs = filterType === 'all' ? allLogbookLogs : allLogbookLogs.filter(log => log.type === filterType);
+        
+        if (filteredLogs.length === 0) {
+            container.innerHTML = '<div class="text-center py-8 text-gray-500 dark:text-gray-400 italic">Belum ada log aktivitas</div>';
+            return;
+        }
+        
+        container.innerHTML = filteredLogs.map(log => `
+            <div class="log-entry log-${log.type} p-3 rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-lg badge-${log.type} shrink-0">
+                        <i class="fa-solid ${logbookIcons[log.type]}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <div class="font-semibold text-sm text-gray-900 dark:text-white">${log.message}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">${log.timeStr}</div>
+                        </div>
+                        ${log.details ? `<div class="text-xs text-gray-600 dark:text-gray-400 mt-1">${log.details}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateLogbookStats() {
+        document.getElementById('logbook-stat-total').innerText = allLogbookLogs.length;
+        document.getElementById('logbook-stat-success').innerText = allLogbookLogs.filter(l => l.type === 'success').length;
+        document.getElementById('logbook-stat-warning').innerText = allLogbookLogs.filter(l => l.type === 'warning').length;
+        document.getElementById('logbook-stat-error').innerText = allLogbookLogs.filter(l => l.type === 'error').length;
+    }
+
+    function filterLogbookLogs() {
+        renderLogbookLogs();
+    }
+
+    function clearLogbookLogs() {
+        if (confirm('Hapus semua log?')) {
+            allLogbookLogs = [];
+            renderLogbookLogs();
+            updateLogbookStats();
+        }
+    }
+
+    function exportLogbookLogs() {
+        if (allLogbookLogs.length === 0) {
+            alert('Tidak ada log untuk di-export');
+            return;
+        }
+        
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + "Timestamp,Type,Message,Details\n"
+            + allLogbookLogs.map(log => 
+                `"${log.timeStr}","${log.type}","${log.message}","${log.details}"`
+            ).join("\n");
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `logbook_${Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>
 </body>
 </html>
