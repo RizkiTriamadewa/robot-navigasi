@@ -1,0 +1,111 @@
+# ===================================
+# Robot Navigation Dashboard
+# .gitignore
+# ===================================
+
+# === Credentials & Secrets ===
+# Firebase config (jika ada file terpisah)
+firebase-config.js
+firebase-credentials.json
+.env
+.env.local
+.env.production
+
+# Database credentials
+db_config.php
+config.php
+
+# === Dependencies ===
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+
+# === Logs ===
+*.log
+logs/
+error_log
+access_log
+
+# === Temporary Files ===
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# === IDE & Editor ===
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.phpintel/
+*.code-workspace
+
+# === Build & Cache ===
+.cache/
+dist/
+build/
+*.min.js
+*.min.css
+
+# === Backup Files ===
+*.bak
+*.backup
+*.old
+*_backup.*
+backup/
+
+# === OS Files ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === PHP Specific ===
+composer.phar
+phpunit.xml
+.phpunit.result.cache
+
+# === Excel & Office Temp Files ===
+~$*.xlsx
+~$*.xls
+~$*.doc*
+~$*.ppt*
+.~lock.*
+
+# === Media & Large Files (optional) ===
+# Uncomment jika tidak ingin push file media besar
+# *.mp4
+# *.avi
+# *.mov
+# *.zip
+# *.rar
+
+# === Project Specific ===
+# Temporary scripts
+read_excel.js
+update_excel.js
+test_*.php
+debug_*.php
+
+# User uploads (jika ada)
+uploads/
+user_data/
+
+# === Keep Important Files ===
+# Pastikan file-file ini TIDAK di-ignore:
+# !index.php
+# !sensors.php
+# !logbook.php
+# !db.sql
+# !setup_tables.sql
+# !README*.md
+# !CHECKLIST.md
+# !Robot Monitoring.xlsx
