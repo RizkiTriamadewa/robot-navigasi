@@ -1,183 +1,363 @@
 ╔══════════════════════════════════════════════════════════════════╗
-║                  🎉 FITUR BARU SUDAH SELESAI! 🎉                 ║
+║           🎉 ROBOT DASHBOARD - CARA PAKAI (v3.0.0) 🎉           ║
+║              Single Page Application + RBAC System              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 📋 RINGKASAN CEPAT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ SEMUA FITUR DARI LIST SUDAH DIBUAT (11/11)
+✅ SEMUA FITUR SUDAH SELESAI (11/11 Monitoring + RBAC System)
 
-Yang SUDAH ADA di Dashboard (index.php):
-  ✅ Monitoring Sensor: Battery
-  ✅ Monitoring Sensor: Kamera  
-  ✅ Monitoring Sensor: GPS Tracking
-  ✅ Monitoring data dalam bentuk angka dan grafik
-
-Yang BARU DIBUAT di Page Terpisah:
-  ✅ Monitoring Sensor: Level Cairan → sensors.php
-  ✅ Monitoring Sensor: Motion Detection → sensors.php
-  ✅ Monitoring Sensor: Posisi (X,Y,Z) → sensors.php
-  ✅ Monitoring Sensor: Speed → sensors.php
-  ✅ Monitoring posisi bergerak mode otomatis/manual → sensors.php
-  ✅ Monitoring koneksi internet → sensors.php
-  ✅ Monitoring logbook → logbook.php
+Arsitektur: Single Page Application (SPA) dengan 5 Tab Navigation
+Security: Role-Based Access Control (RBAC) dengan 4 user roles
 
 
-📁 FILE YANG DIBUAT
+📁 STRUKTUR APLIKASI
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Halaman Baru:
-  1. sensors.php         → Halaman Sensor Monitor
-  2. logbook.php         → Halaman Logbook
+🔐 RBAC System:
+  ✅ login.php           → Halaman login
+  ✅ logout.php          → Logout handler
+  ✅ auth.php            → Authentication functions
+  ✅ setup_rbac.sql      → Database RBAC setup
 
-Backend:
-  3. api_logbook.php     → API untuk logbook
-  4. setup_tables.sql    → SQL untuk database
-
-Dokumentasi:
-  5. README_FITUR_BARU.md → Dokumentasi lengkap
-  6. VISUAL_GUIDE.md      → Visual guide
-  7. CHECKLIST.md         → Testing checklist
-  8. SUMMARY.md           → Summary lengkap
-  9. CARA_PAKAI.txt       → File ini
-
-Modified:
-  10. index.php          → Ditambahkan tombol Sensors & Logbook
+📱 Main Application:
+  ✅ index.php           → Single Page Application (5 tabs)
+  ✅ api.php             → REST API
+  ✅ db.php              → Database connection
+  ✅ db.sql              → Main database schema
+  ✅ setup_tables.sql    → Additional tables
 
 
-🚀 CARA MENGGUNAKAN (3 LANGKAH MUDAH)
+🚀 CARA SETUP
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-LANGKAH 1: Setup Database
-──────────────────────────
-  1. Buka phpMyAdmin (http://localhost/phpmyadmin)
-  2. Pilih database: robot_dashboard
-  3. Klik tab "SQL"
-  4. Copy-paste isi file: setup_tables.sql
-  5. Klik "Go"
-  
-  ATAU via MySQL CLI:
-  mysql -u root -p robot_dashboard < setup_tables.sql
+STEP 1: Setup Database Utama
+────────────────────────────────────────────────────────────────
+1. Buka phpMyAdmin: http://localhost/phpmyadmin
+2. Buat database baru: robot_dashboard
+3. Import file: db.sql
+
+STEP 2: Setup RBAC Tables
+────────────────────────────────────────────────────────────────
+1. Pilih database: robot_dashboard
+2. Klik tab SQL
+3. Import file: setup_rbac.sql
+   (Ini akan membuat 5 tabel: users, roles, permissions, 
+    role_permissions, audit_logs)
+
+STEP 3: Login
+────────────────────────────────────────────────────────────────
+1. Buka: http://localhost/robot_dashboard/robot-navigasi/login.php
+2. Login dengan salah satu akun demo:
+   
+   Username: admin       Password: admin123      (Super Admin)
+   Username: operator    Password: operator123   (Operator)
+   Username: viewer      Password: viewer123     (Viewer)
+   Username: technician  Password: tech123       (Technician)
+
+STEP 4: Akses Dashboard
+────────────────────────────────────────────────────────────────
+Setelah login, otomatis redirect ke:
+http://localhost/robot_dashboard/robot-navigasi/index.php
 
 
-LANGKAH 2: Buka Dashboard
-──────────────────────────
-  Buka browser, ketik:
-  http://localhost/robot_dashboard/robot-navigasi/index.php
-
-
-LANGKAH 3: Akses Halaman Baru
-──────────────────────────────
-  Di header dashboard, klik:
-  
-  🟣 Tombol "Sensors" (warna ungu)
-     → Membuka halaman Sensor Monitor
-     
-  🔵 Tombol "Logbook" (warna indigo)
-     → Membuka halaman Logbook
-  
-  Atau akses langsung:
-  http://localhost/robot_dashboard/robot-navigasi/sensors.php
-  http://localhost/robot_dashboard/robot-navigasi/logbook.php
-
-
-📍 LOKASI FITUR
+🎯 NAVIGASI DASHBOARD (5 TAB)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-DASHBOARD UTAMA (index.php)
+TAB 1: MONITORING (Dashboard Utama)
+────────────────────────────────────────────────────────────────
+Fitur:
   ✅ Battery monitoring
-  ✅ Live FPV Camera
-  ✅ GPS Tracking & Map
-  ✅ Jarak, Air Keluar, Sisa Tangki
-  ✅ Control buttons
-  ✅ Riwayat & Laporan
+  ✅ Kamera (Live FPV) dengan multi-camera support
+  ✅ GPS Tracking & Interactive Map
+  ✅ Jarak tempuh real-time
+  ✅ Air keluar monitoring
+  ✅ Sisa tangki
+  ✅ Path tracking dengan canvas
+  ✅ Control buttons (Up, Down, Left, Right)
+  ✅ Spray water button
+  ✅ Save & Reset session
+  ✅ Mode selection (Manual/Auto)
 
-SENSOR MONITOR (sensors.php)
-  ✅ Level Cairan (% dan ml)
+Cara Pakai:
+  1. Gunakan control buttons untuk menggerakkan robot
+  2. Klik "Semprot" untuk spray water
+  3. Klik "Simpan" untuk save session
+  4. Klik "Sesi Baru" untuk reset (Admin only)
+  5. Pilih mode: Manual atau Auto (GPS)
+
+TAB 2: SENSORS (Sensor Monitor)
+────────────────────────────────────────────────────────────────
+Fitur:
+  ✅ Level Cairan (persentase & ml)
   ✅ Motion Detection (Moving/Idle)
-  ✅ Posisi (X, Y, Z)
+  ✅ Posisi (X, Y, Z coordinates)
   ✅ Speed (current & average)
   ✅ Mode Operasi (Manual/Auto)
   ✅ Koneksi Internet (status, ping, quality)
-  ✅ Speed History Chart
-  ✅ Liquid Level History Chart
 
-LOGBOOK (logbook.php)
+Cara Pakai:
+  1. Klik tab "Sensors" di header
+  2. Lihat 6 sensor cards dengan data real-time
+  3. Data update otomatis dari Firebase
+
+TAB 3: LOGBOOK (Activity Logs)
+────────────────────────────────────────────────────────────────
+Fitur:
   ✅ Real-time activity logs
   ✅ 4 tipe log (Info, Success, Warning, Error)
   ✅ Statistics dashboard
   ✅ Filter by type
-  ✅ Clear logs
+  ✅ Clear logs (Admin only)
   ✅ Export to CSV
 
+Cara Pakai:
+  1. Klik tab "Logbook" di header
+  2. Lihat logs real-time
+  3. Filter by type: All, Info, Success, Warning, Error
+  4. Klik "Export CSV" untuk download
+  5. Klik "Clear Logs" untuk hapus semua (Admin only)
 
-🎨 FITUR UNGGULAN
+TAB 4: RIWAYAT (History)
+────────────────────────────────────────────────────────────────
+Fitur:
+  ✅ Tabel history semua sesi robot
+  ✅ Filter by day, month, year
+  ✅ Data: Waktu, Baterai, Jarak, Air Keluar, Sisa Air
+
+Cara Pakai:
+  1. Klik tab "Riwayat" di header
+  2. Pilih filter: Today, This Month, This Year, All
+  3. Lihat history data sesi robot
+
+TAB 5: LAPORAN (PDF Report)
+────────────────────────────────────────────────────────────────
+Fitur:
+  ✅ Summary data sesi saat ini
+  ✅ Download PDF report
+  ✅ Include map screenshot
+
+Cara Pakai:
+  1. Klik tab "Laporan" di header
+  2. Klik "Download PDF" untuk generate report
+
+
+🔐 RBAC SYSTEM (Role-Based Access Control)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✨ Real-time Updates
-   - Data update otomatis via Firebase
-   - Tidak perlu refresh manual
+4 USER ROLES:
+────────────────────────────────────────────────────────────────
 
-📊 Interactive Charts
-   - Speed history chart
-   - Liquid level history chart
-   - Smooth animations
+1. SUPER ADMIN (admin / admin123)
+   ✅ Full system access
+   ✅ Semua control buttons enabled
+   ✅ Bisa control robot
+   ✅ Bisa spray water
+   ✅ Bisa save & reset session
+   ✅ Bisa clear logs
+   ✅ Bisa manage users (future)
 
-🎨 Premium Design
-   - Glassmorphism panels
-   - Gradient buttons
-   - Dark/Light mode
-   - Smooth animations
+2. OPERATOR (operator / operator123)
+   ✅ Robot control & monitoring
+   ✅ Control buttons enabled
+   ✅ Bisa spray water
+   ✅ Bisa save session
+   ❌ Tidak bisa reset session (Admin only)
+   ❌ Tidak bisa clear logs
 
-📱 Responsive
-   - Desktop: Layout 4 kolom
-   - Tablet: Layout 2 kolom
-   - Mobile: Layout 1 kolom
+3. VIEWER (viewer / viewer123)
+   ✅ Read-only access
+   ✅ Bisa view semua data
+   ✅ Bisa generate PDF
+   ❌ Semua control buttons DISABLED
+   ❌ Tidak bisa control robot
+   ❌ Tidak bisa spray water
+   ❌ Tidak bisa save/reset session
+
+4. TECHNICIAN (technician / tech123)
+   ✅ Maintenance & logs
+   ✅ Bisa view & export logs
+   ✅ Bisa tambah maintenance log
+   ❌ Control buttons DISABLED
+   ❌ Tidak bisa control robot
 
 
-🔧 TROUBLESHOOTING
+🎨 FITUR UI
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-❌ Halaman blank/error 500
-   → Pastikan XAMPP running (Apache + MySQL)
-   → Cek db.php connection benar
+Header (Top Right):
+  ✅ User info badge (nama + role)
+  ✅ Real-time clock
+  ✅ Dark/Light mode toggle
+  ✅ Logout button dengan konfirmasi
 
-❌ Firebase tidak connect
-   → Pastikan internet aktif
-   → Cek browser console untuk error
-
-❌ Charts tidak muncul
-   → Refresh halaman (Ctrl+F5)
-   → Cek browser console
-
-❌ Database error
-   → Jalankan setup_tables.sql
-   → Pastikan database robot_dashboard ada
+Design:
+  ✅ Glassmorphism panels
+  ✅ Gradient buttons
+  ✅ Smooth animations
+  ✅ Responsive layout
+  ✅ Consistent blue color scheme
+  ✅ Permission-based UI (buttons disabled sesuai role)
 
 
-📞 BANTUAN LEBIH LANJUT
+🔒 SECURITY FEATURES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Baca dokumentasi lengkap:
-  📖 README_FITUR_BARU.md  → Dokumentasi detail
-  🎨 VISUAL_GUIDE.md       → Visual guide dengan mockup
-  ✅ CHECKLIST.md          → Testing checklist
-  📊 SUMMARY.md            → Summary lengkap
+✅ Password hashing (bcrypt)
+✅ SQL injection prevention (prepared statements)
+✅ Session management (30 min timeout)
+✅ Auto-logout on timeout
+✅ Audit trail logging
+✅ Permission-based UI rendering
+✅ Secure login/logout
 
 
-✅ STATUS AKHIR
+⚙️ TECHNOLOGY STACK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Total Fitur: 11/11 ✅
-Total Halaman Baru: 2 ✅
-Total File Dibuat: 9 ✅
-Status: SELESAI & SIAP DIGUNAKAN ✅
+Backend:
+  • PHP 7.4+
+  • MySQL (mysqli)
+  • Firebase Realtime Database
+
+Frontend:
+  • HTML5, CSS3, JavaScript ES6+
+  • Tailwind CSS (CDN)
+  • Font Awesome 6.4.0
+  • SweetAlert2
+  • html2pdf.js
+
+
+📋 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MASALAH: Tidak bisa login
+SOLUSI:
+  1. Pastikan setup_rbac.sql sudah dijalankan
+  2. Cek tabel users ada: SELECT * FROM users;
+  3. Pastikan password benar (case-sensitive)
+  4. Clear browser cache (Ctrl+F5)
+
+MASALAH: Control buttons disabled untuk Admin
+SOLUSI:
+  1. Logout dan login ulang
+  2. Clear browser cache
+  3. Cek role_permissions table
+  4. Pastikan session memiliki permissions
+
+MASALAH: Session timeout terlalu cepat
+SOLUSI:
+  1. Edit auth.php
+  2. Function getSessionTimeout()
+  3. Ubah return value (default: 1800 = 30 menit)
+
+MASALAH: Firebase tidak connect
+SOLUSI:
+  1. Cek koneksi internet
+  2. Cek Firebase config di index.php
+  3. Pastikan Firebase Realtime Database aktif
+
+
+⚠️ PENTING SEBELUM PRODUCTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. GANTI PASSWORD DEFAULT
+   ❌ Jangan gunakan admin/admin123 di production
+   ✅ Buat password kuat (min 12 karakter)
+
+2. BUAT USER REAL
+   ✅ Buat user account sesuai kebutuhan
+   ❌ Disable atau hapus demo accounts
+
+3. ENABLE HTTPS
+   ✅ Gunakan SSL certificate
+   ✅ Secure login credentials
+
+4. BACKUP DATABASE
+   ✅ Backup regular database
+   ✅ Simpan di tempat aman
+
+5. REVIEW PERMISSIONS
+   ✅ Pastikan setiap role punya permission yang sesuai
+   ✅ Test dengan semua role
+
+
+📞 SUPPORT & DOKUMENTASI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Dokumentasi Lengkap:
+  • README_RBAC.md         → Panduan RBAC (Bahasa Indonesia)
+  • RBAC_SETUP_GUIDE.md    → Setup instructions
+  • SUMMARY.md             → Project summary
+  • VISUAL_GUIDE.md        → Visual guide
+  • CARA_PAKAI.txt         → File ini
+
+Quick Links:
+  • Login:     /robot-navigasi/login.php
+  • Dashboard: /robot-navigasi/index.php
+  • API:       /robot-navigasi/api.php
+
+
+✅ CHECKLIST TESTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Setup:
+  [ ] XAMPP running (Apache + MySQL)
+  [ ] Database robot_dashboard exists
+  [ ] Tabel daily_logs ada
+  [ ] Tabel users, roles, permissions ada (RBAC)
+  [ ] Firebase config benar
+
+Login:
+  [ ] Bisa akses login.php
+  [ ] Bisa login dengan admin/admin123
+  [ ] Bisa login dengan operator/operator123
+  [ ] Bisa login dengan viewer/viewer123
+  [ ] Bisa login dengan technician/tech123
+  [ ] User info muncul di header
+  [ ] Logout button ada
+
+Dashboard:
+  [ ] 5 tab navigation muncul
+  [ ] Semua tab bisa dibuka
+  [ ] Dark mode toggle berfungsi
+  [ ] Clock real-time berjalan
+  [ ] Tab switching smooth
+
+Permissions (Admin):
+  [ ] Semua control buttons enabled
+  [ ] Bisa control robot
+  [ ] Bisa spray water
+  [ ] Bisa save session
+  [ ] Bisa reset session
+
+Permissions (Viewer):
+  [ ] Semua control buttons DISABLED
+  [ ] Tidak bisa control robot
+  [ ] Bisa view data
+  [ ] Bisa generate PDF
+
+
+🎉 KESIMPULAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATUS: ✅ PRODUCTION READY
+
+Fitur Monitoring: 11/11 ✅ (100%)
+RBAC System: 15/15 ✅ (100%)
+Documentation: ✅ Complete
+Security: ✅ Implemented
+
+Arsitektur: Single Page Application + RBAC
+Versi: 3.0.0
+Status: 🟢 COMPLETE & SECURED
 
 
 ╔══════════════════════════════════════════════════════════════════╗
-║              🎉 SELAMAT MENGGUNAKAN FITUR BARU! 🎉               ║
+║                    SELAMAT MENGGUNAKAN! 🚀                       ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Dibuat: 2026-05-07
-Versi: 1.0.0
-Status: ✅ PRODUCTION READY
+Updated: 2026-05-10 (RBAC Added)
+Developer: Rizki Triamadewa

@@ -1,5 +1,22 @@
 <?php
 require 'db.php';
+require 'auth.php';
+
+// Require login to access dashboard
+requireLogin();
+
+// Check session timeout
+if (isSessionExpired()) {
+    logoutUser($conn);
+    header('Location: login.php?timeout=1');
+    exit;
+}
+
+// Refresh session
+refreshSession();
+
+// Get current user
+$currentUser = getCurrentUser();
 
 // Ambil data SESI TERBARU (Memungkinkan banyak laporan dalam 1 hari)
 $query = $conn->query("SELECT * FROM daily_logs ORDER BY log_date DESC LIMIT 1");
@@ -438,12 +455,29 @@ sort($availableMonths);
     </div>
 
     <div class="flex items-center space-x-2 shrink-0">
+        <!-- User Info -->
+        <div class="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800">
+            <i class="fa-solid fa-user-circle text-blue-500 text-lg"></i>
+            <div class="text-left">
+                <p class="text-[10px] font-bold text-blue-700 dark:text-blue-400 leading-none"><?= htmlspecialchars($currentUser['full_name']) ?></p>
+                <p class="text-[9px] text-blue-600 dark:text-blue-500 leading-none"><?= htmlspecialchars($currentUser['role_name']) ?></p>
+            </div>
+        </div>
+        
+        <!-- Clock -->
         <div class="text-[10px] md:text-xs hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800">
             <i class="fa-solid fa-clock text-teal-500 text-sm"></i>
             <span id="clock" class="text-teal-600 dark:text-teal-400 font-mono font-bold">00:00:00</span>
         </div>
+        
+        <!-- Theme Toggle -->
         <button onclick="toggleTheme()" class="px-3 py-2 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 dark:from-slate-700 dark:to-slate-800 dark:text-yellow-400 dark:hover:from-slate-600 dark:hover:to-slate-700 transition-all shadow-md hover:shadow-lg">
             <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+        
+        <!-- Logout Button -->
+        <button onclick="confirmLogout()" class="px-3 py-2 rounded-lg bg-gradient-to-br from-red-100 to-red-200 text-red-700 hover:from-red-200 hover:to-red-300 dark:from-red-900/30 dark:to-red-800/30 dark:text-red-400 dark:hover:from-red-900/50 dark:hover:to-red-800/50 transition-all shadow-md hover:shadow-lg" title="Logout">
+            <i class="fa-solid fa-right-from-bracket text-sm"></i>
         </button>
     </div>
 </div>
@@ -568,31 +602,31 @@ sort($availableMonths);
                 
                 <div class="flex-1 flex flex-row items-stretch justify-center gap-3 sm:gap-6 min-h-0 h-full">
                     <div class="flex-1 flex flex-col items-center justify-center gap-2 md:gap-4 p-2 md:p-4 bg-[#f8fafc] dark:bg-[#1a1e29]/50 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm">
-                        <button onclick="moveRobot('up')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                        <button onclick="moveRobot('up')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256] <?= !hasPermission('control_robot') ? 'opacity-50 cursor-not-allowed' : '' ?>" <?= !hasPermission('control_robot') ? 'disabled' : '' ?>>
                             <i class="fa-solid fa-chevron-up"></i>
                         </button>
                         <div class="flex gap-2 md:gap-4">
-                            <button onclick="moveRobot('left')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                            <button onclick="moveRobot('left')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256] <?= !hasPermission('control_robot') ? 'opacity-50 cursor-not-allowed' : '' ?>" <?= !hasPermission('control_robot') ? 'disabled' : '' ?>>
                                 <i class="fa-solid fa-chevron-left"></i>
                             </button>
-                            <button onclick="moveRobot('down')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                            <button onclick="moveRobot('down')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256] <?= !hasPermission('control_robot') ? 'opacity-50 cursor-not-allowed' : '' ?>" <?= !hasPermission('control_robot') ? 'disabled' : '' ?>>
                                 <i class="fa-solid fa-chevron-down"></i>
                             </button>
-                            <button onclick="moveRobot('right')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256]">
+                            <button onclick="moveRobot('right')" class="btn-control w-14 h-14 md:w-24 md:h-24 rounded-xl shrink-0 flex items-center justify-center text-2xl md:text-4xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-sm dark:bg-[#2a3040] dark:text-gray-200 dark:border-[#3b4256] <?= !hasPermission('control_robot') ? 'opacity-50 cursor-not-allowed' : '' ?>" <?= !hasPermission('control_robot') ? 'disabled' : '' ?>>
                                 <i class="fa-solid fa-chevron-right"></i>
                             </button>
                         </div>
                     </div>
                     
                     <div class="flex-1 flex flex-col gap-2 h-full py-1">
-                        <button onclick="sprayWater()" class="flex-1 min-h-0 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-sm transition-all flex flex-col justify-center items-center gap-1.5 text-xs sm:text-sm">
+                        <button onclick="sprayWater()" class="flex-1 min-h-0 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-sm transition-all flex flex-col justify-center items-center gap-1.5 text-xs sm:text-sm <?= !hasPermission('spray_water') ? 'opacity-50 cursor-not-allowed' : '' ?>" <?= !hasPermission('spray_water') ? 'disabled' : '' ?>>
                             <i class="fa-solid fa-droplet text-2xl sm:text-3xl mb-1"></i> Semprot
                         </button>
                         <div class="flex-1 min-h-0 flex gap-2">
-                            <button onclick="saveData(false)" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-sm transition-all flex flex-col justify-center items-center gap-1 text-[10px] sm:text-xs">
+                            <button onclick="saveData(false)" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-sm transition-all flex flex-col justify-center items-center gap-1 text-[10px] sm:text-xs <?= !hasPermission('save_session') ? 'opacity-50 cursor-not-allowed' : '' ?>" <?= !hasPermission('save_session') ? 'disabled' : '' ?>>
                                 <i class="fa-solid fa-floppy-disk text-lg sm:text-xl mb-0.5"></i> Simpan
                             </button>
-                            <button onclick="resetData()" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 rounded-xl transition shadow-sm flex flex-col justify-center items-center gap-1 text-[10px] sm:text-xs">
+                            <button onclick="resetData()" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 rounded-xl transition shadow-sm flex flex-col justify-center items-center gap-1 text-[10px] sm:text-xs <?= !hasPermission('reset_session') ? 'opacity-50 cursor-not-allowed' : '' ?>" <?= !hasPermission('reset_session') ? 'disabled' : '' ?>>
                                 <i class="fa-solid fa-rotate-right text-lg sm:text-xl mb-0.5"></i> Sesi Baru
                             </button>
                         </div>
@@ -1750,6 +1784,26 @@ sort($availableMonths);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // Logout confirmation
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Logout?',
+            text: 'Apakah Anda yakin ingin keluar dari sistem?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fa-solid fa-right-from-bracket mr-2"></i>Ya, Logout',
+            cancelButtonText: 'Batal',
+            background: document.body.classList.contains('dark') ? '#1e293b' : '#ffffff',
+            color: document.body.classList.contains('dark') ? '#e2e8f0' : '#1e293b'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = 'logout.php';
+            }
+        });
     }
 </script>
 </body>

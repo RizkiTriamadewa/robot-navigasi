@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2026 at 09:46 AM
+-- Generation Time: May 10, 2026 at 04:23 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,6 +47,42 @@ INSERT INTO `activity_logs` (`id`, `type`, `message`, `details`, `created_at`) V
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `audit_logs`
+--
+
+CREATE TABLE `audit_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `action` varchar(100) NOT NULL,
+  `module` varchar(50) DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `module`, `details`, `ip_address`, `created_at`) VALUES
+(1, 1, 'login', 'auth', 'User logged in', '::1', '2026-05-10 14:11:02'),
+(2, 1, 'logout', 'auth', 'User logged out', '::1', '2026-05-10 14:11:08'),
+(3, 1, 'login', 'auth', 'User logged in', '::1', '2026-05-10 14:16:07'),
+(4, 1, 'logout', 'auth', 'User logged out', '::1', '2026-05-10 14:16:10'),
+(5, 2, 'login', 'auth', 'User logged in', '::1', '2026-05-10 14:16:19'),
+(6, 2, 'logout', 'auth', 'User logged out', '::1', '2026-05-10 14:16:25'),
+(7, 3, 'login', 'auth', 'User logged in', '::1', '2026-05-10 14:16:34'),
+(8, 3, 'logout', 'auth', 'User logged out', '::1', '2026-05-10 14:16:42'),
+(9, 3, 'login', 'auth', 'User logged in', '::1', '2026-05-10 14:16:52'),
+(10, 3, 'logout', 'auth', 'User logged out', '::1', '2026-05-10 14:16:58'),
+(11, 3, 'login', 'auth', 'User logged in', '::1', '2026-05-10 14:17:53'),
+(12, 3, 'logout', 'auth', 'User logged out', '::1', '2026-05-10 14:17:57'),
+(13, 1, 'login', 'auth', 'User logged in', '::1', '2026-05-10 14:20:17'),
+(14, 1, 'logout', 'auth', 'User logged out', '::1', '2026-05-10 14:20:23');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `daily_logs`
 --
 
@@ -79,6 +115,146 @@ INSERT INTO `daily_logs` (`id`, `log_date`, `distance_m`, `water_used_ml`, `batt
 (15, '2026-04-22 14:14:25', 5.15, 200, 75, '[{\"x\":400,\"y\":200},{\"x\":400,\"y\":190},{\"x\":400,\"y\":180},{\"x\":400,\"y\":170},{\"x\":400,\"y\":160},{\"x\":400,\"y\":150},{\"x\":400,\"y\":140},{\"x\":410,\"y\":140},{\"x\":420,\"y\":140},{\"x\":430,\"y\":140},{\"x\":440,\"y\":140},{\"x\":450,\"y\":140},{\"x\":450,\"y\":150},{\"x\":450,\"y\":160},{\"x\":450,\"y\":170},{\"x\":450,\"y\":180},{\"x\":450,\"y\":190},{\"x\":450,\"y\":200},{\"x\":440,\"y\":200},{\"x\":430,\"y\":200},{\"x\":420,\"y\":200},{\"x\":420,\"y\":190},{\"x\":420,\"y\":180},{\"x\":420,\"y\":170},{\"x\":420,\"y\":160},{\"x\":430,\"y\":160},{\"x\":440,\"y\":160},{\"x\":450,\"y\":160},{\"x\":460,\"y\":160},{\"x\":470,\"y\":160},{\"x\":461.23523582001474,\"y\":164.81444792985107},{\"x\":452.4704716400295,\"y\":169.62889585970214},{\"x\":443.7057074600442,\"y\":174.4433437895532},{\"x\":434.94094328005895,\"y\":179.25779171940428},{\"x\":426.1761791000737,\"y\":184.07223964925532},{\"x\":417.4114149200884,\"y\":188.8866875791064},{\"x\":408.64665074010315,\"y\":193.70113550895744},{\"x\":399.8818865601179,\"y\":198.51558343880848}]', '2026-04-22 07:14:25', '[{\"x\":420,\"y\":190},{\"x\":420,\"y\":160},{\"x\":470,\"y\":160},{\"x\":399.8818865601179,\"y\":198.51558343880848}]'),
 (16, '2026-04-22 14:16:37', 18.4634, 200, 75, '[{\"x\":400,\"y\":200},{\"x\":400,\"y\":190},{\"x\":400,\"y\":180},{\"x\":400,\"y\":170},{\"x\":400,\"y\":160},{\"x\":400,\"y\":150},{\"x\":400,\"y\":140},{\"x\":410,\"y\":140},{\"x\":420,\"y\":140},{\"x\":430,\"y\":140},{\"x\":440,\"y\":140},{\"x\":450,\"y\":140},{\"x\":450,\"y\":150},{\"x\":450,\"y\":160},{\"x\":450,\"y\":170},{\"x\":450,\"y\":180},{\"x\":450,\"y\":190},{\"x\":450,\"y\":200},{\"x\":440,\"y\":200},{\"x\":430,\"y\":200},{\"x\":420,\"y\":200},{\"x\":420,\"y\":190},{\"x\":420,\"y\":180},{\"x\":420,\"y\":170},{\"x\":420,\"y\":160},{\"x\":430,\"y\":160},{\"x\":440,\"y\":160},{\"x\":450,\"y\":160},{\"x\":460,\"y\":160},{\"x\":470,\"y\":160},{\"x\":461.23523582001474,\"y\":164.81444792985107},{\"x\":452.4704716400295,\"y\":169.62889585970214},{\"x\":443.7057074600442,\"y\":174.4433437895532},{\"x\":434.94094328005895,\"y\":179.25779171940428},{\"x\":426.1761791000737,\"y\":184.07223964925532},{\"x\":417.4114149200884,\"y\":188.8866875791064},{\"x\":408.64665074010315,\"y\":193.70113550895744},{\"x\":399.8818865601179,\"y\":198.51558343880848},{\"x\":389.8818865601179,\"y\":198.51558343880848},{\"x\":379.8818865601179,\"y\":198.51558343880848},{\"x\":369.8818865601179,\"y\":198.51558343880848},{\"x\":359.8818865601179,\"y\":198.51558343880848},{\"x\":349.8818865601179,\"y\":198.51558343880848},{\"x\":339.8818865601179,\"y\":198.51558343880848},{\"x\":329.8818865601179,\"y\":198.51558343880848},{\"x\":319.8818865601179,\"y\":198.51558343880848},{\"x\":319.7971438403965,\"y\":188.51594251168243},{\"x\":319.71240112067505,\"y\":178.51630158455637},{\"x\":319.62765840095364,\"y\":168.51666065743032},{\"x\":319.5429156812322,\"y\":158.51701973030427},{\"x\":319.4581729615108,\"y\":148.51737880317822},{\"x\":319.3734302417894,\"y\":138.51773787605217},{\"x\":319.28868752206796,\"y\":128.51809694892611},{\"x\":319.2039448023466,\"y\":118.51845602180006},{\"x\":319.1192020826252,\"y\":108.51881509467401},{\"x\":319.0344593629038,\"y\":98.51917416754796},{\"x\":318.9497166431824,\"y\":88.51953324042191},{\"x\":328.9212390773217,\"y\":87.76538448489876},{\"x\":338.89276151146095,\"y\":87.01123572937561},{\"x\":348.8642839456002,\"y\":86.25708697385248},{\"x\":358.8358063797395,\"y\":85.50293821832933},{\"x\":368.80732881387877,\"y\":84.7487894628062},{\"x\":378.77885124801804,\"y\":83.99464070728305},{\"x\":388.7503736821573,\"y\":83.24049195175992},{\"x\":398.7218961162966,\"y\":82.48634319623677},{\"x\":408.69341855043587,\"y\":81.73219444071364},{\"x\":418.66494098457514,\"y\":80.9780456851905},{\"x\":428.6364634187144,\"y\":80.22389692966736},{\"x\":423.49150586443915,\"y\":71.64896767254193},{\"x\":415.8905206015989,\"y\":65.15088926165114},{\"x\":406.76170806519224,\"y\":61.068637226910454},{\"x\":397.0734191857524,\"y\":58.591328487870726},{\"x\":387.19355802857615,\"y\":60.1367551328201},{\"x\":387.19355802857615,\"y\":49.89531513277278},{\"x\":367.7421891271993,\"y\":49.89531513277278},{\"x\":367.7421891271993,\"y\":74.71967513218893},{\"x\":387.4145953749179,\"y\":74.71967513218893},{\"x\":387.4145953749179,\"y\":84.73847513260061},{\"x\":401.4505254282362,\"y\":84.73847513260061}]', '2026-04-22 07:16:37', '[{\"x\":420,\"y\":190},{\"x\":420,\"y\":160},{\"x\":470,\"y\":160},{\"x\":399.8818865601179,\"y\":198.51558343880848}]');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permissions`
+--
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `module` varchar(50) DEFAULT NULL COMMENT 'monitoring, sensors, logbook, etc',
+  `action` varchar(50) DEFAULT NULL COMMENT 'view, create, update, delete, control'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `permissions`
+--
+
+INSERT INTO `permissions` (`id`, `name`, `description`, `module`, `action`) VALUES
+(1, 'view_dashboard', 'View monitoring dashboard', 'monitoring', 'view'),
+(2, 'control_robot', 'Control robot movement', 'monitoring', 'control'),
+(3, 'save_session', 'Save robot session data', 'monitoring', 'create'),
+(4, 'reset_session', 'Reset robot session', 'monitoring', 'delete'),
+(5, 'spray_water', 'Activate water spray', 'monitoring', 'control'),
+(6, 'view_sensors', 'View sensor data', 'sensors', 'view'),
+(7, 'view_logbook', 'View activity logs', 'logbook', 'view'),
+(8, 'export_logs', 'Export logs to CSV', 'logbook', 'export'),
+(9, 'clear_logs', 'Clear all logs', 'logbook', 'delete'),
+(10, 'add_maintenance_log', 'Add maintenance log entry', 'logbook', 'create'),
+(11, 'view_history', 'View session history', 'history', 'view'),
+(12, 'delete_history', 'Delete history records', 'history', 'delete'),
+(13, 'generate_pdf', 'Generate PDF reports', 'reports', 'create'),
+(14, 'manage_users', 'Manage user accounts', 'admin', 'manage'),
+(15, 'view_audit_logs', 'View audit logs', 'admin', 'view');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roles`
+--
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
+(1, 'Super Admin', 'Full system access - IT Administrator', '2026-05-10 13:56:30'),
+(2, 'Operator', 'Robot control & monitoring - Field operator', '2026-05-10 13:56:30'),
+(3, 'Viewer', 'Read-only access - Management/Supervisor', '2026-05-10 13:56:30'),
+(4, 'Technician', 'Maintenance & logs - Maintenance team', '2026-05-10 13:56:30');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_permissions`
+--
+
+CREATE TABLE `role_permissions` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `role_permissions`
+--
+
+INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
+(1, 1),
+(1, 2),
+(1, 3),
+(1, 4),
+(1, 5),
+(1, 6),
+(1, 7),
+(1, 8),
+(1, 9),
+(1, 10),
+(1, 11),
+(1, 12),
+(1, 13),
+(1, 14),
+(1, 15),
+(2, 1),
+(2, 2),
+(2, 3),
+(2, 5),
+(2, 6),
+(2, 7),
+(2, 8),
+(2, 11),
+(2, 13),
+(3, 1),
+(3, 6),
+(3, 7),
+(3, 11),
+(3, 13),
+(4, 1),
+(4, 6),
+(4, 7),
+(4, 8),
+(4, 10),
+(4, 11),
+(4, 13);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL COMMENT 'Hashed with password_hash()',
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `role_id` int(11) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `last_login` timestamp NULL DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `email`, `role_id`, `is_active`, `created_at`, `last_login`, `created_by`) VALUES
+(1, 'admin', '$2y$10$jNGATEXQXnVpoLYoPTcIb.wpvI2HAznnbkFHsmUTqCieQ87YV25Tm', 'System Administrator', 'admin@robot-dashboard.local', 1, 1, '2026-05-10 13:56:30', '2026-05-10 14:20:17', NULL),
+(2, 'operator', '$2y$10$jG1hxakG3J6rG.fWBFj/xemzZMtKJuQtj818YGwJt49a0Arfpk/0K', 'Field Operator', 'operator@robot-dashboard.local', 2, 1, '2026-05-10 13:56:30', '2026-05-10 14:16:19', NULL),
+(3, 'viewer', '$2y$10$fg0SMOpqk6Xe4Fxk6zFDb.X414vpVb0FG78souqBKB.5PO96EzPcK', 'Supervisor', 'viewer@robot-dashboard.local', 3, 1, '2026-05-10 13:56:30', '2026-05-10 14:17:53', NULL),
+(4, 'technician', '$2y$10$snuU.0T3.Io0MUj8qi5dSO.Pmkp8Y4PbAz1POk1lSUfFhhJ2Zjxr6', 'Maintenance Tech', 'tech@robot-dashboard.local', 4, 1, '2026-05-10 13:56:30', NULL, NULL);
+
 --
 -- Indexes for dumped tables
 --
@@ -92,10 +268,51 @@ ALTER TABLE `activity_logs`
   ADD KEY `created_at` (`created_at`);
 
 --
+-- Indexes for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_action` (`action`),
+  ADD KEY `idx_created_at` (`created_at`);
+
+--
 -- Indexes for table `daily_logs`
 --
 ALTER TABLE `daily_logs`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `permissions`
+--
+ALTER TABLE `permissions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `role_permissions`
+--
+ALTER TABLE `role_permissions`
+  ADD PRIMARY KEY (`role_id`,`permission_id`),
+  ADD KEY `permission_id` (`permission_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD KEY `idx_username` (`username`),
+  ADD KEY `idx_role_id` (`role_id`),
+  ADD KEY `idx_is_active` (`is_active`),
+  ADD KEY `fk_users_creator` (`created_by`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -108,10 +325,58 @@ ALTER TABLE `activity_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT for table `daily_logs`
 --
 ALTER TABLE `daily_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT for table `permissions`
+--
+ALTER TABLE `permissions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  ADD CONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `role_permissions`
+--
+ALTER TABLE `role_permissions`
+  ADD CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `fk_users_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
