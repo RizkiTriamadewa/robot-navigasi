@@ -1,6 +1,6 @@
 ╔══════════════════════════════════════════════════════════════════╗
 ║           🎉 ROBOT DASHBOARD - CARA PAKAI (v4.0.0) 🎉           ║
-║        Single Page Application + RBAC + Obstacle Detection      ║
+║        Single Page Application + RBAC + Obstacle Detection       ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 📋 RINGKASAN CEPAT
