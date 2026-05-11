@@ -640,6 +640,12 @@ sort($availableMonths);
             <div class="flex-none flex justify-between items-center mb-1">
                 <h2 class="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Map & Tracking</h2>
                 <div class="flex gap-2 items-center">
+                    <button onclick="toggleObstacleMode()" id="btn-obstacle-mode" class="text-[8px] font-bold px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600 transition-all">
+                        <i class="fa-solid fa-cube mr-1"></i> Add Obstacle
+                    </button>
+                    <button onclick="clearObstacles()" class="text-[8px] font-bold px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-all">
+                        <i class="fa-solid fa-trash mr-1"></i> Clear
+                    </button>
                     <span class="text-[8px] text-gray-400 italic">Tahan & Gambar rute</span>
                     <span id="gps-status" class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 dark:bg-slate-700 dark:text-gray-400">GPS OFFLINE</span>
                 </div>
@@ -1275,6 +1281,59 @@ sort($availableMonths);
     let rx = 400, ry = 200, step = 10;
     if (robotData.path.length > 0) { let lp = robotData.path[robotData.path.length-1]; rx = lp.x; ry = lp.y; } else { robotData.path.push({x: rx, y: ry}); }
 
+    // --- OBSTACLE SYSTEM ---
+    let obstacles = [
+        { x: 300, y: 150, width: 80, height: 80, type: 'wall' },
+        { x: 500, y: 250, width: 60, height: 100, type: 'wall' },
+        { x: 200, y: 300, width: 100, height: 50, type: 'wall' },
+        { x: 600, y: 100, width: 70, height: 70, type: 'wall' },
+        { x: 450, y: 400, width: 90, height: 60, type: 'wall' }
+    ];
+
+    // Fungsi untuk menambah obstacle baru (bisa dipanggil dari Firebase atau manual)
+    function addObstacle(x, y, width, height) {
+        obstacles.push({ x, y, width, height, type: 'wall' });
+        drawMap();
+        addLogbookLog('info', 'Obstacle Terdeteksi', `Posisi: (${x}, ${y}), Ukuran: ${width}x${height}`);
+    }
+
+    // Fungsi untuk cek collision dengan obstacles
+    function checkCollision(newX, newY, robotSize = 16) {
+        const robotHalfSize = robotSize / 2;
+        const robotLeft = newX - robotHalfSize;
+        const robotRight = newX + robotHalfSize;
+        const robotTop = newY - robotHalfSize;
+        const robotBottom = newY + robotHalfSize;
+
+        for (let obstacle of obstacles) {
+            const obsLeft = obstacle.x;
+            const obsRight = obstacle.x + obstacle.width;
+            const obsTop = obstacle.y;
+            const obsBottom = obstacle.y + obstacle.height;
+
+            // AABB collision detection
+            if (robotRight > obsLeft && robotLeft < obsRight &&
+                robotBottom > obsTop && robotTop < obsBottom) {
+                return obstacle; // Collision detected
+            }
+        }
+        return null; // No collision
+    }
+
+    // Fungsi untuk mendapatkan jarak terdekat ke obstacle
+    function getDistanceToNearestObstacle(x, y) {
+        let minDistance = Infinity;
+        for (let obstacle of obstacles) {
+            const obsCenterX = obstacle.x + obstacle.width / 2;
+            const obsCenterY = obstacle.y + obstacle.height / 2;
+            const dx = x - obsCenterX;
+            const dy = y - obsCenterY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < minDistance) minDistance = distance;
+        }
+        return minDistance;
+    }
+
     function updateUI() {
         document.getElementById('val-distance').innerText = robotData.distance.toFixed(1);
         document.getElementById('val-water-used').innerText = robotData.waterUsed;
@@ -1299,14 +1358,122 @@ sort($availableMonths);
         return { x: x + (rx - canvas.width / 2), y: y + (ry - canvas.height / 2) };
     }
 
+
+    let isObstacleMode = false;
+    let obstacleStartPos = null;
+
+    function toggleObstacleMode() {
+        isObstacleMode = !isObstacleMode;
+        const btn = document.getElementById('btn-obstacle-mode');
+        if (isObstacleMode) {
+            btn.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+            btn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'text-white');
+            btn.innerHTML = '<i class="fa-solid fa-cube mr-1"></i> Mode: Add Obstacle';
+            Swal.fire({ 
+                toast: true, 
+                position: 'top-end', 
+                icon: 'info', 
+                title: 'Obstacle Mode Active', 
+                text: 'Klik dan drag di map untuk menambah obstacle',
+                showConfirmButton: false, 
+                timer: 2500,
+                heightAuto: false 
+            });
+        } else {
+            btn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+            btn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'text-white');
+            btn.innerHTML = '<i class="fa-solid fa-cube mr-1"></i> Add Obstacle';
+        }
+    }
+
+    function clearObstacles() {
+        if (obstacles.length === 0) {
+            Swal.fire({ icon: 'info', title: 'Tidak ada obstacle', text: 'Map sudah bersih.', heightAuto: false });
+            return;
+        }
+        Swal.fire({
+            title: 'Hapus Semua Obstacle?',
+            text: `${obstacles.length} obstacle akan dihapus dari map.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
+            heightAuto: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                obstacles = [];
+                drawMap();
+                addLogbookLog('info', 'Obstacles Cleared', 'Semua obstacle telah dihapus dari map');
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Obstacles dihapus', showConfirmButton: false, timer: 1500, heightAuto: false });
+            }
+        });
+    }
+
     function startDrawing(e) {
+        if (isObstacleMode) {
+            // Obstacle placement mode
+            obstacleStartPos = getWorldCoords(e);
+            return;
+        }
         if(document.getElementById('mode-select').value === 'auto') return;
         isDrawingPath = true; tempDrawPath = [getWorldCoords(e)]; drawMap();
     }
+    
     function drawMovement(e) {
+        if (isObstacleMode && obstacleStartPos) {
+            // Preview obstacle while dragging
+            e.preventDefault();
+            const currentPos = getWorldCoords(e);
+            const previewObstacle = {
+                x: Math.min(obstacleStartPos.x, currentPos.x),
+                y: Math.min(obstacleStartPos.y, currentPos.y),
+                width: Math.abs(currentPos.x - obstacleStartPos.x),
+                height: Math.abs(currentPos.y - obstacleStartPos.y),
+                type: 'preview'
+            };
+            drawMap();
+            // Draw preview
+            ctx.save();
+            ctx.translate(-(rx - canvas.width / 2), -(ry - canvas.height / 2));
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.fillRect(previewObstacle.x, previewObstacle.y, previewObstacle.width, previewObstacle.height);
+            ctx.strokeRect(previewObstacle.x, previewObstacle.y, previewObstacle.width, previewObstacle.height);
+            ctx.setLineDash([]);
+            ctx.restore();
+            return;
+        }
         if(!isDrawingPath) return; e.preventDefault(); tempDrawPath.push(getWorldCoords(e)); drawMap();
     }
+    
     function stopDrawing() {
+        if (isObstacleMode && obstacleStartPos) {
+            // Finalize obstacle placement
+            const endPos = getWorldCoords(event);
+            const width = Math.abs(endPos.x - obstacleStartPos.x);
+            const height = Math.abs(endPos.y - obstacleStartPos.y);
+            
+            if (width > 20 && height > 20) { // Minimum size
+                const x = Math.min(obstacleStartPos.x, endPos.x);
+                const y = Math.min(obstacleStartPos.y, endPos.y);
+                addObstacle(x, y, width, height);
+                Swal.fire({ 
+                    toast: true, 
+                    position: 'top-end', 
+                    icon: 'success', 
+                    title: 'Obstacle Added', 
+                    showConfirmButton: false, 
+                    timer: 1000,
+                    heightAuto: false 
+                });
+            }
+            obstacleStartPos = null;
+            return;
+        }
         if(!isDrawingPath) return; isDrawingPath = false; executeDrawnPath();
     }
 
@@ -1326,7 +1493,30 @@ sort($availableMonths);
             
             if(distToTarget < 10) { pIdx += 3; } 
             else {
-                rx += (dx / distToTarget) * 10; ry += (dy / distToTarget) * 10; 
+                // Calculate next position
+                let nextX = rx + (dx / distToTarget) * 10;
+                let nextY = ry + (dy / distToTarget) * 10;
+                
+                // Check collision before moving
+                const collision = checkCollision(nextX, nextY);
+                if (collision) {
+                    // Collision detected - stop path execution
+                    clearInterval(pathInterval);
+                    tempDrawPath = [];
+                    Swal.fire({ 
+                        icon: 'error', 
+                        title: 'Obstacle Terdeteksi!', 
+                        text: 'Robot berhenti karena menabrak dinding/objek pada jalur yang digambar.',
+                        heightAuto: false 
+                    });
+                    addLogbookLog('warning', 'Path Collision', `Robot menabrak obstacle saat mengikuti path di (${Math.round(nextX)}, ${Math.round(nextY)})`);
+                    drawMap();
+                    return;
+                }
+                
+                // No collision - continue movement
+                rx = nextX;
+                ry = nextY;
                 robotData.path.push({x: rx, y: ry});
                 robotData.distance += 0.1; 
                 updateUI(); markUnsaved();
@@ -1342,39 +1532,136 @@ sort($availableMonths);
 
         ctx.save(); ctx.translate(-camX, -camY);
 
+        // Draw grid
         ctx.strokeStyle = isDark ? '#2d3446' : '#e2e8f0'; ctx.lineWidth = 1;
         let sX = Math.floor(camX/40)*40, eX = camX+canvas.width+40;
         let sY = Math.floor(camY/40)*40, eY = camY+canvas.height+40;
         for(let i=sX; i<=eX; i+=40){ ctx.beginPath(); ctx.moveTo(i,sY); ctx.lineTo(i,eY); ctx.stroke(); }
         for(let i=sY; i<=eY; i+=40){ ctx.beginPath(); ctx.moveTo(sX,i); ctx.lineTo(eX,i); ctx.stroke(); }
 
+        // Draw obstacles (walls/objects)
+        for (let obstacle of obstacles) {
+            // Shadow effect
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            
+            // Main obstacle body
+            ctx.fillStyle = isDark ? '#ef4444' : '#dc2626'; // Red color for obstacles
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Border
+            ctx.strokeStyle = isDark ? '#991b1b' : '#7f1d1d';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            
+            // Diagonal stripes pattern for warning effect
+            ctx.strokeStyle = isDark ? '#fbbf24' : '#f59e0b';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < obstacle.width + obstacle.height; i += 15) {
+                ctx.beginPath();
+                ctx.moveTo(obstacle.x + i, obstacle.y);
+                ctx.lineTo(obstacle.x, obstacle.y + i);
+                ctx.stroke();
+            }
+            
+            // Label "OBSTACLE"
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⚠', obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2);
+        }
+
+        // Draw robot path
         if (robotData.path.length > 1) {
             ctx.beginPath(); ctx.moveTo(robotData.path[0].x, robotData.path[0].y);
             for (let i = 1; i < robotData.path.length; i++) ctx.lineTo(robotData.path[i].x, robotData.path[i].y);
             ctx.strokeStyle = '#0d9488'; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
         }
 
+        // Draw temporary drawn path
         if (tempDrawPath.length > 1) {
             ctx.beginPath(); ctx.moveTo(tempDrawPath[0].x, tempDrawPath[0].y);
             for (let i = 1; i < tempDrawPath.length; i++) ctx.lineTo(tempDrawPath[i].x, tempDrawPath[i].y);
             ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
         }
 
+        // Draw spray points
         if (robotData.sprayPoints) {
             ctx.fillStyle = 'rgba(59, 130, 246, 0.9)'; ctx.strokeStyle = 'white';
             for (let pt of robotData.sprayPoints) { ctx.beginPath(); ctx.arc(pt.x, pt.y, 6, 0, 2*Math.PI); ctx.fill(); ctx.stroke(); }
         }
 
-        ctx.fillStyle = isDark ? '#ffffff' : '#1e293b'; ctx.shadowColor = '#0d9488'; ctx.shadowBlur = 10;
-        ctx.fillRect(rx - 8, ry - 8, 16, 16); ctx.shadowBlur = 0;
+        // Draw robot with glow effect
+        ctx.fillStyle = isDark ? '#ffffff' : '#1e293b'; 
+        ctx.shadowColor = '#0d9488'; 
+        ctx.shadowBlur = 10;
+        ctx.fillRect(rx - 8, ry - 8, 16, 16); 
+        ctx.shadowBlur = 0;
+        
+        // Draw proximity warning circle if near obstacle
+        const distanceToObstacle = getDistanceToNearestObstacle(rx, ry);
+        if (distanceToObstacle < 80) {
+            ctx.strokeStyle = distanceToObstacle < 50 ? '#ef4444' : '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(rx, ry, distanceToObstacle, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
         ctx.restore();
     }
 
     function moveRobot(dir) {
         if(document.getElementById('mode-select').value === 'auto') return Swal.fire({ icon: 'warning', text: 'Ubah ke Manual Mode untuk mengontrol manual.', heightAuto: false });
         if(pathInterval) clearInterval(pathInterval); 
-        switch(dir) { case 'up': ry -= step; break; case 'down': ry += step; break; case 'left': rx -= step; break; case 'right': rx += step; break; }
-        robotData.path.push({x: rx, y: ry}); robotData.distance += 0.15; updateUI(); markUnsaved();
+        
+        // Calculate new position
+        let newX = rx, newY = ry;
+        switch(dir) { 
+            case 'up': newY -= step; break; 
+            case 'down': newY += step; break; 
+            case 'left': newX -= step; break; 
+            case 'right': newX += step; break; 
+        }
+        
+        // Check collision before moving
+        const collision = checkCollision(newX, newY);
+        if (collision) {
+            // Collision detected - stop robot
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Obstacle Terdeteksi!', 
+                text: 'Robot berhenti karena menabrak dinding/objek. Silakan belok ke arah lain.',
+                heightAuto: false 
+            });
+            addLogbookLog('warning', 'Collision Detected', `Robot menabrak obstacle di posisi (${Math.round(newX)}, ${Math.round(newY)})`);
+            return; // Stop movement
+        }
+        
+        // No collision - move robot
+        rx = newX;
+        ry = newY;
+        robotData.path.push({x: rx, y: ry}); 
+        robotData.distance += 0.15; 
+        updateUI(); 
+        markUnsaved();
+        
+        // Check proximity warning
+        const distanceToObstacle = getDistanceToNearestObstacle(rx, ry);
+        if (distanceToObstacle < 50) {
+            addLogbookLog('warning', 'Proximity Alert', `Obstacle terdekat: ${Math.round(distanceToObstacle)}px`);
+        }
     }
 
     function sprayWater() {
