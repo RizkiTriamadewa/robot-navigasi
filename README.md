@@ -71,18 +71,28 @@ NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbas
 ## 🎨 Screenshots
 
 ### Login Page
+<img width="1919" height="908" alt="image" src="https://github.com/user-attachments/assets/0ab1c5c9-3077-4bc7-b800-3403b47dd834" />
+
 > Beautiful gradient login page with demo accounts display
 
 ### Dashboard - Monitoring Tab
+<img width="1917" height="915" alt="image" src="https://github.com/user-attachments/assets/22a912af-87f4-459f-997a-7bf2949daa47" />
+
 > Main dashboard with robot controls, live camera, GPS map, and real-time data
 
 ### Dashboard - Sensors Tab
+<img width="1919" height="909" alt="image" src="https://github.com/user-attachments/assets/da2dd568-64be-4206-9aea-100daa372c77" />
+
 > 6 sensor cards with real-time monitoring
 
 ### Dashboard - Logbook Tab
+<img width="1919" height="908" alt="image" src="https://github.com/user-attachments/assets/bb2dff38-5678-4bf8-bfca-0d955c0c5d72" />
+
 > Activity logs with filtering and export functionality
 
 ### Permission-based UI
+<img width="342" height="60" alt="image" src="https://github.com/user-attachments/assets/c3026848-c7e1-4081-9190-e7b21e92aa0c" />
+
 > Buttons disabled based on user role (Viewer vs Admin)
 
 ---
