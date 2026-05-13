@@ -1,6 +1,6 @@
 ╔══════════════════════════════════════════════════════════════════╗
-║           🎉 ROBOT DASHBOARD - CARA PAKAI (v4.0.0) 🎉           ║
-║        Single Page Application + RBAC + Obstacle Detection       ║
+║           🎉 ROBOT DASHBOARD - CARA PAKAI (v4.1.0) 🎉           ║
+║   SPA + RBAC + Obstacle Detection + Admin Management System     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 📋 RINGKASAN CEPAT
@@ -20,10 +20,11 @@ NEW: Obstacle Detection & Collision Avoidance System 🔴
   ✅ login.php           → Halaman login
   ✅ logout.php          → Logout handler
   ✅ auth.php            → Authentication functions
+  ✅ admin_api.php       → Admin management API 🆕
   ✅ setup_rbac.sql      → Database RBAC setup
 
 📱 Main Application:
-  ✅ index.php           → Single Page Application (5 tabs + obstacles)
+  ✅ index.php           → Single Page Application (6 tabs)
   ✅ api.php             → REST API
   ✅ db.php              → Database connection
   ✅ db.sql              → Main database schema
@@ -63,7 +64,7 @@ Setelah login, otomatis redirect ke:
 http://localhost/robot_dashboard/robot-navigasi/index.php
 
 
-🎯 NAVIGASI DASHBOARD (5 TAB)
+🎯 NAVIGASI DASHBOARD (6 TAB)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 TAB 1: MONITORING (Dashboard Utama)
@@ -146,6 +147,54 @@ Fitur:
 Cara Pakai:
   1. Klik tab "Laporan" di header
   2. Klik "Download PDF" untuk generate report
+
+TAB 6: ADMIN (Admin Management) 🆕
+────────────────────────────────────────────────────────────────
+Fitur:
+  ✅ User Management (Create, View, Toggle Status)
+  ✅ RBAC Permission Management (Checkbox Matrix)
+  ✅ Role-based Permission Assignment
+  ✅ Real-time Permission Updates
+  ✅ Audit Logging
+
+Cara Pakai:
+  1. Klik tab "Admin" di header (hanya Super Admin)
+  2. BUAT USER BARU:
+     - Isi form: Username, Nama, Email, Password
+     - Pilih Role: Super Admin, Operator, Viewer, Technician
+     - Centang "User Aktif" jika ingin langsung aktif
+     - Klik "Buat User"
+  3. KELOLA USER:
+     - Lihat daftar user di tabel
+     - Klik "Aktifkan/Nonaktifkan" untuk toggle status
+     - User nonaktif tidak bisa login
+  4. KELOLA PERMISSION:
+     - Scroll ke panel "RBAC Permission Management"
+     - Lihat 4 role cards (Super Admin, Operator, Viewer, Technician)
+     - Centang/uncheck permission untuk setiap role
+     - Permission tersimpan otomatis (debounce 500ms)
+     - Toast notification muncul saat berhasil
+  5. TIPS:
+     - User yang sedang login perlu logout/login ulang setelah permission berubah
+     - Jangan nonaktifkan akun sendiri
+     - Super Admin selalu punya semua permission
+
+Permission Modules:
+  • monitoring - Akses dashboard monitoring
+  • sensors - Akses sensor data
+  • logbook - Akses activity logs
+  • history - Akses riwayat
+  • reports - Generate PDF reports
+  • admin - Manage users & permissions
+  • control_robot - Control robot movement
+  • spray_water - Spray water function
+  • save_session - Save session data
+  • reset_session - Reset session (Admin only)
+  • clear_logs - Clear all logs (Admin only)
+  • manage_obstacles - Add/clear obstacles
+  • export_data - Export data to CSV/PDF
+  • view_audit - View audit logs
+  • manage_users - Full admin access
 
 
 🔴 OBSTACLE DETECTION SYSTEM (NEW!)
@@ -235,7 +284,11 @@ TIPS & TRICKS:
    ✅ Bisa save & reset session
    ✅ Bisa clear logs
    ✅ Bisa add/clear obstacles
-   ✅ Bisa manage users (future)
+   ✅ Bisa manage users & permissions 🆕
+   ✅ Akses tab Admin 🆕
+   ✅ Buat user baru 🆕
+   ✅ Toggle user status 🆕
+   ✅ Update role permissions 🆕
 
 2. OPERATOR (operator / operator123)
    ✅ Robot control & monitoring
@@ -245,6 +298,7 @@ TIPS & TRICKS:
    ✅ Bisa add/clear obstacles
    ❌ Tidak bisa reset session (Admin only)
    ❌ Tidak bisa clear logs
+   ❌ Tidak bisa akses tab Admin 🆕
 
 3. VIEWER (viewer / viewer123)
    ✅ Read-only access
@@ -256,6 +310,7 @@ TIPS & TRICKS:
    ❌ Tidak bisa spray water
    ❌ Tidak bisa save/reset session
    ❌ Tidak bisa add/clear obstacles
+   ❌ Tidak bisa akses tab Admin 🆕
 
 4. TECHNICIAN (technician / tech123)
    ✅ Maintenance & logs
@@ -265,6 +320,7 @@ TIPS & TRICKS:
    ❌ Control buttons DISABLED
    ❌ Tidak bisa control robot
    ❌ Tidak bisa add/clear obstacles
+   ❌ Tidak bisa akses tab Admin 🆕
 
 
 🎨 FITUR UI
@@ -478,6 +534,7 @@ STATUS: ✅ PRODUCTION READY (95%)
 
 Fitur Monitoring: 11/11 ✅ (100%)
 RBAC System: 15/15 ✅ (100%)
+Admin Management: ✅ (100%) 🆕
 Obstacle Detection: ✅ (100%)
 Documentation: ✅ Complete
 Security: ✅ Implemented
@@ -488,8 +545,8 @@ Deferred Tasks: 5/42 (5%)
   - Geofencing (requires GPS polygon)
   - Multi-channel Notifications (requires API keys)
 
-Arsitektur: Single Page Application + RBAC + Obstacle Detection
-Versi: 4.0.0
+Arsitektur: SPA + RBAC + Obstacle Detection + Admin Management
+Versi: 4.1.0
 Status: 🟢 PRODUCTION READY
 
 
@@ -497,10 +554,12 @@ Status: 🟢 PRODUCTION READY
 ║                    SELAMAT MENGGUNAKAN! 🚀                       ║
 ║                                                                  ║
 ║  🔴 NEW: Obstacle Detection & Collision Avoidance System!       ║
+║  🆕 NEW: Admin Management & RBAC Permission Editor!             ║
 ║  Robot sekarang bisa menghindari obstacle secara otomatis!      ║
+║  Admin bisa kelola user & permission dengan mudah!              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Dibuat: 2026-05-07
-Updated: 2026-05-11 (Obstacle Detection Added)
+Updated: 2026-05-13 (Admin Management Added)
 Developer: Rizki Triamadewa
 Progress: 95% (37/42 tasks)

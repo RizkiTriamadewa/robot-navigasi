@@ -3,8 +3,8 @@
 ## 📊 Overall Progress: **95%** ✅
 
 **Status:** 🟢 PRODUCTION READY  
-**Last Updated:** 11 Mei 2026, 08:48 WIB  
-**Version:** 4.0.0 (SPA + RBAC + Obstacle Detection)
+**Last Updated:** 13 Mei 2026, 09:38 WIB  
+**Version:** 4.1.0 (SPA + RBAC + Obstacle Detection + Admin Management)
 
 ---
 
@@ -76,7 +76,7 @@
 
 ## 🎨 User Interface
 
-### Single Page Application (5 Tabs)
+### Single Page Application (6 Tabs)
 
 #### Tab 1: **Monitoring** (Dashboard Utama)
 - Live FPV camera dengan multi-camera
@@ -109,9 +109,62 @@
 - Download PDF report
 - Include map screenshot
 
+#### Tab 6: **Admin** (Admin Management) 🆕
+- **User Management:**
+  - Create new users dengan form lengkap
+  - View all users dalam tabel
+  - Toggle user status (aktif/nonaktif)
+  - User info: username, nama, email, role, status, last login
+- **RBAC Permission Management:**
+  - Permission matrix untuk 4 roles
+  - Checkbox interface untuk toggle permissions
+  - Grouping by module (monitoring, sensors, logbook, etc.)
+  - Auto-save dengan debounce (500ms)
+  - Real-time permission updates
+- **Audit Logging:**
+  - Log semua aksi admin (create user, update permissions, toggle status)
+- **Security:**
+  - Hanya Super Admin yang bisa akses
+  - Password hashing untuk user baru
+  - Prevent self-disable
+
 ---
 
-## 🚀 NEW FEATURES (Version 4.0.0)
+## 🚀 NEW FEATURES (Version 4.1.0)
+
+### 🆕 Admin Management System (v4.1.0)
+**Added:** 13 Mei 2026
+
+**User Management:**
+- Create new users dengan form validation
+- View all users dalam tabel interaktif
+- Toggle user status (aktif/nonaktif)
+- Display user info lengkap (username, nama, email, role, status, last login)
+- Password hashing otomatis untuk keamanan
+
+**RBAC Permission Management:**
+- Permission matrix untuk 4 roles (Super Admin, Operator, Viewer, Technician)
+- Checkbox interface untuk toggle permissions per role
+- Grouping permissions by module (monitoring, sensors, logbook, history, reports, admin, dll)
+- Auto-save dengan debounce 500ms
+- Real-time permission updates
+- Toast notification saat berhasil save
+
+**Security Features:**
+- Tab Admin hanya bisa diakses Super Admin
+- Prevent user menonaktifkan akun sendiri
+- Audit logging untuk semua aksi admin
+- Session-based permission refresh
+
+**API Endpoint (admin_api.php):**
+- `GET ?action=get_users` - Fetch all users
+- `GET ?action=get_permissions` - Fetch permissions & mappings
+- `POST ?action=create_user` - Create new user
+- `POST ?action=toggle_user_status` - Toggle user active status
+- `POST ?action=update_permissions` - Update role permissions
+
+### 🔴 Obstacle Detection System (v4.0.0)
+**Added:** 11 Mei 2026
 
 ### 🔴 Obstacle Detection System
 
@@ -160,10 +213,11 @@ robot-navigasi/
 │   ├── setup_rbac.sql         ← Database RBAC
 │   ├── auth.php               ← Auth functions
 │   ├── login.php              ← Login page
-│   └── logout.php             ← Logout handler
+│   ├── logout.php             ← Logout handler
+│   └── admin_api.php          ← Admin management API 🆕
 │
 ├── 📱 Application
-│   ├── index.php              ← Main SPA (with obstacles)
+│   ├── index.php              ← Main SPA (6 tabs)
 │   ├── api.php                ← REST API
 │   ├── db.php                 ← DB connection
 │   └── setup_tables.sql       ← Database tables
@@ -188,12 +242,13 @@ robot-navigasi/
 - ✅ Analyze - 100%
 - ✅ Actuate - 100%
 - ✅ RBAC & Authentication - 100%
+- ✅ **Admin Management** - 100% 🆕
 - ✅ Notifikasi - 100%
 - ✅ Alarm Threshold - 100%
 - ✅ Event-based Alert - 100%
 - ✅ Device Provisioning - 100%
 - ✅ UI/UX - 100%
-- ✅ **Obstacle Detection** - 100% (NEW!)
+- ✅ **Obstacle Detection** - 100%
 
 ### Deferred Features (User Request)
 - ⏸️ Machine Vision Analysis (0%) - Requires ML/AI
@@ -368,7 +423,7 @@ Sistem saat ini (95%) sudah **production-ready** dan fully functional untuk semu
 
 ---
 
-**Dibuat:** 07 Mei 2026  
+**Dibuat:** 23 Februari 2026  
 **Updated:** 11 Mei 2026  
 **Version:** 4.0.0 (SPA + RBAC + Obstacle Detection)  
 **Developer:** Rizki Triamadewa  
@@ -376,4 +431,4 @@ Sistem saat ini (95%) sudah **production-ready** dan fully functional untuk semu
 
 ---
 
-*Untuk panduan lengkap cara pakai, lihat: [CARA_PAKAI.txt](file:///c:/xampp/htdocs/robot_dashboard/robot-navigasi/CARA_PAKAI.txt)*
+*Untuk panduan lengkap cara pakai, lihat: [CARA_PAKAI.txt]*

@@ -2,13 +2,13 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-7.4+-777BB4?logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-production%20ready-success)
 
-**Advanced Robot Navigation Monitoring System with RBAC**
+**Advanced Robot Navigation Monitoring System with RBAC & Admin Management**
 
 [Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Documentation](#-documentation) • [Screenshots](#-screenshots)
 
@@ -18,14 +18,16 @@
 
 ## 📋 Overview
 
-NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbasis web dengan arsitektur **Single Page Application (SPA)** dan **Role-Based Access Control (RBAC)**. Dashboard ini menyediakan monitoring real-time untuk 11 sensor robot, kontrol pergerakan, dan manajemen user dengan 4 level akses berbeda.
+NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbasis web dengan arsitektur **Single Page Application (SPA)**, **Role-Based Access Control (RBAC)**, dan **Admin Management System**. Dashboard ini menyediakan monitoring real-time untuk 11 sensor robot, kontrol pergerakan, obstacle detection, dan manajemen user dengan 4 level akses berbeda.
 
 ### ✨ Highlights
 
-- 🎯 **Single Page Application** - Seamless navigation tanpa page reload
+- 🎯 **Single Page Application** - Seamless navigation tanpa page reload (6 tabs)
 - 🔐 **RBAC System** - 4 user roles dengan 15 granular permissions
+- 🆕 **Admin Management** - User & permission management interface
 - 📊 **Real-time Monitoring** - 11 sensor monitoring via Firebase
 - 🗺️ **Interactive Map** - GPS tracking dengan path visualization
+- 🔴 **Obstacle Detection** - Collision avoidance system
 - 📱 **Responsive Design** - Mobile-friendly interface
 - 🎨 **Modern UI** - Glassmorphism design dengan dark mode
 - 🔒 **Secure** - Password hashing, SQL injection prevention, session management
@@ -174,20 +176,22 @@ NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbas
 
 ### Dashboard Navigation
 
-The dashboard consists of 5 main tabs:
+The dashboard consists of 6 main tabs:
 
-1. **Monitoring** - Main dashboard with robot controls
+1. **Monitoring** - Main dashboard with robot controls & obstacle detection
 2. **Sensors** - Additional sensor monitoring
 3. **Logbook** - Activity logs and history
 4. **Riwayat** - Session history data
 5. **Laporan** - PDF report generation
+6. **Admin** - User & permission management (Super Admin only) 🆕
 
 ### User Roles
 
 #### Super Admin
 - ✅ Full system access
 - ✅ All control buttons enabled
-- ✅ Can manage users
+- ✅ Can manage users & permissions 🆕
+- ✅ Access to Admin tab 🆕
 - ✅ Can reset sessions
 
 #### Operator
@@ -249,10 +253,11 @@ robot-navigasi/
 │   ├── setup_rbac.sql      # Database RBAC setup
 │   ├── auth.php            # Authentication functions
 │   ├── login.php           # Login page
-│   └── logout.php          # Logout handler
+│   ├── logout.php          # Logout handler
+│   └── admin_api.php       # Admin management API 🆕
 │
 ├── 📱 Application
-│   ├── index.php           # Main SPA
+│   ├── index.php           # Main SPA (6 tabs)
 │   ├── api.php             # REST API
 │   ├── db.php              # Database connection
 │   └── db.sql              # Main database schema
@@ -382,27 +387,35 @@ $db = 'robot_dashboard';
 
 ## 📊 Statistics
 
-- **Total Features**: 11 monitoring + RBAC system
+- **Total Features**: 11 monitoring + RBAC + Admin Management + Obstacle Detection
 - **Total Roles**: 4 user roles
 - **Total Permissions**: 15 granular permissions
 - **Total Database Tables**: 7 (2 main + 5 RBAC)
-- **Total Files**: 20 files
-- **Lines of Code**: ~2000+ lines
-- **Architecture**: SPA + RBAC
-- **Version**: 3.0.0
+- **Total Files**: 21 files (including admin_api.php)
+- **Lines of Code**: ~2500+ lines
+- **Architecture**: SPA + RBAC + Admin Management
+- **Version**: 4.1.0
+- **Tabs**: 6 (Monitoring, Sensors, Logbook, Riwayat, Laporan, Admin)
 
 ---
 
 ## 🗺️ Roadmap
 
-### Version 3.1.0 (Planned)
-- [ ] Admin panel for user management
+### Version 4.1.0 (Completed) ✅
+- ✅ Admin panel for user management
+- ✅ RBAC permission management interface
+- ✅ User creation & status toggle
+- ✅ Real-time permission updates
+- ✅ Audit logging for admin actions
+
+### Version 4.2.0 (Planned)
 - [ ] Password reset functionality
 - [ ] User profile page
 - [ ] Email notifications
 - [ ] Advanced analytics dashboard
+- [ ] Export audit logs
 
-### Version 3.2.0 (Future)
+### Version 4.3.0 (Future)
 - [ ] Two-factor authentication (2FA)
 - [ ] API authentication (JWT)
 - [ ] Mobile app (React Native)

@@ -452,6 +452,11 @@ sort($availableMonths);
         <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
             <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden md:inline">Laporan</span>
         </button>
+        <?php if (hasPermission('manage_users')): ?>
+        <button onclick="switchTab('admin')" id="btn-tab-admin" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-user-shield mr-1"></i> <span class="hidden md:inline">Admin</span>
+        </button>
+        <?php endif; ?>
     </div>
 
     <div class="flex items-center space-x-2 shrink-0">
@@ -942,6 +947,111 @@ sort($availableMonths);
     </div>
 </div>
 
+<!-- TAB ADMIN -->
+<?php if (hasPermission('manage_users')): ?>
+<div id="tab-admin" class="tab-content flex-1 flex-col space-y-3 min-h-0 overflow-hidden">
+    <div class="flex-1 overflow-y-auto space-y-3 min-h-0">
+        
+        <!-- User Management Panel -->
+        <div class="panel rounded-xl p-4 bg-white border border-gray-200 shadow-lg">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-users text-blue-500"></i> User Management
+            </h2>
+            
+            <!-- Create User Form -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-3">Buat User Baru</h3>
+                <form id="form-create-user" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Username *</label>
+                        <input type="text" name="username" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:text-white" placeholder="username">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nama Lengkap *</label>
+                        <input type="text" name="full_name" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:text-white" placeholder="Nama lengkap">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                        <input type="email" name="email" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:text-white" placeholder="email@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Password *</label>
+                        <input type="password" name="password" required minlength="6" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:text-white" placeholder="Min. 6 karakter">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Role *</label>
+                        <select name="role_id" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:text-white">
+                            <option value="">Pilih Role</option>
+                            <option value="1">Super Admin</option>
+                            <option value="2">Operator</option>
+                            <option value="3">Viewer</option>
+                            <option value="4">Technician</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="is_active" checked class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">User Aktif</span>
+                        </label>
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="w-full md:w-auto px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold text-sm rounded-lg transition-all shadow-md hover:shadow-lg">
+                            <i class="fa-solid fa-user-plus mr-2"></i> Buat User
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Users Table -->
+            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700">
+                <table class="w-full text-xs text-left text-gray-600 dark:text-gray-300">
+                    <thead class="bg-blue-500 dark:bg-blue-600 text-white uppercase tracking-wider font-semibold text-[10px]">
+                        <tr>
+                            <th class="px-3 py-3">Username</th>
+                            <th class="px-3 py-3">Nama Lengkap</th>
+                            <th class="px-3 py-3">Email</th>
+                            <th class="px-3 py-3">Role</th>
+                            <th class="px-3 py-3">Status</th>
+                            <th class="px-3 py-3">Last Login</th>
+                            <th class="px-3 py-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-gray-200 dark:divide-slate-700">
+                        <tr><td colspan="7" class="p-4 text-center text-gray-500">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- RBAC Permission Management -->
+        <div class="panel rounded-xl p-4 bg-white border border-gray-200 shadow-lg">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-purple-500"></i> RBAC Permission Management
+            </h2>
+            
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 mb-4">
+                <p class="text-xs text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fa-solid fa-info-circle text-purple-500 mr-1"></i>
+                    Centang permission yang ingin diberikan ke setiap role. Perubahan akan tersimpan otomatis.
+                </p>
+                <p class="text-xs text-yellow-600 dark:text-yellow-400">
+                    <i class="fa-solid fa-exclamation-triangle mr-1"></i>
+                    User yang sedang login mungkin perlu logout/login ulang untuk melihat perubahan permission.
+                </p>
+            </div>
+            
+            <div id="rbac-permissions-container">
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>Loading permissions...</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+<?php endif; ?>
+
 <div id="pdf-wrapper" style="display: none; position: absolute; top: 0; left: 0; width: 100%; z-index: -9999; background: white; padding: 10px;">
     <div id="pdf-report-template" class="mx-auto w-[700px] bg-white text-black p-8 font-sans border border-gray-200">
         <div class="border-b-2 border-gray-800 pb-4 mb-6 flex justify-between items-end">
@@ -1180,11 +1290,14 @@ sort($availableMonths);
 
     // --- TAB & UI LOGIC ---
     function switchTab(tabId) {
-        ['monitoring', 'riwayat', 'laporan', 'sensors', 'logbook'].forEach(id => {
-            document.getElementById('tab-' + id).classList.remove('active');
+        ['monitoring', 'riwayat', 'laporan', 'sensors', 'logbook', 'admin'].forEach(id => {
+            const tabEl = document.getElementById('tab-' + id);
+            if (tabEl) tabEl.classList.remove('active');
             let btn = document.getElementById('btn-tab-' + id);
-            btn.classList.remove('active', 'tab-btn');
-            btn.classList.add('tab-btn', 'text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-slate-700');
+            if (btn) {
+                btn.classList.remove('active', 'tab-btn');
+                btn.classList.add('tab-btn', 'text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-slate-700');
+            }
         });
         document.getElementById('tab-' + tabId).classList.add('active');
         let activeBtn = document.getElementById('btn-tab-' + tabId);
@@ -1193,6 +1306,9 @@ sort($availableMonths);
         if(tabId === 'monitoring') setTimeout(resizeAndDrawMap, 50);
         if(tabId === 'sensors') initSensorsTab();
         if(tabId === 'logbook') initLogbookTab();
+        <?php if (hasPermission('manage_users')): ?>
+        if(tabId === 'admin') loadAdminData();
+        <?php endif; ?>
     }
 
     const htmlTag = document.documentElement;
@@ -2092,6 +2208,273 @@ sort($availableMonths);
             }
         });
     }
+
+    // ==================== ADMIN TAB FUNCTIONS ====================
+    <?php if (hasPermission('manage_users')): ?>
+    
+    // Load users on admin tab switch
+    function loadAdminData() {
+        loadUsers();
+        loadPermissions();
+    }
+    
+    // Load users list
+    async function loadUsers() {
+        try {
+            const response = await fetch('admin_api.php?action=get_users');
+            const data = await response.json();
+            
+            if (data.success) {
+                const tbody = document.getElementById('users-table-body');
+                tbody.innerHTML = '';
+                
+                if (data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500">Belum ada user</td></tr>';
+                    return;
+                }
+                
+                data.users.forEach(user => {
+                    const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString('id-ID') : 'Belum pernah';
+                    const statusBadge = user.is_active == 1 
+                        ? '<span class="px-2 py-1 text-[10px] font-bold rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Aktif</span>'
+                        : '<span class="px-2 py-1 text-[10px] font-bold rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Nonaktif</span>';
+                    
+                    const toggleBtn = `<button onclick="toggleUserStatus(${user.id}, ${user.is_active == 1 ? 0 : 1})" class="px-2 py-1 text-[10px] font-bold rounded ${user.is_active == 1 ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'} transition">
+                        ${user.is_active == 1 ? 'Nonaktifkan' : 'Aktifkan'}
+                    </button>`;
+                    
+                    const row = `<tr class="bg-white hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 transition">
+                        <td class="px-3 py-3 font-semibold">${user.username}</td>
+                        <td class="px-3 py-3">${user.full_name}</td>
+                        <td class="px-3 py-3">${user.email || '-'}</td>
+                        <td class="px-3 py-3"><span class="px-2 py-1 text-[10px] font-bold rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">${user.role_name}</span></td>
+                        <td class="px-3 py-3">${statusBadge}</td>
+                        <td class="px-3 py-3 text-[10px]">${lastLogin}</td>
+                        <td class="px-3 py-3">${toggleBtn}</td>
+                    </tr>`;
+                    
+                    tbody.innerHTML += row;
+                });
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+    
+    // Create user form handler
+    document.getElementById('form-create-user')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('admin_api.php?action=create_user', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message,
+                    heightAuto: false
+                });
+                this.reset();
+                loadUsers();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message,
+                    heightAuto: false
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan saat membuat user',
+                heightAuto: false
+            });
+        }
+    });
+    
+    // Toggle user status
+    async function toggleUserStatus(userId, newStatus) {
+        const statusText = newStatus == 1 ? 'mengaktifkan' : 'menonaktifkan';
+        
+        const result = await Swal.fire({
+            title: 'Konfirmasi',
+            text: `Apakah Anda yakin ingin ${statusText} user ini?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya',
+            cancelButtonText: 'Batal',
+            heightAuto: false
+        });
+        
+        if (!result.isConfirmed) return;
+        
+        try {
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('is_active', newStatus);
+            
+            const response = await fetch('admin_api.php?action=toggle_user_status', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message,
+                    heightAuto: false,
+                    timer: 2000
+                });
+                loadUsers();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message,
+                    heightAuto: false
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan',
+                heightAuto: false
+            });
+        }
+    }
+    
+    // Load permissions and build RBAC matrix
+    async function loadPermissions() {
+        try {
+            const response = await fetch('admin_api.php?action=get_permissions');
+            const data = await response.json();
+            
+            if (data.success) {
+                buildPermissionMatrix(data.roles, data.permissions, data.mappings);
+            }
+        } catch (error) {
+            console.error('Error loading permissions:', error);
+        }
+    }
+    
+    // Build permission matrix UI
+    function buildPermissionMatrix(roles, permissions, mappings) {
+        const container = document.getElementById('rbac-permissions-container');
+        
+        // Group permissions by module
+        const grouped = {};
+        permissions.forEach(perm => {
+            if (!grouped[perm.module]) grouped[perm.module] = [];
+            grouped[perm.module].push(perm);
+        });
+        
+        // Create mapping lookup
+        const mappingSet = new Set(mappings.map(m => `${m.role_id}-${m.permission_id}`));
+        
+        let html = '<div class="space-y-4">';
+        
+        // Create table for each role
+        roles.forEach(role => {
+            html += `<div class="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 px-4 py-3">
+                    <h3 class="text-white font-bold text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-user-tag"></i> ${role.name}
+                    </h3>
+                </div>
+                <div class="p-4 bg-white dark:bg-slate-800">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">`;
+            
+            // Group permissions by module
+            Object.keys(grouped).forEach(module => {
+                html += `<div class="border border-gray-200 dark:border-slate-700 rounded-lg p-3">
+                    <h4 class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">${module}</h4>
+                    <div class="space-y-2">`;
+                
+                grouped[module].forEach(perm => {
+                    const isChecked = mappingSet.has(`${role.id}-${perm.id}`);
+                    html += `<label class="flex items-start gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 p-1 rounded transition">
+                        <input type="checkbox" 
+                               class="mt-0.5 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                               data-role-id="${role.id}"
+                               data-permission-id="${perm.id}"
+                               ${isChecked ? 'checked' : ''}
+                               onchange="updatePermission(${role.id})">
+                        <div class="flex-1">
+                            <div class="text-xs font-semibold text-gray-800 dark:text-gray-200">${perm.name}</div>
+                            <div class="text-[10px] text-gray-500 dark:text-gray-400">${perm.description || ''}</div>
+                        </div>
+                    </label>`;
+                });
+                
+                html += `</div></div>`;
+            });
+            
+            html += `</div></div></div>`;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    // Update role permissions
+    let updateTimeout;
+    async function updatePermission(roleId) {
+        clearTimeout(updateTimeout);
+        
+        updateTimeout = setTimeout(async () => {
+            const checkboxes = document.querySelectorAll(`input[data-role-id="${roleId}"]:checked`);
+            const permissionIds = Array.from(checkboxes).map(cb => cb.dataset.permissionId);
+            
+            try {
+                const formData = new FormData();
+                formData.append('role_id', roleId);
+                formData.append('permission_ids', JSON.stringify(permissionIds));
+                
+                const response = await fetch('admin_api.php?action=update_permissions', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show subtle success indicator
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Permission tersimpan'
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating permissions:', error);
+            }
+        }, 500);
+    }
+    
+    <?php endif; ?>
 </script>
 </body>
-</html>
+</html> 

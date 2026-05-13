@@ -190,46 +190,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </form>
             
-            <!-- Demo Accounts Info -->
-            <div class="mt-8 pt-6 border-t border-gray-200">
-                <p class="text-xs text-gray-500 text-center mb-3 font-semibold">Demo Accounts:</p>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-gray-700">Admin</span>
-                            <span class="role-badge role-admin">Super Admin</span>
-                        </div>
-                        <p class="text-gray-600 font-mono">admin / admin123</p>
-                    </div>
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-gray-700">Operator</span>
-                            <span class="role-badge role-operator">Operator</span>
-                        </div>
-                        <p class="text-gray-600 font-mono">operator / operator123</p>
-                    </div>
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-gray-700">Viewer</span>
-                            <span class="role-badge role-viewer">Viewer</span>
-                        </div>
-                        <p class="text-gray-600 font-mono">viewer / viewer123</p>
-                    </div>
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-gray-700">Tech</span>
-                            <span class="role-badge role-tech">Technician</span>
-                        </div>
-                        <p class="text-gray-600 font-mono">technician / tech123</p>
-                    </div>
-                </div>
-            </div>
-            
             <!-- Footer -->
-            <div class="mt-6 text-center">
-                <p class="text-xs text-gray-500">
+            <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+                <p class="text-xs text-gray-500 mb-2">
                     <i class="fa-solid fa-shield-halved mr-1"></i>
                     Secure RBAC Authentication System
+                </p>
+                <p class="text-xs text-gray-400">
+                    Hubungi administrator untuk mendapatkan akses
                 </p>
             </div>
         </div>
