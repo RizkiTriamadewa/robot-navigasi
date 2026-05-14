@@ -1,16 +1,17 @@
 ╔══════════════════════════════════════════════════════════════════╗
-║           🎉 ROBOT DASHBOARD - CARA PAKAI (v4.1.0) 🎉           ║
-║   SPA + RBAC + Obstacle Detection + Admin Management System     ║
+║           🎉 ROBOT DASHBOARD - CARA PAKAI (v4.2.0) 🎉           ║
+║   SPA + RBAC + Custom Roles + Obstacle Detection + Admin        ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 📋 RINGKASAN CEPAT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ PROGRESS: 95% (37/42 Tasks Completed)
+✅ PROGRESS: 96% (38/42 Tasks Completed)
 
-Arsitektur: Single Page Application (SPA) dengan 5 Tab Navigation
-Security: Role-Based Access Control (RBAC) dengan 4 user roles
-NEW: Obstacle Detection & Collision Avoidance System 🔴
+Arsitektur: Single Page Application (SPA) dengan 6 Tab Navigation
+Security: Role-Based Access Control (RBAC) - role custom unlimited
+NEW: Custom Roles Management 🟢 (admin bisa buat role sendiri)
+Obstacle Detection & Collision Avoidance System 🔴
 
 
 📁 STRUKTUR APLIKASI
@@ -20,45 +21,41 @@ NEW: Obstacle Detection & Collision Avoidance System 🔴
   ✅ login.php           → Halaman login
   ✅ logout.php          → Logout handler
   ✅ auth.php            → Authentication functions
-  ✅ admin_api.php       → Admin management API 🆕
-  ✅ setup_rbac.sql      → Database RBAC setup
+  ✅ admin_api.php       → Admin & role management API 🆕
+  ✅ db.sql              → Schema utama (users, roles, permissions, ...)
 
 📱 Main Application:
   ✅ index.php           → Single Page Application (6 tabs)
   ✅ api.php             → REST API
   ✅ db.php              → Database connection
-  ✅ db.sql              → Main database schema
-  ✅ setup_tables.sql    → Additional tables
 
 
 🚀 CARA SETUP
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STEP 1: Setup Database Utama
+STEP 1: Setup Database
 ────────────────────────────────────────────────────────────────
 1. Buka phpMyAdmin: http://localhost/phpmyadmin
 2. Buat database baru: robot_dashboard
 3. Import file: db.sql
+   (Schema sudah lengkap: users, roles, permissions, role_permissions,
+    audit_logs, daily_logs, activity_logs)
 
-STEP 2: Setup RBAC Tables
-────────────────────────────────────────────────────────────────
-1. Pilih database: robot_dashboard
-2. Klik tab SQL
-3. Import file: setup_rbac.sql
-   (Ini akan membuat 5 tabel: users, roles, permissions, 
-    role_permissions, audit_logs)
-
-STEP 3: Login
+STEP 2: Login
 ────────────────────────────────────────────────────────────────
 1. Buka: http://localhost/robot_dashboard/robot-navigasi/login.php
 2. Login dengan salah satu akun demo:
    
    Username: admin       Password: admin123      (Super Admin)
-   Username: operator    Password: operator123   (Operator)
-   Username: viewer      Password: viewer123     (Viewer)
-   Username: technician  Password: tech123       (Technician)
+   Username: operator    Password: operator123   (Operator - role bawaan)
+   Username: viewer      Password: viewer123     (Viewer - role bawaan)
+   Username: technician  Password: tech123       (Technician - role bawaan)
 
-STEP 4: Akses Dashboard
+   Catatan: Operator/Viewer/Technician adalah role bawaan biasa
+   (bukan role sistem) sehingga bisa di-rename atau dihapus jika
+   tidak dipakai. Hanya Super Admin yang berstatus role sistem.
+
+STEP 3: Akses Dashboard
 ────────────────────────────────────────────────────────────────
 Setelah login, otomatis redirect ke:
 http://localhost/robot_dashboard/robot-navigasi/index.php
@@ -152,7 +149,8 @@ TAB 6: ADMIN (Admin Management) 🆕
 ────────────────────────────────────────────────────────────────
 Fitur:
   ✅ User Management (Create, View, Toggle Status)
-  ✅ RBAC Permission Management (Checkbox Matrix)
+  ✅ Role Management (Create / Rename / Delete role custom) 🟢
+  ✅ RBAC Permission Management (Checkbox Matrix per page/aksi)
   ✅ Role-based Permission Assignment
   ✅ Real-time Permission Updates
   ✅ Audit Logging
@@ -161,25 +159,38 @@ Cara Pakai:
   1. Klik tab "Admin" di header (hanya Super Admin)
   2. BUAT USER BARU:
      - Isi form: Username, Nama, Email, Password
-     - Pilih Role: Super Admin, Operator, Viewer, Technician
+     - Pilih Role dari dropdown (otomatis ikut role yang ada di DB,
+       termasuk role custom yang kamu buat) 🟢
      - Centang "User Aktif" jika ingin langsung aktif
      - Klik "Buat User"
   3. KELOLA USER:
      - Lihat daftar user di tabel
      - Klik "Aktifkan/Nonaktifkan" untuk toggle status
      - User nonaktif tidak bisa login
-  4. KELOLA PERMISSION:
+  4. KELOLA ROLE (Role Management) 🟢:
+     - Isi nama role + deskripsi, lalu klik "Tambah Role"
+     - Tabel role menampilkan badge tipe (Sistem / Custom) dan
+       jumlah permission yang sudah aktif
+     - Tombol "Edit" untuk rename / ubah deskripsi
+     - Tombol "Hapus" hanya aktif untuk role custom yang tidak
+       sedang dipakai user manapun
+     - Role Super Admin = tipe Sistem, tidak bisa di-rename / hapus
+  5. KELOLA PERMISSION:
      - Scroll ke panel "RBAC Permission Management"
-     - Lihat 4 role cards (Super Admin, Operator, Viewer, Technician)
-     - Centang/uncheck permission untuk setiap role
+     - Setiap role punya kotak akses (checkbox per permission /
+       page) yang bisa kamu atur sendiri
+     - Centang/uncheck permission untuk role apapun
      - Permission tersimpan otomatis (debounce 500ms)
      - Toast notification muncul saat berhasil
-  5. TIPS:
-     - User yang sedang login perlu logout/login ulang setelah permission berubah
+     - Super Admin: kotak terkunci & selalu full access
+  6. TIPS:
+     - User yang sedang login perlu logout/login ulang setelah
+       permission berubah
      - Jangan nonaktifkan akun sendiri
-     - Super Admin selalu punya semua permission
+     - Sebelum hapus role, pindahkan dulu user yang masih memakai
+       role tersebut ke role lain
 
-Permission Modules:
+Permission Modules (kotak akses default):
   • monitoring - Akses dashboard monitoring
   • sensors - Akses sensor data
   • logbook - Akses activity logs
@@ -189,12 +200,15 @@ Permission Modules:
   • control_robot - Control robot movement
   • spray_water - Spray water function
   • save_session - Save session data
-  • reset_session - Reset session (Admin only)
-  • clear_logs - Clear all logs (Admin only)
-  • manage_obstacles - Add/clear obstacles
+  • reset_session - Reset session
+  • clear_logs - Clear all logs
   • export_data - Export data to CSV/PDF
   • view_audit - View audit logs
   • manage_users - Full admin access
+
+Catatan: daftar di atas adalah permission default. Kamu bisa
+menambah permission baru dengan INSERT ke tabel `permissions`,
+dan otomatis akan muncul sebagai kotak akses baru di matrix.
 
 
 🔴 OBSTACLE DETECTION SYSTEM (NEW!)
@@ -273,54 +287,47 @@ TIPS & TRICKS:
 🔐 RBAC SYSTEM (Role-Based Access Control)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-4 USER ROLES:
+ROLE BAWAAN + ROLE CUSTOM (UNLIMITED) 🟢
 ────────────────────────────────────────────────────────────────
 
-1. SUPER ADMIN (admin / admin123)
-   ✅ Full system access
-   ✅ Semua control buttons enabled
-   ✅ Bisa control robot
-   ✅ Bisa spray water
-   ✅ Bisa save & reset session
-   ✅ Bisa clear logs
-   ✅ Bisa add/clear obstacles
-   ✅ Bisa manage users & permissions 🆕
-   ✅ Akses tab Admin 🆕
-   ✅ Buat user baru 🆕
-   ✅ Toggle user status 🆕
-   ✅ Update role permissions 🆕
+Sistem mendukung jumlah role tak terbatas. Ada 1 role sistem
+(Super Admin) yang TIDAK bisa diubah/dihapus, plus role-role
+lain yang sepenuhnya bisa kamu kelola sendiri lewat tab Admin.
 
-2. OPERATOR (operator / operator123)
+1. SUPER ADMIN (admin / admin123)  ← Role Sistem 🔒
+   ✅ Top tier, full access by design
+   ✅ Permission selalu full, tidak bisa di-uncheck
+   ✅ Nama "Super Admin" tidak bisa di-rename
+   ✅ Role tidak bisa dihapus
+   ✅ Hanya Super Admin yang bisa membuka tab Admin
+   ✅ Bisa buat / rename / hapus role custom
+
+2. OPERATOR (operator / operator123)  ← Role Bawaan
+   Default permission:
    ✅ Robot control & monitoring
-   ✅ Control buttons enabled
-   ✅ Bisa spray water
-   ✅ Bisa save session
-   ✅ Bisa add/clear obstacles
-   ❌ Tidak bisa reset session (Admin only)
-   ❌ Tidak bisa clear logs
-   ❌ Tidak bisa akses tab Admin 🆕
+   ✅ Bisa spray water, save session
+   ❌ Tidak bisa reset session, clear logs, akses Admin
+   📝 Bisa di-rename atau dihapus jika tidak dipakai
 
-3. VIEWER (viewer / viewer123)
-   ✅ Read-only access
-   ✅ Bisa view semua data
+3. VIEWER (viewer / viewer123)  ← Role Bawaan
+   Default permission:
+   ✅ Read-only (lihat dashboard, sensors, logbook, history)
    ✅ Bisa generate PDF
-   ✅ Bisa view obstacles
-   ❌ Semua control buttons DISABLED
-   ❌ Tidak bisa control robot
-   ❌ Tidak bisa spray water
-   ❌ Tidak bisa save/reset session
-   ❌ Tidak bisa add/clear obstacles
-   ❌ Tidak bisa akses tab Admin 🆕
+   ❌ Semua control buttons disabled
+   📝 Bisa di-rename atau dihapus jika tidak dipakai
 
-4. TECHNICIAN (technician / tech123)
-   ✅ Maintenance & logs
-   ✅ Bisa view & export logs
-   ✅ Bisa tambah maintenance log
-   ✅ Bisa view obstacles
-   ❌ Control buttons DISABLED
+4. TECHNICIAN (technician / tech123)  ← Role Bawaan
+   Default permission:
+   ✅ View & export logs, tambah maintenance log
    ❌ Tidak bisa control robot
-   ❌ Tidak bisa add/clear obstacles
-   ❌ Tidak bisa akses tab Admin 🆕
+   📝 Bisa di-rename atau dihapus jika tidak dipakai
+
+5. ROLE CUSTOM (mis. QA Tester, Supervisor Lapangan, dll) 🟢
+   ✅ Buat lewat tab Admin → Role Management
+   ✅ Tentukan sendiri kotak akses (page/aksi) di
+      RBAC Permission Management
+   ✅ Bisa di-rename, dihapus (jika belum dipakai user),
+      dan permission-nya bebas diubah kapan saja
 
 
 🎨 FITUR UI
@@ -382,10 +389,23 @@ Frontend:
 
 MASALAH: Tidak bisa login
 SOLUSI:
-  1. Pastikan setup_rbac.sql sudah dijalankan
+  1. Pastikan db.sql sudah di-import ke database robot_dashboard
   2. Cek tabel users ada: SELECT * FROM users;
   3. Pastikan password benar (case-sensitive)
   4. Clear browser cache (Ctrl+F5)
+
+MASALAH: Role custom yang baru dibuat tidak bisa dihapus
+SOLUSI:
+  1. Cek apakah masih ada user yang memakai role tersebut:
+     SELECT username FROM users WHERE role_id = <id_role>;
+  2. Pindahkan user-user itu ke role lain dulu, baru hapus role.
+  3. Role sistem (Super Admin) tidak akan pernah bisa dihapus.
+
+MASALAH: Permission Super Admin tidak bisa di-uncheck
+SOLUSI:
+  Itu by design. Super Admin selalu full access (top tier role).
+  Kalau butuh akun "admin terbatas", buat role custom baru lalu
+  pilih kotak akses sesuai kebutuhan.
 
 MASALAH: Control buttons disabled untuk Admin
 SOLUSI:
@@ -454,10 +474,10 @@ SOLUSI:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Dokumentasi Lengkap:
-  • SUMMARY.md             → Project summary (95% complete)
+  • SUMMARY.md             → Project summary (96% complete)
   • CARA_PAKAI.txt         → File ini
-  • README_RBAC.md         → Panduan RBAC (Bahasa Indonesia)
-  • RBAC_SETUP_GUIDE.md    → Setup instructions
+  • README.md              → Repository overview & quick start
+  • db.sql                 → Database schema lengkap
   • Robot Monitoring.xlsx  → Progress tracking
 
 Quick Links:
@@ -472,8 +492,8 @@ Quick Links:
 Setup:
   [ ] XAMPP running (Apache + MySQL)
   [ ] Database robot_dashboard exists
-  [ ] Tabel daily_logs ada
-  [ ] Tabel users, roles, permissions ada (RBAC)
+  [ ] db.sql sudah di-import (semua tabel ter-create)
+  [ ] Tabel daily_logs, users, roles, permissions ada
   [ ] Firebase config benar
 
 Login:
@@ -526,40 +546,53 @@ Permissions (Viewer):
   [ ] Bisa view data
   [ ] Bisa generate PDF
 
+Custom Roles (NEW!) 🟢:
+  [ ] Form "Tambah Role" muncul di tab Admin
+  [ ] Bisa buat role custom baru
+  [ ] Role custom muncul di dropdown create user
+  [ ] Role custom muncul di RBAC Permission Matrix
+  [ ] Bisa centang/uncheck kotak akses untuk role custom
+  [ ] Role custom bisa di-rename via tombol Edit
+  [ ] Role custom bisa dihapus jika tidak dipakai user
+  [ ] Super Admin punya badge "Sistem" + checkbox terkunci
+  [ ] Tombol Hapus pada Super Admin disabled
+  [ ] Hapus role yang masih dipakai user otomatis ditolak
+
 
 🎉 KESIMPULAN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STATUS: ✅ PRODUCTION READY (95%)
+STATUS: ✅ PRODUCTION READY (96%)
 
 Fitur Monitoring: 11/11 ✅ (100%)
 RBAC System: 15/15 ✅ (100%)
-Admin Management: ✅ (100%) 🆕
+Admin Management: ✅ (100%)
+Custom Roles Management: ✅ (100%) 🟢
 Obstacle Detection: ✅ (100%)
 Documentation: ✅ Complete
 Security: ✅ Implemented
 
-Completed Tasks: 37/42 (95%)
-Deferred Tasks: 5/42 (5%)
+Completed Tasks: 38/42 (96%)
+Deferred Tasks: 4/42 (4%)
   - Machine Vision Analysis (requires ML)
   - Geofencing (requires GPS polygon)
   - Multi-channel Notifications (requires API keys)
 
-Arsitektur: SPA + RBAC + Obstacle Detection + Admin Management
-Versi: 4.1.0
+Arsitektur: SPA + RBAC + Custom Roles + Obstacle Detection + Admin
+Versi: 4.2.0
 Status: 🟢 PRODUCTION READY
 
 
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    SELAMAT MENGGUNAKAN! 🚀                       ║
 ║                                                                  ║
-║  🔴 NEW: Obstacle Detection & Collision Avoidance System!       ║
-║  🆕 NEW: Admin Management & RBAC Permission Editor!             ║
-║  Robot sekarang bisa menghindari obstacle secara otomatis!      ║
-║  Admin bisa kelola user & permission dengan mudah!              ║
+║  🟢 NEW: Custom Roles - Buat role sebanyak yang kamu butuhkan!  ║
+║  🔴 Obstacle Detection & Collision Avoidance System             ║
+║  🆕 Admin Management & RBAC Permission Editor                    ║
+║  Robot bisa menghindari obstacle, admin bebas atur role custom! ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Dibuat: 2026-05-07
-Updated: 2026-05-13 (Admin Management Added)
+Updated: 2026-05-14 (Custom Roles Management Added)
 Developer: Rizki Triamadewa
-Progress: 95% (37/42 tasks)
+Progress: 96% (38/42 tasks)

@@ -10,6 +10,9 @@ header('Content-Type: application/json');
 
 $action = $_GET['action'] ?? '';
 
+// Super Admin role id (top-tier, immutable)
+const SUPER_ADMIN_ROLE_ID = 1;
+
 try {
     switch ($action) {
         case 'get_users':
@@ -30,6 +33,18 @@ try {
             
         case 'update_permissions':
             updateRolePermissions($conn);
+            break;
+            
+        case 'create_role':
+            createRole($conn);
+            break;
+            
+        case 'update_role':
+            updateRole($conn);
+            break;
+            
+        case 'delete_role':
+            deleteRole($conn);
             break;
             
         default:
@@ -67,7 +82,7 @@ function getUsersList($conn) {
  */
 function getPermissionsData($conn) {
     // Get all roles
-    $rolesStmt = $conn->prepare("SELECT id, name FROM roles ORDER BY id");
+    $rolesStmt = $conn->prepare("SELECT id, name, description, is_system FROM roles ORDER BY id");
     $rolesStmt->execute();
     $rolesResult = $rolesStmt->get_result();
     $roles = [];
@@ -203,6 +218,12 @@ function updateRolePermissions($conn) {
         return;
     }
     
+    // Super Admin permissions are locked (full access by design)
+    if ($role_id === SUPER_ADMIN_ROLE_ID) {
+        echo json_encode(['success' => false, 'message' => 'Permission Super Admin tidak bisa diubah']);
+        return;
+    }
+    
     if (!is_array($permission_ids)) {
         echo json_encode(['success' => false, 'message' => 'Invalid permission data']);
         return;
@@ -237,5 +258,182 @@ function updateRolePermissions($conn) {
     } catch (Exception $e) {
         $conn->rollback();
         echo json_encode(['success' => false, 'message' => 'Gagal update permission: ' . $e->getMessage()]);
+    }
+}
+
+/**
+ * Create a new custom role (optionally with initial permissions)
+ */
+function createRole($conn) {
+    $name = trim($_POST['name'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $permission_ids = json_decode($_POST['permission_ids'] ?? '[]', true);
+    
+    if ($name === '') {
+        echo json_encode(['success' => false, 'message' => 'Nama role wajib diisi']);
+        return;
+    }
+    
+    if (mb_strlen($name) > 50) {
+        echo json_encode(['success' => false, 'message' => 'Nama role maksimal 50 karakter']);
+        return;
+    }
+    
+    if (!is_array($permission_ids)) {
+        $permission_ids = [];
+    }
+    
+    // Unique check
+    $checkStmt = $conn->prepare("SELECT id FROM roles WHERE name = ?");
+    $checkStmt->bind_param("s", $name);
+    $checkStmt->execute();
+    if ($checkStmt->get_result()->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'Nama role sudah digunakan']);
+        return;
+    }
+    
+    $conn->begin_transaction();
+    try {
+        $insertRole = $conn->prepare("INSERT INTO roles (name, description, is_system) VALUES (?, ?, 0)");
+        $insertRole->bind_param("ss", $name, $description);
+        $insertRole->execute();
+        $newRoleId = $conn->insert_id;
+        
+        if (!empty($permission_ids)) {
+            $insertPerm = $conn->prepare("INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)");
+            foreach ($permission_ids as $pid) {
+                $pid = intval($pid);
+                if ($pid <= 0) continue;
+                $insertPerm->bind_param("ii", $newRoleId, $pid);
+                $insertPerm->execute();
+            }
+        }
+        
+        $conn->commit();
+        logAudit($conn, $_SESSION['user_id'], 'create_role', 'admin', "Created role: $name (ID $newRoleId)");
+        
+        echo json_encode(['success' => true, 'message' => 'Role berhasil dibuat', 'role_id' => $newRoleId]);
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo json_encode(['success' => false, 'message' => 'Gagal membuat role: ' . $e->getMessage()]);
+    }
+}
+
+/**
+ * Update an existing role's name/description.
+ * Super Admin (system role) can be edited only by another Super Admin
+ * AND only its description (name stays "Super Admin").
+ */
+function updateRole($conn) {
+    $role_id = intval($_POST['role_id'] ?? 0);
+    $name = trim($_POST['name'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    
+    if ($role_id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invalid role ID']);
+        return;
+    }
+    
+    if ($name === '') {
+        echo json_encode(['success' => false, 'message' => 'Nama role wajib diisi']);
+        return;
+    }
+    
+    // Lookup current role to check is_system flag
+    $cur = $conn->prepare("SELECT name, is_system FROM roles WHERE id = ?");
+    $cur->bind_param("i", $role_id);
+    $cur->execute();
+    $row = $cur->get_result()->fetch_assoc();
+    if (!$row) {
+        echo json_encode(['success' => false, 'message' => 'Role tidak ditemukan']);
+        return;
+    }
+    
+    // System role: name is locked, only description editable
+    if ((int)$row['is_system'] === 1) {
+        if ($name !== $row['name']) {
+            echo json_encode(['success' => false, 'message' => 'Nama role sistem tidak bisa diubah']);
+            return;
+        }
+    }
+    
+    // Unique check (excluding self)
+    $checkStmt = $conn->prepare("SELECT id FROM roles WHERE name = ? AND id <> ?");
+    $checkStmt->bind_param("si", $name, $role_id);
+    $checkStmt->execute();
+    if ($checkStmt->get_result()->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'Nama role sudah digunakan']);
+        return;
+    }
+    
+    $stmt = $conn->prepare("UPDATE roles SET name = ?, description = ? WHERE id = ?");
+    $stmt->bind_param("ssi", $name, $description, $role_id);
+    
+    if ($stmt->execute()) {
+        logAudit($conn, $_SESSION['user_id'], 'update_role', 'admin', "Updated role ID $role_id ($name)");
+        echo json_encode(['success' => true, 'message' => 'Role berhasil diupdate']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Gagal update role']);
+    }
+}
+
+/**
+ * Delete a custom role.
+ * - System roles (Super Admin) cannot be deleted.
+ * - Roles still assigned to one or more users cannot be deleted.
+ */
+function deleteRole($conn) {
+    $role_id = intval($_POST['role_id'] ?? 0);
+    
+    if ($role_id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invalid role ID']);
+        return;
+    }
+    
+    // Check existence + is_system
+    $cur = $conn->prepare("SELECT name, is_system FROM roles WHERE id = ?");
+    $cur->bind_param("i", $role_id);
+    $cur->execute();
+    $row = $cur->get_result()->fetch_assoc();
+    if (!$row) {
+        echo json_encode(['success' => false, 'message' => 'Role tidak ditemukan']);
+        return;
+    }
+    
+    if ((int)$row['is_system'] === 1) {
+        echo json_encode(['success' => false, 'message' => 'Role sistem tidak bisa dihapus']);
+        return;
+    }
+    
+    // Check if any user still uses this role
+    $useStmt = $conn->prepare("SELECT COUNT(*) AS cnt FROM users WHERE role_id = ?");
+    $useStmt->bind_param("i", $role_id);
+    $useStmt->execute();
+    $cnt = (int)$useStmt->get_result()->fetch_assoc()['cnt'];
+    if ($cnt > 0) {
+        echo json_encode([
+            'success' => false,
+            'message' => "Role masih digunakan oleh $cnt user. Pindahkan user ke role lain dulu."
+        ]);
+        return;
+    }
+    
+    $conn->begin_transaction();
+    try {
+        // role_permissions has ON DELETE CASCADE, but be explicit for clarity
+        $delPerm = $conn->prepare("DELETE FROM role_permissions WHERE role_id = ?");
+        $delPerm->bind_param("i", $role_id);
+        $delPerm->execute();
+        
+        $delRole = $conn->prepare("DELETE FROM roles WHERE id = ?");
+        $delRole->bind_param("i", $role_id);
+        $delRole->execute();
+        
+        $conn->commit();
+        logAudit($conn, $_SESSION['user_id'], 'delete_role', 'admin', "Deleted role: {$row['name']} (ID $role_id)");
+        echo json_encode(['success' => true, 'message' => 'Role berhasil dihapus']);
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo json_encode(['success' => false, 'message' => 'Gagal menghapus role: ' . $e->getMessage()]);
     }
 }

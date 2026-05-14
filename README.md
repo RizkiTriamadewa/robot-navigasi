@@ -2,13 +2,13 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-7.4+-777BB4?logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-production%20ready-success)
 
-**Advanced Robot Navigation Monitoring System with RBAC & Admin Management**
+**Advanced Robot Navigation Monitoring System with Custom RBAC & Admin Management**
 
 [Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Documentation](#-documentation) • [Screenshots](#-screenshots)
 
@@ -18,13 +18,13 @@
 
 ## 📋 Overview
 
-NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbasis web dengan arsitektur **Single Page Application (SPA)**, **Role-Based Access Control (RBAC)**, dan **Admin Management System**. Dashboard ini menyediakan monitoring real-time untuk 11 sensor robot, kontrol pergerakan, obstacle detection, dan manajemen user dengan 4 level akses berbeda.
+NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbasis web dengan arsitektur **Single Page Application (SPA)**, **Role-Based Access Control (RBAC) dengan custom roles**, dan **Admin Management System**. Dashboard ini menyediakan monitoring real-time untuk 11 sensor robot, kontrol pergerakan, obstacle detection, dan manajemen user dengan jumlah role tak terbatas yang bisa kamu konfigurasi sendiri.
 
 ### ✨ Highlights
 
 - 🎯 **Single Page Application** - Seamless navigation tanpa page reload (6 tabs)
-- 🔐 **RBAC System** - 4 user roles dengan 15 granular permissions
-- 🆕 **Admin Management** - User & permission management interface
+- 🔐 **RBAC System** - Custom roles unlimited dengan kotak akses per page/aksi 🟢
+- 🆕 **Admin Management** - User, role, dan permission management interface
 - 📊 **Real-time Monitoring** - 11 sensor monitoring via Firebase
 - 🗺️ **Interactive Map** - GPS tracking dengan path visualization
 - 🔴 **Obstacle Detection** - Collision avoidance system
@@ -54,12 +54,20 @@ NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbas
 
 ### 🔐 RBAC System
 
-| Role | Description | Permissions |
-|------|-------------|-------------|
-| **Super Admin** | Full system access | All 15 permissions |
-| **Operator** | Robot control & monitoring | 9 permissions (control + monitor) |
-| **Viewer** | Read-only access | 5 permissions (view only) |
-| **Technician** | Maintenance & logs | 7 permissions (logs + maintenance) |
+| Role | Type | Description | Permissions |
+|------|------|-------------|-------------|
+| **Super Admin** | 🔒 System | Top-tier role, full access by design | All permissions (locked) |
+| **Operator** | Built-in | Robot control & monitoring | 9 permissions (control + monitor) |
+| **Viewer** | Built-in | Read-only access | 5 permissions (view only) |
+| **Technician** | Built-in | Maintenance & logs | 7 permissions (logs + maintenance) |
+| **Custom Roles** | 🟢 Custom | Buat role sendiri sebanyak yang dibutuhkan | Atur sendiri lewat checkbox matrix |
+
+**Custom Roles Highlights (NEW v4.2.0):**
+- ✅ Buat role baru dari tab Admin → Role Management
+- ✅ Atur kotak akses (page/aksi) per role lewat permission matrix
+- ✅ Rename atau hapus role custom kapan saja
+- ✅ Super Admin tetap top-tier role yang tidak bisa diubah/dihapus
+- ✅ Hapus role yang masih dipakai user otomatis ditolak (data integrity)
 
 **Security Features:**
 - ✅ Password hashing (bcrypt)
@@ -143,11 +151,8 @@ NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbas
    # Create database
    mysql -u root -p -e "CREATE DATABASE robot_dashboard"
    
-   # Import main database
+   # Import schema (tables, roles, permissions, demo users)
    mysql -u root -p robot_dashboard < db.sql
-   
-   # Import RBAC tables
-   mysql -u root -p robot_dashboard < setup_rbac.sql
    ```
 
 3. **Configure Database Connection**
@@ -183,34 +188,41 @@ The dashboard consists of 6 main tabs:
 3. **Logbook** - Activity logs and history
 4. **Riwayat** - Session history data
 5. **Laporan** - PDF report generation
-6. **Admin** - User & permission management (Super Admin only) 🆕
+6. **Admin** - User, role & permission management (Super Admin only) 🆕
 
 ### User Roles
 
-#### Super Admin
-- ✅ Full system access
+#### Super Admin (System Role 🔒)
+- ✅ Full system access by design (top-tier)
 - ✅ All control buttons enabled
-- ✅ Can manage users & permissions 🆕
-- ✅ Access to Admin tab 🆕
-- ✅ Can reset sessions
+- ✅ Manage users, roles & permissions
+- ✅ Create / rename / delete custom roles
+- ✅ Cannot be renamed or deleted (built-in safeguard)
 
-#### Operator
+#### Operator (Built-in Role)
 - ✅ Robot control & monitoring
-- ✅ Can save sessions
+- ✅ Save sessions
 - ❌ Cannot reset sessions
 - ❌ Cannot manage users
+- 📝 Can be renamed or deleted via Admin tab if not in use
 
-#### Viewer
+#### Viewer (Built-in Role)
 - ✅ View all data
 - ✅ Generate PDF reports
 - ❌ All control buttons disabled
-- ❌ Read-only access
+- 📝 Can be renamed or deleted via Admin tab if not in use
 
-#### Technician
+#### Technician (Built-in Role)
 - ✅ View & export logs
 - ✅ Add maintenance logs
 - ❌ Cannot control robot
-- ❌ Cannot manage users
+- 📝 Can be renamed or deleted via Admin tab if not in use
+
+#### Custom Roles 🟢 (NEW v4.2.0)
+- ✅ Create unlimited custom roles via Admin → Role Management
+- ✅ Pick exactly which page/action permissions are allowed via the checkbox matrix
+- ✅ Rename, delete, or update permissions anytime
+- ✅ Custom roles automatically appear in the "Create User" role dropdown
 
 ---
 
@@ -218,30 +230,28 @@ The dashboard consists of 6 main tabs:
 
 ### Main Documentation
 - [SUMMARY.md](SUMMARY.md) - Complete project summary
-- [README_RBAC.md](README_RBAC.md) - RBAC system guide (Indonesian)
-- [RBAC_SETUP_GUIDE.md](RBAC_SETUP_GUIDE.md) - Setup instructions
 - [CARA_PAKAI.txt](CARA_PAKAI.txt) - User guide (Indonesian)
-- [VISUAL_GUIDE.md](VISUAL_GUIDE.md) - Visual mockups
 
 ### API Documentation
 - [api.php](api.php) - REST API endpoints
+- [admin_api.php](admin_api.php) - Admin / role / permission management API
 
 ### Database Schema
-- [db.sql](db.sql) - Main database schema
-- [setup_rbac.sql](setup_rbac.sql) - RBAC tables
+- [db.sql](db.sql) - Complete database schema (tables, roles, permissions, demo users)
 
 ---
 
 ## 🔐 Demo Accounts
 
-| Username | Password | Role | Access Level |
-|----------|----------|------|--------------|
-| `admin` | `admin123` | Super Admin | Full Access |
-| `operator` | `operator123` | Operator | Control + Monitor |
-| `viewer` | `viewer123` | Viewer | Read-only |
-| `technician` | `tech123` | Technician | Logs + Maintenance |
+| Username | Password | Role | Type | Access Level |
+|----------|----------|------|------|--------------|
+| `admin` | `admin123` | Super Admin | 🔒 System | Full Access |
+| `operator` | `operator123` | Operator | Built-in | Control + Monitor |
+| `viewer` | `viewer123` | Viewer | Built-in | Read-only |
+| `technician` | `tech123` | Technician | Built-in | Logs + Maintenance |
 
 > ⚠️ **Warning**: Change these passwords before production deployment!
+> 💡 Built-in roles can be renamed or deleted via the Admin tab. Only Super Admin is locked as a system role.
 
 ---
 
@@ -250,22 +260,20 @@ The dashboard consists of 6 main tabs:
 ```
 robot-navigasi/
 ├── 🔐 RBAC System
-│   ├── setup_rbac.sql      # Database RBAC setup
 │   ├── auth.php            # Authentication functions
 │   ├── login.php           # Login page
 │   ├── logout.php          # Logout handler
-│   └── admin_api.php       # Admin management API 🆕
+│   └── admin_api.php       # Admin / role / permission API 🆕
 │
 ├── 📱 Application
 │   ├── index.php           # Main SPA (6 tabs)
 │   ├── api.php             # REST API
 │   ├── db.php              # Database connection
-│   └── db.sql              # Main database schema
+│   └── db.sql              # Complete database schema
 │
 ├── 📚 Documentation
 │   ├── README.md           # This file
 │   ├── SUMMARY.md          # Project summary
-│   ├── README_RBAC.md      # RBAC guide
 │   └── CARA_PAKAI.txt      # User guide
 │
 └── ⚙️ Config
@@ -359,10 +367,25 @@ $db = 'robot_dashboard';
 **Problem**: Login fails with correct credentials
 
 **Solution**:
-1. Verify `setup_rbac.sql` was executed
+1. Verify `db.sql` was imported into the `robot_dashboard` database
 2. Check users table: `SELECT * FROM users;`
 3. Clear browser cache (Ctrl+F5)
 4. Check password hash in database
+
+### Cannot Delete a Custom Role
+
+**Problem**: "Role masih digunakan oleh N user" message when deleting
+
+**Solution**:
+1. Reassign affected users to a different role first
+2. Or deactivate / delete those users
+3. Then retry the delete action
+
+### Super Admin Permissions Look Locked
+
+**Problem**: Cannot uncheck Super Admin permissions
+
+**Solution**: This is intentional. Super Admin is the top-tier system role and always has full access. If you need a restricted admin, create a custom role and assign only the permissions you want.
 
 ### Control Buttons Disabled
 
@@ -387,19 +410,26 @@ $db = 'robot_dashboard';
 
 ## 📊 Statistics
 
-- **Total Features**: 11 monitoring + RBAC + Admin Management + Obstacle Detection
-- **Total Roles**: 4 user roles
-- **Total Permissions**: 15 granular permissions
+- **Total Features**: 11 monitoring + Custom RBAC + Admin Management + Obstacle Detection
+- **Total Roles**: Unlimited (1 system + 3 built-in + N custom)
+- **Total Permissions**: 15 granular permissions (extendable via DB)
 - **Total Database Tables**: 7 (2 main + 5 RBAC)
-- **Total Files**: 21 files (including admin_api.php)
-- **Lines of Code**: ~2500+ lines
-- **Architecture**: SPA + RBAC + Admin Management
-- **Version**: 4.1.0
+- **Total Files**: 21+ files (including admin_api.php)
+- **Lines of Code**: ~2700+ lines
+- **Architecture**: SPA + Custom RBAC + Admin Management
+- **Version**: 4.2.0
 - **Tabs**: 6 (Monitoring, Sensors, Logbook, Riwayat, Laporan, Admin)
 
 ---
 
 ## 🗺️ Roadmap
+
+### Version 4.2.0 (Completed) ✅
+- ✅ Custom roles management (create / rename / delete)
+- ✅ Per-role permission matrix with checkbox toggles
+- ✅ Super Admin locked as system role (top-tier)
+- ✅ Dynamic role dropdown in user creation form
+- ✅ Safeguards: cannot delete role still in use, cannot edit system role permissions
 
 ### Version 4.1.0 (Completed) ✅
 - ✅ Admin panel for user management
@@ -408,14 +438,15 @@ $db = 'robot_dashboard';
 - ✅ Real-time permission updates
 - ✅ Audit logging for admin actions
 
-### Version 4.2.0 (Planned)
+### Version 4.3.0 (Planned)
 - [ ] Password reset functionality
 - [ ] User profile page
+- [ ] Reassign users when deleting a role
 - [ ] Email notifications
 - [ ] Advanced analytics dashboard
 - [ ] Export audit logs
 
-### Version 4.3.0 (Future)
+### Version 4.4.0 (Future)
 - [ ] Two-factor authentication (2FA)
 - [ ] API authentication (JWT)
 - [ ] Mobile app (React Native)

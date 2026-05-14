@@ -160,6 +160,7 @@ CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `description` text DEFAULT NULL,
+  `is_system` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = built-in role, cannot be renamed or deleted',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -167,11 +168,11 @@ CREATE TABLE `roles` (
 -- Dumping data for table `roles`
 --
 
-INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
-(1, 'Super Admin', 'Full system access - IT Administrator', '2026-05-10 13:56:30'),
-(2, 'Operator', 'Robot control & monitoring - Field operator', '2026-05-10 13:56:30'),
-(3, 'Viewer', 'Read-only access - Management/Supervisor', '2026-05-10 13:56:30'),
-(4, 'Technician', 'Maintenance & logs - Maintenance team', '2026-05-10 13:56:30');
+INSERT INTO `roles` (`id`, `name`, `description`, `is_system`, `created_at`) VALUES
+(1, 'Super Admin', 'Full system access - IT Administrator', 1, '2026-05-10 13:56:30'),
+(2, 'Operator', 'Robot control & monitoring - Field operator', 0, '2026-05-10 13:56:30'),
+(3, 'Viewer', 'Read-only access - Management/Supervisor', 0, '2026-05-10 13:56:30'),
+(4, 'Technician', 'Maintenance & logs - Maintenance team', 0, '2026-05-10 13:56:30');
 
 -- --------------------------------------------------------
 

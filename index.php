@@ -980,12 +980,8 @@ sort($availableMonths);
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Role *</label>
-                        <select name="role_id" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:text-white">
-                            <option value="">Pilih Role</option>
-                            <option value="1">Super Admin</option>
-                            <option value="2">Operator</option>
-                            <option value="3">Viewer</option>
-                            <option value="4">Technician</option>
+                        <select name="role_id" id="create-user-role-select" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:text-white">
+                            <option value="">Memuat role...</option>
                         </select>
                     </div>
                     <div class="flex items-center">
@@ -1018,6 +1014,56 @@ sort($availableMonths);
                     </thead>
                     <tbody id="users-table-body" class="divide-y divide-gray-200 dark:divide-slate-700">
                         <tr><td colspan="7" class="p-4 text-center text-gray-500">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Role Management -->
+        <div class="panel rounded-xl p-4 bg-white border border-gray-200 shadow-lg">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-tag text-emerald-500"></i> Role Management
+            </h2>
+            
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 mb-4">
+                <p class="text-xs text-gray-700 dark:text-gray-300">
+                    <i class="fa-solid fa-info-circle text-emerald-500 mr-1"></i>
+                    Buat role custom sesuai kebutuhan. Atur akses page-nya di panel <strong>RBAC Permission Management</strong> di bawah. Role <strong>Super Admin</strong> adalah role sistem dan tidak bisa diubah.
+                </p>
+            </div>
+            
+            <!-- Create Role Form -->
+            <form id="form-create-role" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nama Role *</label>
+                    <input type="text" name="name" required maxlength="50" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-emerald-500 dark:bg-slate-700 dark:text-white" placeholder="Mis. QA Tester">
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Deskripsi</label>
+                    <input type="text" name="description" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-emerald-500 dark:bg-slate-700 dark:text-white" placeholder="Deskripsi singkat">
+                </div>
+                <div class="md:col-span-1 flex items-end">
+                    <button type="submit" class="w-full px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-lg transition-all shadow-md hover:shadow-lg">
+                        <i class="fa-solid fa-plus mr-2"></i> Tambah Role
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Roles Table -->
+            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700">
+                <table class="w-full text-xs text-left text-gray-600 dark:text-gray-300">
+                    <thead class="bg-emerald-500 dark:bg-emerald-600 text-white uppercase tracking-wider font-semibold text-[10px]">
+                        <tr>
+                            <th class="px-3 py-3">ID</th>
+                            <th class="px-3 py-3">Nama</th>
+                            <th class="px-3 py-3">Deskripsi</th>
+                            <th class="px-3 py-3">Tipe</th>
+                            <th class="px-3 py-3">Jumlah Permission</th>
+                            <th class="px-3 py-3 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roles-table-body" class="divide-y divide-gray-200 dark:divide-slate-700">
+                        <tr><td colspan="6" class="p-4 text-center text-gray-500">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2212,6 +2258,11 @@ sort($availableMonths);
     // ==================== ADMIN TAB FUNCTIONS ====================
     <?php if (hasPermission('manage_users')): ?>
     
+    // Cache for roles data (used by both Role Mgmt table and create-user dropdown)
+    let cachedRoles = [];
+    let cachedPermissions = [];
+    let cachedMappings = [];
+    
     // Load users on admin tab switch
     function loadAdminData() {
         loadUsers();
@@ -2366,10 +2417,203 @@ sort($availableMonths);
             const data = await response.json();
             
             if (data.success) {
+                cachedRoles = data.roles;
+                cachedPermissions = data.permissions;
+                cachedMappings = data.mappings;
                 buildPermissionMatrix(data.roles, data.permissions, data.mappings);
+                renderRolesTable(data.roles, data.mappings);
+                populateRoleDropdown(data.roles);
             }
         } catch (error) {
             console.error('Error loading permissions:', error);
+        }
+    }
+    
+    // Populate the create-user role dropdown
+    function populateRoleDropdown(roles) {
+        const sel = document.getElementById('create-user-role-select');
+        if (!sel) return;
+        const prev = sel.value;
+        sel.innerHTML = '<option value="">Pilih Role</option>' +
+            roles.map(r => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join('');
+        if (prev) sel.value = prev;
+    }
+    
+    // Render Role Management table
+    function renderRolesTable(roles, mappings) {
+        const tbody = document.getElementById('roles-table-body');
+        if (!tbody) return;
+        
+        // Count permissions per role
+        const counts = {};
+        mappings.forEach(m => {
+            counts[m.role_id] = (counts[m.role_id] || 0) + 1;
+        });
+        
+        if (roles.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Belum ada role</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = roles.map(role => {
+            const isSystem = parseInt(role.is_system) === 1;
+            const typeBadge = isSystem
+                ? '<span class="px-2 py-1 text-[10px] font-bold rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><i class="fa-solid fa-lock mr-1"></i>Sistem</span>'
+                : '<span class="px-2 py-1 text-[10px] font-bold rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Custom</span>';
+            
+            const permCount = counts[role.id] || 0;
+            
+            const editBtn = `<button onclick="openEditRoleModal(${role.id})" class="px-2 py-1 text-[10px] font-bold rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition" title="Edit role">
+                <i class="fa-solid fa-pen"></i> Edit
+            </button>`;
+            const deleteBtn = isSystem
+                ? `<button disabled class="px-2 py-1 text-[10px] font-bold rounded bg-gray-100 text-gray-400 cursor-not-allowed" title="Role sistem tidak bisa dihapus">
+                    <i class="fa-solid fa-trash"></i> Hapus
+                </button>`
+                : `<button onclick="deleteRole(${role.id}, '${escapeHtml(role.name).replace(/'/g, "\\'")}')" class="px-2 py-1 text-[10px] font-bold rounded bg-red-100 text-red-700 hover:bg-red-200 transition" title="Hapus role">
+                    <i class="fa-solid fa-trash"></i> Hapus
+                </button>`;
+            
+            return `<tr class="bg-white hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-slate-700 transition">
+                <td class="px-3 py-3 font-semibold">${role.id}</td>
+                <td class="px-3 py-3 font-semibold">${escapeHtml(role.name)}</td>
+                <td class="px-3 py-3 text-gray-600 dark:text-gray-400">${escapeHtml(role.description || '-')}</td>
+                <td class="px-3 py-3">${typeBadge}</td>
+                <td class="px-3 py-3"><span class="px-2 py-1 text-[10px] font-bold rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">${permCount} permission</span></td>
+                <td class="px-3 py-3 text-right space-x-1">${editBtn} ${deleteBtn}</td>
+            </tr>`;
+        }).join('');
+    }
+    
+    // Simple HTML escaper used for safely injecting names into HTML
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+    
+    // Create role
+    document.getElementById('form-create-role')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        try {
+            const response = await fetch('admin_api.php?action=create_role', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message, heightAuto: false, timer: 1500, showConfirmButton: false });
+                this.reset();
+                loadPermissions();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: data.message, heightAuto: false });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan saat membuat role', heightAuto: false });
+        }
+    });
+    
+    // Edit role modal (uses SweetAlert form)
+    async function openEditRoleModal(roleId) {
+        const role = cachedRoles.find(r => parseInt(r.id) === parseInt(roleId));
+        if (!role) return;
+        const isSystem = parseInt(role.is_system) === 1;
+        
+        const { value: formValues } = await Swal.fire({
+            title: 'Edit Role',
+            html:
+                `<div class="text-left text-sm space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Role *</label>
+                        <input id="swal-role-name" class="swal2-input !w-full !mx-0" maxlength="50" value="${escapeHtml(role.name)}" ${isSystem ? 'readonly' : ''}>
+                        ${isSystem ? '<p class="text-[11px] text-amber-600 mt-1"><i class="fa-solid fa-lock mr-1"></i>Nama role sistem tidak bisa diubah</p>' : ''}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Deskripsi</label>
+                        <input id="swal-role-desc" class="swal2-input !w-full !mx-0" value="${escapeHtml(role.description || '')}">
+                    </div>
+                </div>`,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#10b981',
+            heightAuto: false,
+            preConfirm: () => {
+                const name = document.getElementById('swal-role-name').value.trim();
+                const description = document.getElementById('swal-role-desc').value.trim();
+                if (!name) {
+                    Swal.showValidationMessage('Nama role wajib diisi');
+                    return false;
+                }
+                return { name, description };
+            }
+        });
+        
+        if (!formValues) return;
+        
+        try {
+            const formData = new FormData();
+            formData.append('role_id', roleId);
+            formData.append('name', formValues.name);
+            formData.append('description', formValues.description);
+            
+            const response = await fetch('admin_api.php?action=update_role', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message, heightAuto: false, timer: 1500, showConfirmButton: false });
+                loadPermissions();
+                loadUsers();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: data.message, heightAuto: false });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan', heightAuto: false });
+        }
+    }
+    
+    // Delete role
+    async function deleteRole(roleId, roleName) {
+        const result = await Swal.fire({
+            title: 'Hapus Role?',
+            html: `Role <strong>${escapeHtml(roleName)}</strong> akan dihapus secara permanen.<br><span class="text-xs text-gray-500">Hanya bisa dihapus jika tidak ada user yang memakai role ini.</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, hapus',
+            cancelButtonText: 'Batal',
+            heightAuto: false
+        });
+        if (!result.isConfirmed) return;
+        
+        try {
+            const formData = new FormData();
+            formData.append('role_id', roleId);
+            const response = await fetch('admin_api.php?action=delete_role', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message, heightAuto: false, timer: 1500, showConfirmButton: false });
+                loadPermissions();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: data.message, heightAuto: false });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan', heightAuto: false });
         }
     }
     
@@ -2387,37 +2631,65 @@ sort($availableMonths);
         // Create mapping lookup
         const mappingSet = new Set(mappings.map(m => `${m.role_id}-${m.permission_id}`));
         
+        if (roles.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-500 py-6">Belum ada role.</p>';
+            return;
+        }
+        
         let html = '<div class="space-y-4">';
         
         // Create table for each role
         roles.forEach(role => {
+            const isSystem = parseInt(role.is_system) === 1;
+            const headerGradient = isSystem
+                ? 'from-amber-500 to-orange-500 dark:from-amber-600 dark:to-orange-600'
+                : 'from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600';
+            const lockBadge = isSystem
+                ? '<span class="ml-2 px-2 py-0.5 text-[10px] font-bold rounded bg-white/20 text-white"><i class="fa-solid fa-lock mr-1"></i>Sistem - Full Access</span>'
+                : '';
+            
             html += `<div class="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
-                <div class="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 px-4 py-3">
+                <div class="bg-gradient-to-r ${headerGradient} px-4 py-3 flex items-center justify-between">
                     <h3 class="text-white font-bold text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-user-tag"></i> ${role.name}
+                        <i class="fa-solid fa-user-tag"></i> ${escapeHtml(role.name)}
+                        ${lockBadge}
                     </h3>
                 </div>
-                <div class="p-4 bg-white dark:bg-slate-800">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">`;
+                <div class="p-4 bg-white dark:bg-slate-800">`;
+            
+            if (isSystem) {
+                html += `<p class="text-xs text-gray-600 dark:text-gray-400 italic mb-3">
+                    <i class="fa-solid fa-circle-info mr-1"></i>
+                    Super Admin selalu memiliki akses penuh ke semua page dan permission. Konfigurasi ini tidak bisa diubah.
+                </p>`;
+            }
+            
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">`;
             
             // Group permissions by module
             Object.keys(grouped).forEach(module => {
                 html += `<div class="border border-gray-200 dark:border-slate-700 rounded-lg p-3">
-                    <h4 class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">${module}</h4>
+                    <h4 class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">${escapeHtml(module)}</h4>
                     <div class="space-y-2">`;
                 
                 grouped[module].forEach(perm => {
-                    const isChecked = mappingSet.has(`${role.id}-${perm.id}`);
-                    html += `<label class="flex items-start gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 p-1 rounded transition">
+                    // System role: always treated as fully checked and disabled
+                    const isChecked = isSystem ? true : mappingSet.has(`${role.id}-${perm.id}`);
+                    const disabledAttr = isSystem ? 'disabled' : '';
+                    const onChangeAttr = isSystem ? '' : `onchange="updatePermission(${role.id})"`;
+                    const labelClass = isSystem ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700';
+                    
+                    html += `<label class="flex items-start gap-2 ${labelClass} p-1 rounded transition">
                         <input type="checkbox" 
                                class="mt-0.5 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                                data-role-id="${role.id}"
                                data-permission-id="${perm.id}"
                                ${isChecked ? 'checked' : ''}
-                               onchange="updatePermission(${role.id})">
+                               ${disabledAttr}
+                               ${onChangeAttr}>
                         <div class="flex-1">
-                            <div class="text-xs font-semibold text-gray-800 dark:text-gray-200">${perm.name}</div>
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400">${perm.description || ''}</div>
+                            <div class="text-xs font-semibold text-gray-800 dark:text-gray-200">${escapeHtml(perm.name)}</div>
+                            <div class="text-[10px] text-gray-500 dark:text-gray-400">${escapeHtml(perm.description || '')}</div>
                         </div>
                     </label>`;
                 });
