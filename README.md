@@ -230,7 +230,7 @@ The dashboard consists of 6 main tabs:
 
 ### Main Documentation
 - [SUMMARY.md](SUMMARY.md) - Complete project summary
-- [CARA_PAKAI.txt](CARA_PAKAI.txt) - User guide (Indonesian)
+- [CARA_PAKAI.md](CARA_PAKAI.md) - User guide (Bahasa Indonesia)
 
 ### API Documentation
 - [api.php](api.php) - REST API endpoints
@@ -252,6 +252,7 @@ The dashboard consists of 6 main tabs:
 
 > ⚠️ **Warning**: Change these passwords before production deployment!
 > 💡 Built-in roles can be renamed or deleted via the Admin tab. Only Super Admin is locked as a system role.
+> 📝 DB juga sudah berisi 1 contoh role custom (`Mahasiswa`, id=5) yang bisa kamu rename/hapus dari tab Admin.
 
 ---
 
@@ -263,7 +264,7 @@ robot-navigasi/
 │   ├── auth.php            # Authentication functions
 │   ├── login.php           # Login page
 │   ├── logout.php          # Logout handler
-│   └── admin_api.php       # Admin / role / permission API 🆕
+│   └── admin_api.php       # Admin / role / permission API
 │
 ├── 📱 Application
 │   ├── index.php           # Main SPA (6 tabs)
@@ -274,7 +275,7 @@ robot-navigasi/
 ├── 📚 Documentation
 │   ├── README.md           # This file
 │   ├── SUMMARY.md          # Project summary
-│   └── CARA_PAKAI.txt      # User guide
+│   └── CARA_PAKAI.md       # User guide (Bahasa Indonesia)
 │
 └── ⚙️ Config
     ├── .gitignore
@@ -326,7 +327,7 @@ $db = 'robot_dashboard';
 - [ ] Test session timeout (30 min)
 - [ ] Test logout functionality
 - [ ] Verify audit logs recording
-- [ ] Test all 5 tabs navigation
+- [ ] Test all 6 tabs navigation
 - [ ] Test dark mode toggle
 - [ ] Test PDF generation
 
@@ -413,9 +414,7 @@ $db = 'robot_dashboard';
 - **Total Features**: 11 monitoring + Custom RBAC + Admin Management + Obstacle Detection
 - **Total Roles**: Unlimited (1 system + 3 built-in + N custom)
 - **Total Permissions**: 15 granular permissions (extendable via DB)
-- **Total Database Tables**: 7 (2 main + 5 RBAC)
-- **Total Files**: 21+ files (including admin_api.php)
-- **Lines of Code**: ~2700+ lines
+- **Total Database Tables**: 7 (2 main: `daily_logs`, `activity_logs` + 5 RBAC: `users`, `roles`, `permissions`, `role_permissions`, `audit_logs`)
 - **Architecture**: SPA + Custom RBAC + Admin Management
 - **Version**: 4.2.0
 - **Tabs**: 6 (Monitoring, Sensors, Logbook, Riwayat, Laporan, Admin)

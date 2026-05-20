@@ -3,7 +3,7 @@
 ## 📊 Overall Progress: **96%** ✅
 
 **Status:** 🟢 PRODUCTION READY  
-**Last Updated:** 14 Mei 2026  
+**Last Updated:** 20 Mei 2026  
 **Version:** 4.2.0 (SPA + Custom RBAC + Obstacle Detection + Admin Management)
 
 ---
@@ -257,7 +257,7 @@ robot-navigasi/
 │   ├── auth.php               ← Auth functions (Super Admin bypass)
 │   ├── login.php              ← Login page
 │   ├── logout.php             ← Logout handler
-│   └── admin_api.php          ← Admin / role / permission API 🆕
+│   └── admin_api.php          ← Admin / role / permission API
 │
 ├── 📱 Application
 │   ├── index.php              ← Main SPA (6 tabs)
@@ -265,14 +265,10 @@ robot-navigasi/
 │   ├── db.php                 ← DB connection
 │   └── db.sql                 ← Complete database schema
 │
-├── 📚 Documentation
-│   ├── SUMMARY.md             ← This file
-│   ├── CARA_PAKAI.txt         ← User guide
-│   ├── README.md              ← Repository overview
-│   └── Robot Monitoring.xlsx  ← Project tracking (96%)
-│
-└── 📊 Project Files
-    └── Robot Monitoring.xlsx  ← Progress tracking
+└── 📚 Documentation
+    ├── SUMMARY.md             ← This file
+    ├── CARA_PAKAI.md          ← User guide (Bahasa Indonesia)
+    └── README.md              ← Repository overview
 ```
 
 ---
@@ -378,6 +374,8 @@ robot-navigasi/
 | viewer | viewer123 | Viewer |
 | technician | tech123 | Technician |
 
+> Selain 4 akun di atas, DB juga sudah berisi 1 contoh role custom: **Mahasiswa** (id=5). Kamu bebas rename/hapus dari tab Admin.
+
 ⚠️ **PENTING:** Ganti password default sebelum production!
 
 ---
@@ -480,11 +478,11 @@ Sistem saat ini (96%) sudah **production-ready** dan fully functional untuk semu
 ---
 
 **Dibuat:** 23 Februari 2026  
-**Updated:** 14 Mei 2026  
+**Updated:** 20 Mei 2026  
 **Version:** 4.2.0 (SPA + Custom RBAC + Obstacle Detection)  
 **Developer:** Rizki Triamadewa  
 **Status:** ✅ COMPLETED (96%)
 
 ---
 
-*Untuk panduan lengkap cara pakai, lihat: [CARA_PAKAI.txt]*
+*Untuk panduan lengkap cara pakai, lihat: [CARA_PAKAI.md](CARA_PAKAI.md)*
