@@ -1,0 +1,19 @@
+# ============================================================
+# DENY ALL - File di src/ tidak boleh diakses langsung dari URL
+# ============================================================
+# src/Config/db.php  berisi kredensial database
+# src/Auth/auth.php  berisi logic autentikasi
+#
+# Hanya di-include via require __DIR__ . '/../src/...' dari public/
+# ============================================================
+
+<IfModule mod_authz_core.c>
+    # Apache 2.4+
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    # Apache 2.2 (legacy)
+    Order Deny,Allow
+    Deny from all
+</IfModule>

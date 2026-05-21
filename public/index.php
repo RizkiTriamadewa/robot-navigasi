@@ -1,6 +1,6 @@
 <?php
-require 'db.php';
-require 'auth.php';
+require __DIR__ . '/../src/Config/db.php';
+require __DIR__ . '/../src/Auth/auth.php';
 
 // Require login to access dashboard
 requireLogin();
@@ -45,6 +45,30 @@ while($row = $historyQuery->fetch_assoc()) {
 }
 sort($availableYears);
 sort($availableMonths);
+
+// Ambil data DETEKSI HAMA (untuk tab Riwayat)
+$pestData = [];
+if ($pestRes = @$conn->query("
+    SELECT p.*, dl.log_date AS session_date
+      FROM pest_detections p
+      LEFT JOIN daily_logs dl ON dl.id = p.session_id
+     ORDER BY p.detected_at DESC
+     LIMIT 200
+")) {
+    while ($r = $pestRes->fetch_assoc()) $pestData[] = $r;
+}
+
+// Ambil data POSISI ROBOT (untuk tab Demografi)
+$positionData = [];
+if ($posRes = @$conn->query("
+    SELECT p.*, dl.log_date AS session_date
+      FROM robot_positions p
+      LEFT JOIN daily_logs dl ON dl.id = p.session_id
+     ORDER BY p.recorded_at DESC
+     LIMIT 200
+")) {
+    while ($r = $posRes->fetch_assoc()) $positionData[] = $r;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id" class="dark">
@@ -449,6 +473,11 @@ sort($availableMonths);
         <button onclick="switchTab('riwayat')" id="btn-tab-riwayat" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
             <i class="fa-solid fa-clock-rotate-left mr-1"></i> <span class="hidden md:inline">Riwayat</span>
         </button>
+        <?php if (hasPermission('view_demografi')): ?>
+        <button onclick="switchTab('demografi')" id="btn-tab-demografi" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
+            <i class="fa-solid fa-map-location-dot mr-1"></i> <span class="hidden md:inline">Demografi</span>
+        </button>
+        <?php endif; ?>
         <button onclick="switchTab('laporan')" id="btn-tab-laporan" class="tab-btn px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs transition-all">
             <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden md:inline">Laporan</span>
         </button>
@@ -664,7 +693,10 @@ sort($availableMonths);
 </div>
 
 <div id="tab-riwayat" class="tab-content flex-1 flex-col space-y-2 overflow-hidden min-h-0">
-    <div class="panel h-full flex flex-col p-3 rounded-lg bg-white border border-gray-200 shadow-sm">
+    <div class="h-full flex flex-col gap-2 overflow-y-auto pr-1">
+
+    <!-- ============ PANEL 1: Riwayat Sesi (existing) ============ -->
+    <div class="panel flex flex-col p-3 rounded-lg bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-sm">
         <div class="flex-none flex justify-between items-center mb-3">
             <h2 class="text-sm md:text-base font-bold text-gray-900 dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-500"></i> Riwayat Sesi</h2>
             <div class="flex space-x-2 overflow-x-auto pb-1 md:pb-0">
@@ -704,18 +736,19 @@ sort($availableMonths);
 
         <div class="flex-1 overflow-auto rounded-lg border border-gray-200 dark:border-slate-700 relative shadow-inner bg-[#f8fafc] dark:bg-slate-800/50">
             <table class="w-full text-xs sm:text-sm text-left text-gray-600 dark:text-gray-300">
-                <thead class="sticky top-0 bg-gray-200 dark:bg-slate-900 z-10 shadow-sm uppercase tracking-wider font-semibold text-[10px] sm:text-xs">
+                <thead class="sticky top-0 bg-gray-200 dark:bg-slate-900 text-gray-700 dark:text-gray-200 z-10 shadow-sm uppercase tracking-wider font-semibold text-[10px] sm:text-xs">
                     <tr>
                         <th class="px-3 py-3 whitespace-nowrap">Waktu (Sesi)</th>
                         <th class="px-3 py-3 whitespace-nowrap">Baterai</th>
                         <th class="px-3 py-3 whitespace-nowrap">Jarak</th>
                         <th class="px-3 py-3 whitespace-nowrap">Air Keluar</th>
                         <th class="px-3 py-3 whitespace-nowrap">Sisa Air</th>
+                        <th class="px-3 py-3 whitespace-nowrap text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="history-table-body" class="divide-y divide-gray-200 dark:divide-slate-700/80">
                     <?php if(empty($historyData)): ?>
-                        <tr><td colspan="5" class="p-6 text-center text-gray-500 font-medium italic">Belum ada riwayat terekam.</td></tr>
+                        <tr><td colspan="6" class="p-6 text-center text-gray-500 font-medium italic">Belum ada riwayat terekam.</td></tr>
                     <?php else: ?>
                         <?php foreach($historyData as $row): 
                             $time = strtotime($row['log_date']);
@@ -725,12 +758,22 @@ sort($availableMonths);
                             $sisaAir = 2000 - $row['water_used_ml'];
                             $btr = isset($row['battery_percent']) ? number_format($row['battery_percent'], 1) : 100.0;
                         ?>
-                        <tr class="bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors" data-year="<?= $year ?>" data-month="<?= $month ?>" data-day="<?= $day ?>">
+                        <tr class="bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors" data-id="<?= (int)$row['id'] ?>" data-year="<?= $year ?>" data-month="<?= $month ?>" data-day="<?= $day ?>">
                             <td class="px-3 py-3 whitespace-nowrap font-semibold text-gray-800 dark:text-gray-200"><?= date('d M Y - H:i', $time) ?></td>
                             <td class="px-3 py-3 whitespace-nowrap font-bold text-green-600 dark:text-green-400"><?= $btr ?>%</td>
                             <td class="px-3 py-3 whitespace-nowrap font-bold text-teal-600 dark:text-teal-400"><?= number_format($row['distance_m'], 1) ?>m</td>
                             <td class="px-3 py-3 whitespace-nowrap font-medium"><?= $row['water_used_ml'] ?>ml</td>
                             <td class="px-3 py-3 whitespace-nowrap font-bold text-cyan-600 dark:text-cyan-400"><?= max(0, $sisaAir) ?>ml</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-center">
+                                <?php if (hasPermission('delete_session')): ?>
+                                <button onclick="deleteSession(<?= (int)$row['id'] ?>)"
+                                        class="text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-300 dark:border-rose-700 rounded-md px-2 py-1 text-[10px] font-bold transition-all">
+                                    <i class="fa-solid fa-trash"></i> Hapus
+                                </button>
+                                <?php else: ?>
+                                <span class="text-gray-400 text-[10px] italic">--</span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -738,7 +781,241 @@ sort($availableMonths);
             </table>
         </div>
     </div>
+
+    <!-- ============ PANEL 2: Riwayat Deteksi Hama ============ -->
+    <?php if (hasPermission('view_pest_detection')): ?>
+    <div class="panel flex flex-col p-3 rounded-lg bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-sm">
+        <div class="flex-none flex flex-wrap justify-between items-center gap-2 mb-3">
+            <h2 class="text-sm md:text-base font-bold text-gray-900 dark:text-white">
+                <i class="fa-solid fa-bug mr-2 text-rose-500"></i> Riwayat Deteksi Hama
+            </h2>
+            <div class="flex flex-wrap gap-2 items-center">
+                <input type="text" id="pest-filter-search" oninput="filterPestTable()"
+                       placeholder="Cari nama hama..."
+                       class="text-xs px-2.5 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 w-36">
+
+                <div class="relative inline-block">
+                    <select id="pest-filter-severity" onchange="filterPestTable()" class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 text-gray-700 dark:text-gray-200 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:border-slate-700 appearance-none">
+                        <option value="all">Semua Severity</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
+
+                <div class="relative inline-block">
+                    <select id="pest-filter-day" onchange="filterPestTable()" class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 text-gray-700 dark:text-gray-200 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:border-slate-700 appearance-none">
+                        <option value="all">Semua Hari</option>
+                        <?php for($i=1; $i<=31; $i++): $d = str_pad($i, 2, '0', STR_PAD_LEFT); ?>
+                            <option value="<?= $d ?>"><?= $d ?></option>
+                        <?php endfor; ?>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
+
+                <div class="relative inline-block">
+                    <select id="pest-filter-month" onchange="filterPestTable()" class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 text-gray-700 dark:text-gray-200 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:border-slate-700 appearance-none">
+                        <option value="all">Semua Bln</option>
+                        <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option>
+                        <option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option>
+                        <option value="09">Sep</option><option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
+
+                <div class="relative inline-block">
+                    <select id="pest-filter-year" onchange="filterPestTable()" class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 text-gray-700 dark:text-gray-200 text-xs pl-2.5 pr-7 py-2 rounded-lg border border-gray-300 dark:border-slate-700 appearance-none">
+                        <option value="all">Semua Thn</option>
+                        <?php
+                            $pestYears = [];
+                            foreach($pestData as $pp) {
+                                $yy = date('Y', strtotime($pp['detected_at']));
+                                if(!in_array($yy, $pestYears)) $pestYears[] = $yy;
+                            }
+                            sort($pestYears);
+                            foreach($pestYears as $py): ?>
+                                <option value="<?= $py ?>"><?= $py ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                </div>
+
+                <?php if (hasPermission('delete_pest_detection')): ?>
+                <button onclick="deleteAllPests()" class="text-[10px] font-bold px-2 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-sm">
+                    <i class="fa-solid fa-trash"></i> Hapus Semua
+                </button>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-auto rounded-lg border border-gray-200 dark:border-slate-700 relative shadow-inner bg-[#f8fafc] dark:bg-slate-800/50">
+            <table class="w-full text-xs sm:text-sm text-left text-gray-600 dark:text-gray-300">
+                <thead class="sticky top-0 bg-gray-200 dark:bg-slate-900 text-gray-700 dark:text-gray-200 z-10 shadow-sm uppercase tracking-wider font-semibold text-[10px] sm:text-xs">
+                    <tr>
+                        <th class="px-3 py-3 whitespace-nowrap">Foto</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Waktu</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Hama</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Jenis</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Severity</th>
+                        <th class="px-3 py-3 whitespace-nowrap">Koordinat XYZ</th>
+                        <th class="px-3 py-3 whitespace-nowrap">LU / LS</th>
+                        <th class="px-3 py-3 whitespace-nowrap text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="pest-table-body" class="divide-y divide-gray-200 dark:divide-slate-700/80">
+                    <?php if(empty($pestData)): ?>
+                        <tr><td colspan="8" class="p-6 text-center text-gray-500 font-medium italic">Belum ada deteksi hama. Tekan tombol Semprot di tab Monitoring.</td></tr>
+                    <?php else: ?>
+                        <?php foreach($pestData as $pest):
+                            $sevColor = ['low'=>'bg-green-100 text-green-700','medium'=>'bg-amber-100 text-amber-700','high'=>'bg-rose-100 text-rose-700'][$pest['severity']] ?? '';
+                            $img = $pest['image_url'] ?: 'https://via.placeholder.com/64?text=Pest';
+                            $lat = $pest['latitude']  !== null ? number_format($pest['latitude'],  5) : '-';
+                            $lon = $pest['longitude'] !== null ? number_format($pest['longitude'], 5) : '-';
+                            $mx  = $pest['map_x'] !== null ? number_format($pest['map_x'], 1) : '-';
+                            $my  = $pest['map_y'] !== null ? number_format($pest['map_y'], 1) : '-';
+                            $mz  = $pest['map_z'] !== null ? number_format($pest['map_z'], 1) : '-';
+                            $pTime  = strtotime($pest['detected_at']);
+                            $pYear  = date('Y', $pTime);
+                            $pMonth = date('m', $pTime);
+                            $pDay   = date('d', $pTime);
+                        ?>
+                        <tr class="bg-white hover:bg-rose-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors"
+                            data-id="<?= (int)$pest['id'] ?>"
+                            data-session="<?= (int)($pest['session_id'] ?? 0) ?>"
+                            data-name="<?= htmlspecialchars(strtolower($pest['pest_name'])) ?>"
+                            data-severity="<?= htmlspecialchars($pest['severity']) ?>"
+                            data-year="<?= $pYear ?>" data-month="<?= $pMonth ?>" data-day="<?= $pDay ?>">
+                            <td class="px-3 py-2">
+                                <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($pest['pest_name']) ?>"
+                                     class="w-12 h-12 rounded object-cover border border-gray-200 dark:border-slate-700 cursor-pointer"
+                                     onclick="showPestImage('<?= htmlspecialchars($img) ?>', '<?= htmlspecialchars($pest['pest_name']) ?>')"
+                                     onerror="this.src='https://via.placeholder.com/64?text=Pest'">
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap text-gray-800 dark:text-gray-200"><?= date('d M Y H:i', $pTime) ?></td>
+                            <td class="px-3 py-2 whitespace-nowrap font-bold text-rose-600 dark:text-rose-400"><?= htmlspecialchars($pest['pest_name']) ?></td>
+                            <td class="px-3 py-2 whitespace-nowrap"><?= htmlspecialchars($pest['pest_type'] ?? '-') ?></td>
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase <?= $sevColor ?>"><?= htmlspecialchars($pest['severity']) ?></span>
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap font-mono text-[11px]">X:<?= $mx ?> Y:<?= $my ?> Z:<?= $mz ?></td>
+                            <td class="px-3 py-2 whitespace-nowrap font-mono text-[11px]"><?= $lat ?>, <?= $lon ?></td>
+                            <td class="px-3 py-2 whitespace-nowrap text-center">
+                                <?php if (hasPermission('delete_pest_detection')): ?>
+                                <button onclick="deletePest(<?= (int)$pest['id'] ?>)"
+                                        class="text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-300 dark:border-rose-700 rounded-md px-2 py-1 text-[10px] font-bold transition-all">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <?php else: ?>
+                                <span class="text-gray-400 text-[10px] italic">--</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; // view_pest_detection ?>
+
+    </div>
 </div>
+
+<!-- TAB DEMOGRAFI -->
+<?php if (hasPermission('view_demografi')): ?>
+<div id="tab-demografi" class="tab-content flex-1 flex-col space-y-2 min-h-0 overflow-hidden">
+    <div class="flex-1 flex flex-col lg:flex-row gap-2 min-h-0">
+
+        <!-- Map LU/LS -->
+        <div class="flex-1 panel rounded-lg p-3 bg-white border border-gray-200 shadow-sm flex flex-col min-h-0">
+            <div class="flex-none flex justify-between items-center mb-2">
+                <h2 class="text-sm md:text-base font-bold text-gray-900 dark:text-white">
+                    <i class="fa-solid fa-map-location-dot mr-2 text-indigo-500"></i> Demografi Posisi Robot
+                </h2>
+                <div class="flex gap-2 items-center">
+                    <select id="demo-filter-event" onchange="renderDemografi()" class="text-[10px] bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded px-2 py-1">
+                        <option value="all">Semua Event</option>
+                        <option value="start">Start</option>
+                        <option value="stop">Stop</option>
+                        <option value="respawn">Respawn</option>
+                        <option value="pause">Pause</option>
+                        <option value="manual">Manual</option>
+                    </select>
+                    <button onclick="loadDemografi()" class="text-[10px] font-bold px-2 py-1 rounded bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                        <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 relative bg-[#f8fafc] dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700 shadow-inner w-full h-full min-h-0">
+                <canvas id="demografi-map" class="absolute top-0 left-0 w-full h-full"></canvas>
+            </div>
+            <div class="flex-none mt-2 flex flex-wrap gap-3 text-[10px] text-gray-600 dark:text-gray-400">
+                <span><i class="fa-solid fa-circle text-emerald-500 mr-1"></i> Start</span>
+                <span><i class="fa-solid fa-circle text-rose-500 mr-1"></i> Stop</span>
+                <span><i class="fa-solid fa-circle text-amber-500 mr-1"></i> Respawn</span>
+                <span><i class="fa-solid fa-circle text-blue-500 mr-1"></i> Pause</span>
+                <span><i class="fa-solid fa-circle text-gray-500 mr-1"></i> Manual</span>
+            </div>
+        </div>
+
+        <!-- Tabel Posisi -->
+        <div class="lg:w-[420px] panel rounded-lg p-3 bg-white border border-gray-200 shadow-sm flex flex-col min-h-0">
+            <h3 class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
+                <i class="fa-solid fa-list mr-1"></i> Daftar Posisi Robot
+            </h3>
+            <div class="flex-1 overflow-auto rounded-lg border border-gray-200 dark:border-slate-700 bg-[#f8fafc] dark:bg-slate-800/50">
+                <table class="w-full text-xs text-left text-gray-600 dark:text-gray-300">
+                    <thead class="sticky top-0 bg-gray-200 dark:bg-slate-900 text-gray-700 dark:text-gray-200 z-10 uppercase text-[10px]">
+                        <tr>
+                            <th class="px-2 py-2">Waktu</th>
+                            <th class="px-2 py-2">Event</th>
+                            <th class="px-2 py-2">XYZ</th>
+                            <th class="px-2 py-2">LU/LS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="position-table-body" class="divide-y divide-gray-200 dark:divide-slate-700/80">
+                        <?php if(empty($positionData)): ?>
+                            <tr><td colspan="4" class="p-4 text-center text-gray-500 italic">Belum ada data posisi.</td></tr>
+                        <?php else: ?>
+                            <?php foreach($positionData as $pos):
+                                $evColor = [
+                                    'start' => 'bg-emerald-100 text-emerald-700',
+                                    'stop'  => 'bg-rose-100 text-rose-700',
+                                    'respawn' => 'bg-amber-100 text-amber-700',
+                                    'pause' => 'bg-blue-100 text-blue-700',
+                                    'manual' => 'bg-gray-100 text-gray-700'
+                                ][$pos['event_type']] ?? '';
+                                $lat = $pos['latitude']  !== null ? number_format($pos['latitude'],  4) : '-';
+                                $lon = $pos['longitude'] !== null ? number_format($pos['longitude'], 4) : '-';
+                                $mx  = $pos['map_x'] !== null ? number_format($pos['map_x'], 0) : '-';
+                                $my  = $pos['map_y'] !== null ? number_format($pos['map_y'], 0) : '-';
+                                $mz  = $pos['map_z'] !== null ? number_format($pos['map_z'], 0) : '-';
+                            ?>
+                            <tr class="bg-white hover:bg-indigo-50 dark:bg-[#232836] dark:hover:bg-slate-800">
+                                <td class="px-2 py-2 whitespace-nowrap text-[10px]"><?= date('d/m H:i', strtotime($pos['recorded_at'])) ?></td>
+                                <td class="px-2 py-2 whitespace-nowrap"><span class="px-2 py-0.5 rounded-full text-[9px] font-bold <?= $evColor ?>"><?= htmlspecialchars($pos['event_type']) ?></span></td>
+                                <td class="px-2 py-2 whitespace-nowrap font-mono text-[10px]"><?= "$mx,$my,$mz" ?></td>
+                                <td class="px-2 py-2 whitespace-nowrap font-mono text-[10px]"><?= "$lat / $lon" ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+<?php endif; // view_demografi ?>
 
 <div id="tab-laporan" class="tab-content flex-1 flex-col items-center justify-center min-h-0 overflow-y-auto">
     <div class="panel w-full max-w-sm p-4 rounded-lg bg-white border border-gray-200 shadow-sm text-center">
@@ -1336,7 +1613,7 @@ sort($availableMonths);
 
     // --- TAB & UI LOGIC ---
     function switchTab(tabId) {
-        ['monitoring', 'riwayat', 'laporan', 'sensors', 'logbook', 'admin'].forEach(id => {
+        ['monitoring', 'riwayat', 'demografi', 'laporan', 'sensors', 'logbook', 'admin'].forEach(id => {
             const tabEl = document.getElementById('tab-' + id);
             if (tabEl) tabEl.classList.remove('active');
             let btn = document.getElementById('btn-tab-' + id);
@@ -1444,13 +1721,8 @@ sort($availableMonths);
     if (robotData.path.length > 0) { let lp = robotData.path[robotData.path.length-1]; rx = lp.x; ry = lp.y; } else { robotData.path.push({x: rx, y: ry}); }
 
     // --- OBSTACLE SYSTEM ---
-    let obstacles = [
-        { x: 300, y: 150, width: 80, height: 80, type: 'wall' },
-        { x: 500, y: 250, width: 60, height: 100, type: 'wall' },
-        { x: 200, y: 300, width: 100, height: 50, type: 'wall' },
-        { x: 600, y: 100, width: 70, height: 70, type: 'wall' },
-        { x: 450, y: 400, width: 90, height: 60, type: 'wall' }
-    ];
+    // Mulai dengan map kosong; user menambah obstacle manual via tombol "Add Obstacle".
+    let obstacles = [];
 
     // Fungsi untuk menambah obstacle baru (bisa dipanggil dari Firebase atau manual)
     function addObstacle(x, y, width, height) {
@@ -1827,11 +2099,321 @@ sort($availableMonths);
     }
 
     function sprayWater() {
-        if(robotData.waterRemaining >= 50) {
-            robotData.waterUsed += 50; robotData.waterRemaining -= 50; robotData.sprayPoints.push({x: rx, y: ry});
-            updateUI(); markUnsaved(); Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Air disemprotkan.', showConfirmButton: false, timer: 1000, heightAuto: false });
-        } else Swal.fire({ icon: 'error', title: 'Tangki Kosong!', heightAuto: false });
+        if(robotData.waterRemaining < 50) {
+            Swal.fire({ icon: 'error', title: 'Tangki Kosong!', heightAuto: false });
+            return;
+        }
+        robotData.waterUsed += 50;
+        robotData.waterRemaining -= 50;
+        robotData.sprayPoints.push({x: rx, y: ry});
+        updateUI();
+        markUnsaved();
+
+        // === Random deteksi hama + kirim ke pest_api.php ===
+        const pest = pickRandomPest();
+        const lat  = (typeof lastLat !== 'undefined' && lastLat) ? lastLat : (-6.2 + (Math.random()-0.5)*0.01);
+        const lon  = (typeof lastLng !== 'undefined' && lastLng) ? lastLng : (106.81666 + (Math.random()-0.5)*0.01);
+
+        const payload = {
+            session_id: robotData.id || null,
+            pest_name : pest.name,
+            pest_type : pest.type,
+            severity  : pest.severity,
+            image_url : pest.image,
+            map_x: rx, map_y: ry, map_z: 0,
+            latitude: lat, longitude: lon,
+            notes: 'Auto-detected on spray'
+        };
+
+        fetch('pest_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(r => r.json()).then(d => {
+            if (d.status === 'success') {
+                prependPestRow({ ...payload, id: d.id, detected_at: new Date().toISOString() });
+            }
+        }).catch(()=>{});
+
+        Swal.fire({
+            toast: true, position: 'top-end',
+            icon: 'info',
+            title: `Hama terdeteksi: ${pest.name}`,
+            showConfirmButton: false, timer: 1400, heightAuto: false
+        });
     }
+
+    // ========================================================
+    // RANDOM PEST DATA
+    // Foto dari Wikimedia Commons (URL stabil, sesuai spesies).
+    // Pakai thumbnail width 330px = whitelist resmi Wikimedia
+    // (sama dengan thumbnail default REST API Wikipedia).
+    // ========================================================
+    const PEST_CATALOG = [
+        // Nilaparvata lugens - hama padi nomor 1 di Indonesia
+        { name: 'Wereng Coklat',     type: 'Serangga (Hemiptera)', severity: 'high',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Nilaparvata_lugens_439632934.jpg/330px-Nilaparvata_lugens_439632934.jpg' },
+        // Spodoptera litura - tobacco cutworm / ulat grayak
+        { name: 'Ulat Grayak',       type: 'Larva Ngengat (Lepidoptera)', severity: 'high',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Spodoptera_litura_%2824045593674%29.jpg/330px-Spodoptera_litura_%2824045593674%29.jpg' },
+        // Belalang (Caelifera)
+        { name: 'Belalang',          type: 'Serangga (Orthoptera)', severity: 'medium',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/American_Bird_Grasshopper.jpg/330px-American_Bird_Grasshopper.jpg' },
+        // Tetranychus urticae - two-spotted spider mite
+        { name: 'Tungau Laba-laba',  type: 'Tungau (Acari)', severity: 'medium',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Tetranychus_urticae_%284883560779%29.jpg/330px-Tetranychus_urticae_%284883560779%29.jpg' },
+        // Aphidoidea - kutu daun
+        { name: 'Kutu Daun (Aphid)', type: 'Serangga (Hemiptera)', severity: 'low',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Aphids_September_2008-1.jpg/330px-Aphids_September_2008-1.jpg' },
+        // Scirpophaga incertulas - penggerek batang padi kuning
+        { name: 'Penggerek Batang Padi', type: 'Ngengat (Lepidoptera)', severity: 'high',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Scirpophaga_incertulas_female_moth.png/330px-Scirpophaga_incertulas_female_moth.png' },
+        // Leptocorisa oratoria - rice ear bug / walang sangit
+        { name: 'Walang Sangit',     type: 'Serangga (Hemiptera)', severity: 'medium',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Alydidae_at_Kadavoor.jpg/330px-Alydidae_at_Kadavoor.jpg' },
+        // Pucciniales - jamur karat
+        { name: 'Jamur Karat',       type: 'Jamur (Pucciniales)', severity: 'medium',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Bruine_roest_op_tarwe_%28Puccinia_recondita_f.sp._tritici_on_Triticum_aestivum%29.jpg/330px-Bruine_roest_op_tarwe_%28Puccinia_recondita_f.sp._tritici_on_Triticum_aestivum%29.jpg' },
+        // Cercospora capsici - leaf spot disease
+        { name: 'Bercak Daun',       type: 'Jamur (Cercospora)', severity: 'low',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/%27Cercospora_capsici.jpg/330px-%27Cercospora_capsici.jpg' },
+        // Land slug - siput telanjang
+        { name: 'Siput Telanjang',   type: 'Moluska (Gastropoda)', severity: 'low',
+          image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Slugs_1896.png/330px-Slugs_1896.png' }
+    ];
+    function pickRandomPest() {
+        return PEST_CATALOG[Math.floor(Math.random() * PEST_CATALOG.length)];
+    }
+
+    // Tambah baris baru ke tabel "Riwayat Deteksi Hama" tanpa reload
+    function prependPestRow(p) {
+        const tbody = document.getElementById('pest-table-body');
+        if (!tbody) return;
+        // hapus baris empty-state bila ada
+        const emptyTd = tbody.querySelector('td[colspan="8"]');
+        if (emptyTd) tbody.innerHTML = '';
+
+        const sevClass = {
+            low:    'bg-green-100 text-green-700',
+            medium: 'bg-amber-100 text-amber-700',
+            high:   'bg-rose-100 text-rose-700'
+        }[p.severity] || '';
+
+        const time = new Date(p.detected_at || Date.now());
+        const yyyy = time.getFullYear().toString();
+        const mm   = String(time.getMonth()+1).padStart(2,'0');
+        const dd   = String(time.getDate()).padStart(2,'0');
+
+        const tr = document.createElement('tr');
+        tr.className = 'bg-white hover:bg-rose-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors';
+        tr.setAttribute('data-id', p.id || '');
+        tr.setAttribute('data-session', p.session_id || 0);
+        tr.setAttribute('data-name', (p.pest_name || '').toLowerCase());
+        tr.setAttribute('data-severity', p.severity || '');
+        tr.setAttribute('data-year', yyyy);
+        tr.setAttribute('data-month', mm);
+        tr.setAttribute('data-day', dd);
+
+        tr.innerHTML = `
+            <td class="px-3 py-2">
+              <img src="${p.image_url}" class="w-12 h-12 rounded object-cover border border-gray-200 dark:border-slate-700 cursor-pointer"
+                   onclick="showPestImage('${p.image_url}','${p.pest_name}')"
+                   onerror="this.src='https://via.placeholder.com/64?text=Pest'">
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap text-gray-800 dark:text-gray-200">${time.toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
+            <td class="px-3 py-2 whitespace-nowrap font-bold text-rose-600 dark:text-rose-400">${p.pest_name}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${p.pest_type ?? '-'}</td>
+            <td class="px-3 py-2 whitespace-nowrap"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${sevClass}">${p.severity}</span></td>
+            <td class="px-3 py-2 whitespace-nowrap font-mono text-[11px]">X:${(+p.map_x).toFixed(1)} Y:${(+p.map_y).toFixed(1)} Z:${(+p.map_z||0).toFixed(1)}</td>
+            <td class="px-3 py-2 whitespace-nowrap font-mono text-[11px]">${(+p.latitude).toFixed(5)}, ${(+p.longitude).toFixed(5)}</td>
+            <td class="px-3 py-2 whitespace-nowrap text-center">
+                ${PERMS.delete_pest_detection
+                    ? `<button onclick="deletePest(${p.id})"
+                              class="text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-300 dark:border-rose-700 rounded-md px-2 py-1 text-[10px] font-bold transition-all">
+                          <i class="fa-solid fa-trash"></i>
+                       </button>`
+                    : `<span class="text-gray-400 text-[10px] italic">--</span>`}
+            </td>
+        `;
+        tbody.insertBefore(tr, tbody.firstChild);
+
+        // Apply filter aktif (kalau filter sedang aktif)
+        if (typeof filterPestTable === 'function') filterPestTable();
+    }
+
+    // Modal sederhana untuk preview foto hama
+    function showPestImage(url, title) {
+        Swal.fire({
+            title: title || 'Foto Hama',
+            imageUrl: url,
+            imageAlt: title,
+            heightAuto: false,
+            showConfirmButton: false,
+            showCloseButton: true
+        });
+    }
+
+    // ========================================================
+    // POSITION TRACKING -> position_api.php (untuk tab Demografi)
+    // ========================================================
+    function postRobotPosition(eventType) {
+        // Pakai GPS bila online, jika tidak fallback random kecil di sekitar
+        // koordinat dummy agar tab Demografi tetap punya titik di peta.
+        const lat = (typeof lastLat !== 'undefined' && lastLat)
+                    ? lastLat
+                    : (-6.2 + (Math.random()-0.5)*0.005);
+        const lon = (typeof lastLng !== 'undefined' && lastLng)
+                    ? lastLng
+                    : (106.81666 + (Math.random()-0.5)*0.005);
+
+        return fetch('position_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: robotData.id || null,
+                event_type: eventType,
+                map_x: rx, map_y: ry, map_z: 0,
+                latitude: lat, longitude: lon,
+                battery_percent: robotData.battery
+            })
+        }).catch(()=>{});
+    }
+
+    // ========================================================
+    // TAB DEMOGRAFI - render titik posisi robot di canvas
+    // ========================================================
+    let demografiPositions = <?= json_encode($positionData) ?>;
+
+    // ========================================================
+    // RBAC FLAGS (dari server -> JS)
+    // ========================================================
+    const PERMS = {
+        delete_pest_detection: <?= hasPermission('delete_pest_detection') ? 'true' : 'false' ?>,
+        delete_session       : <?= hasPermission('delete_session')        ? 'true' : 'false' ?>,
+        view_demografi       : <?= hasPermission('view_demografi')        ? 'true' : 'false' ?>,
+        view_pest_detection  : <?= hasPermission('view_pest_detection')   ? 'true' : 'false' ?>
+    };
+
+    function loadDemografi() {
+        fetch('position_api.php?all=1')
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') {
+                    demografiPositions = d.data || [];
+                    renderDemografi();
+                }
+            }).catch(()=>{ renderDemografi(); });
+    }
+
+    function renderDemografi() {
+        const canvas = document.getElementById('demografi-map');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        // Resize ke ukuran container
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = rect.width;
+        canvas.height = rect.height;
+
+        const isDark = document.documentElement.classList.contains('dark');
+        ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Grid
+        ctx.strokeStyle = isDark ? 'rgba(148,163,184,0.15)' : 'rgba(100,116,139,0.15)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= canvas.width;  x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+        for (let y = 0; y <= canvas.height; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+
+        // Filter event
+        const filterEv = document.getElementById('demo-filter-event')?.value || 'all';
+        let pts = demografiPositions.filter(p => p.latitude !== null && p.longitude !== null);
+        if (filterEv !== 'all') pts = pts.filter(p => p.event_type === filterEv);
+
+        if (pts.length === 0) {
+            ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+            ctx.font = 'bold 14px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Belum ada data posisi robot.', canvas.width/2, canvas.height/2);
+            return;
+        }
+
+        // Auto-bounds dari LU/LS
+        let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+        pts.forEach(p => {
+            const la = parseFloat(p.latitude), lo = parseFloat(p.longitude);
+            if (la < minLat) minLat = la;
+            if (la > maxLat) maxLat = la;
+            if (lo < minLon) minLon = lo;
+            if (lo > maxLon) maxLon = lo;
+        });
+        // Padding agar titik tidak menempel di tepi
+        const padLat = Math.max((maxLat-minLat)*0.15, 0.0005);
+        const padLon = Math.max((maxLon-minLon)*0.15, 0.0005);
+        minLat -= padLat; maxLat += padLat;
+        minLon -= padLon; maxLon += padLon;
+
+        const mapPoint = (lat, lon) => ({
+            x: ((lon - minLon) / (maxLon - minLon)) * canvas.width,
+            // y dibalik: lat besar = atas
+            y: canvas.height - ((lat - minLat) / (maxLat - minLat)) * canvas.height
+        });
+
+        // Garis penghubung (urut waktu lama -> baru)
+        const sorted = [...pts].sort((a,b) => new Date(a.recorded_at) - new Date(b.recorded_at));
+        if (sorted.length > 1) {
+            ctx.beginPath();
+            const first = mapPoint(parseFloat(sorted[0].latitude), parseFloat(sorted[0].longitude));
+            ctx.moveTo(first.x, first.y);
+            for (let i = 1; i < sorted.length; i++) {
+                const m = mapPoint(parseFloat(sorted[i].latitude), parseFloat(sorted[i].longitude));
+                ctx.lineTo(m.x, m.y);
+            }
+            ctx.strokeStyle = 'rgba(99,102,241,0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4,4]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Titik per event
+        const colorMap = {
+            start:   '#10b981',
+            stop:    '#f43f5e',
+            respawn: '#f59e0b',
+            pause:   '#3b82f6',
+            manual:  '#64748b'
+        };
+        pts.forEach(p => {
+            const m = mapPoint(parseFloat(p.latitude), parseFloat(p.longitude));
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, 7, 0, Math.PI*2);
+            ctx.fillStyle = colorMap[p.event_type] || '#64748b';
+            ctx.fill();
+            ctx.strokeStyle = isDark ? '#e2e8f0' : '#1e293b';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        });
+
+        // Label bounding (LU/LS)
+        ctx.fillStyle = isDark ? '#94a3b8' : '#475569';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(`LU max: ${maxLat.toFixed(5)}`, 8, 14);
+        ctx.fillText(`LU min: ${minLat.toFixed(5)}`, 8, canvas.height - 18);
+        ctx.textAlign = 'right';
+        ctx.fillText(`LS max: ${maxLon.toFixed(5)}`, canvas.width - 8, 14);
+        ctx.fillText(`LS min: ${minLon.toFixed(5)}`, canvas.width - 8, canvas.height - 18);
+    }
+
+    // Re-render ketika user pertama kali masuk tab Demografi
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('#btn-tab-demografi');
+        if (btn) setTimeout(loadDemografi, 50);
+    });
+    window.addEventListener('resize', () => {
+        if (document.getElementById('tab-demografi')?.classList.contains('active')) renderDemografi();
+    });
 
     // UPDATE PENTING: Update fungsi simpan agar bisa menangani pembuatan sesi baru
     function saveData(isAutoPrompt = false) {
@@ -1856,8 +2438,12 @@ sort($availableMonths);
         .then(data => {
             if(data.status === 'success') {
                 saveCount++; // Tambah jumlah simpanan
-                markSaved(); 
-                
+                markSaved();
+
+                // ID sesi baru dari server (untuk tombol Hapus)
+                const newId = data.new_id || data.id || 0;
+                if (newId) robotData.id = newId;
+
                 // Generate waktu saat ini untuk tabel riwayat
                 let now = new Date();
                 let y = now.getFullYear();
@@ -1869,6 +2455,7 @@ sort($availableMonths);
                 // Tambahkan data ke tabel riwayat secara instan (tanpa reload)
                 let tr = document.createElement('tr');
                 tr.className = "bg-white hover:bg-teal-50 dark:bg-[#232836] dark:hover:bg-slate-800 transition-colors";
+                tr.setAttribute('data-id', newId);
                 tr.setAttribute('data-year', y);
                 tr.setAttribute('data-month', m);
                 tr.setAttribute('data-day', d);
@@ -1878,11 +2465,19 @@ sort($availableMonths);
                     <td class="px-3 py-3 whitespace-nowrap font-bold text-teal-600 dark:text-teal-400">${robotData.distance.toFixed(1)}m</td>
                     <td class="px-3 py-3 whitespace-nowrap font-medium">${robotData.waterUsed}ml</td>
                     <td class="px-3 py-3 whitespace-nowrap font-bold text-cyan-600 dark:text-cyan-400">${robotData.waterRemaining}ml</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-center">
+                        ${PERMS.delete_session
+                            ? `<button onclick="deleteSession(${newId})"
+                                      class="text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-300 dark:border-rose-700 rounded-md px-2 py-1 text-[10px] font-bold transition-all">
+                                  <i class="fa-solid fa-trash"></i> Hapus
+                               </button>`
+                            : `<span class="text-gray-400 text-[10px] italic">--</span>`}
+                    </td>
                 `;
                 let tbody = document.getElementById('history-table-body');
                 
-                // Hapus teks "Belum ada riwayat terekam" jika itu baris pertama
-                if (tbody.querySelector('td[colspan="5"]')) tbody.innerHTML = ''; 
+                // Hapus teks "Belum ada riwayat terekam" jika itu baris pertama (colspan 5 lama / 6 baru)
+                if (tbody.querySelector('td[colspan="5"], td[colspan="6"]')) tbody.innerHTML = '';
                 tbody.insertBefore(tr, tbody.firstChild);
 
                 if (isAutoPrompt) {
@@ -1909,6 +2504,11 @@ sort($availableMonths);
             heightAuto: false // FIX LAYOUT
         }).then(r => {
             if (r.isConfirmed) {
+                // Catat posisi STOP (sebelum respawn) bila pernah bergerak
+                if (robotData.path && robotData.path.length > 1) {
+                    postRobotPosition('stop');
+                }
+
                 robotData.id = 0; 
                 robotData.distance = 0; 
                 robotData.waterUsed = 0; 
@@ -1921,6 +2521,9 @@ sort($availableMonths);
                 
                 updateUI(); 
                 markUnsaved();
+
+                // Catat posisi RESPAWN robot (titik awal sesi baru)
+                postRobotPosition('respawn');
             }
         });
     }
@@ -1955,6 +2558,129 @@ sort($availableMonths);
             } else {
                 row.style.display = 'none';
             }
+        });
+    }
+
+    // ========================================================
+    // FILTER + DELETE - Tabel Riwayat Deteksi Hama
+    // ========================================================
+    function filterPestTable() {
+        const q  = (document.getElementById('pest-filter-search')?.value || '').trim().toLowerCase();
+        const sv = document.getElementById('pest-filter-severity')?.value || 'all';
+        const sd = document.getElementById('pest-filter-day')?.value      || 'all';
+        const sm = document.getElementById('pest-filter-month')?.value    || 'all';
+        const sy = document.getElementById('pest-filter-year')?.value     || 'all';
+
+        document.querySelectorAll('#pest-table-body tr[data-id]').forEach(row => {
+            const name  = row.getAttribute('data-name')     || '';
+            const sev   = row.getAttribute('data-severity') || '';
+            const ry    = row.getAttribute('data-year')     || '';
+            const rm    = row.getAttribute('data-month')    || '';
+            const rd    = row.getAttribute('data-day')      || '';
+
+            const matchSearch   = !q || name.includes(q);
+            const matchSeverity = (sv === 'all' || sv === sev);
+            const matchYear     = (sy === 'all' || sy === ry);
+            const matchMonth    = (sm === 'all' || sm === rm);
+            const matchDay      = (sd === 'all' || sd === rd);
+
+            row.style.display = (matchSearch && matchSeverity && matchYear && matchMonth && matchDay) ? '' : 'none';
+        });
+    }
+
+    function deletePest(id) {
+        if (!id) return;
+        Swal.fire({
+            icon: 'warning',
+            title: 'Hapus deteksi ini?',
+            text: 'Data tidak bisa dikembalikan.',
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            confirmButtonColor: '#e11d48',
+            heightAuto: false
+        }).then(r => {
+            if (!r.isConfirmed) return;
+            fetch('pest_api.php?id=' + id, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(d => {
+                    if (d.status === 'success') {
+                        const row = document.querySelector(`#pest-table-body tr[data-id="${id}"]`);
+                        if (row) row.remove();
+                        if (!document.querySelector('#pest-table-body tr[data-id]')) {
+                            document.getElementById('pest-table-body').innerHTML =
+                                '<tr><td colspan="8" class="p-6 text-center text-gray-500 italic">Belum ada deteksi hama.</td></tr>';
+                        }
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Terhapus.', showConfirmButton: false, timer: 1200, heightAuto: false });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Gagal hapus', text: d.message || '', heightAuto: false });
+                    }
+                }).catch(() => Swal.fire({ icon: 'error', title: 'Gagal koneksi', heightAuto: false }));
+        });
+    }
+
+    function deleteAllPests() {
+        const visibleRows = Array.from(document.querySelectorAll('#pest-table-body tr[data-id]'))
+                                 .filter(r => r.style.display !== 'none');
+        if (visibleRows.length === 0) {
+            Swal.fire({ icon: 'info', title: 'Tidak ada data', heightAuto: false });
+            return;
+        }
+        Swal.fire({
+            icon: 'warning',
+            title: `Hapus ${visibleRows.length} deteksi yang ditampilkan?`,
+            text: 'Filter aktif akan menentukan baris mana yang dihapus.',
+            showCancelButton: true,
+            confirmButtonText: 'Hapus Semua',
+            confirmButtonColor: '#e11d48',
+            heightAuto: false
+        }).then(r => {
+            if (!r.isConfirmed) return;
+            const ids = visibleRows.map(r => r.getAttribute('data-id'));
+            Promise.all(ids.map(id => fetch('pest_api.php?id=' + id, { method: 'DELETE' })))
+                .then(() => {
+                    visibleRows.forEach(r => r.remove());
+                    if (!document.querySelector('#pest-table-body tr[data-id]')) {
+                        document.getElementById('pest-table-body').innerHTML =
+                            '<tr><td colspan="8" class="p-6 text-center text-gray-500 italic">Belum ada deteksi hama.</td></tr>';
+                    }
+                    Swal.fire({ icon: 'success', title: `${ids.length} deteksi terhapus`, timer: 1500, showConfirmButton: false, heightAuto: false });
+                });
+        });
+    }
+
+    // ========================================================
+    // DELETE - Tabel Riwayat Sesi (daily_logs)
+    // ========================================================
+    function deleteSession(id) {
+        if (!id) return;
+        Swal.fire({
+            icon: 'warning',
+            title: 'Hapus sesi ini?',
+            text: 'Deteksi hama dan posisi terkait juga akan ikut terhapus.',
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            confirmButtonColor: '#e11d48',
+            heightAuto: false
+        }).then(r => {
+            if (!r.isConfirmed) return;
+            fetch('api.php?id=' + id, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(d => {
+                    if (d.status === 'success') {
+                        // Hapus baris di tabel sesi
+                        const row = document.querySelector(`#history-table-body tr[data-id="${id}"]`);
+                        if (row) row.remove();
+                        if (!document.querySelector('#history-table-body tr[data-id]')) {
+                            document.getElementById('history-table-body').innerHTML =
+                                '<tr><td colspan="6" class="p-6 text-center text-gray-500 italic">Belum ada riwayat terekam.</td></tr>';
+                        }
+                        // Hapus juga baris-baris hama yang punya session_id ini (CASCADE di server, sinkronkan UI)
+                        document.querySelectorAll(`#pest-table-body tr[data-session="${id}"]`).forEach(r => r.remove());
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Sesi terhapus.', showConfirmButton: false, timer: 1200, heightAuto: false });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Gagal hapus', text: d.message || '', heightAuto: false });
+                    }
+                }).catch(() => Swal.fire({ icon: 'error', title: 'Gagal koneksi', heightAuto: false }));
         });
     }
 
@@ -2749,4 +3475,4 @@ sort($availableMonths);
     <?php endif; ?>
 </script>
 </body>
-</html> 
+</html>

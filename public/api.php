@@ -4,9 +4,50 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
-require 'db.php';
+require __DIR__ . '/../src/Config/db.php';
+require __DIR__ . '/../src/Auth/auth.php';
 
 try {
+    $method = $_SERVER['REQUEST_METHOD'];
+
+    // ==========================================
+    // DELETE /api.php?id=X  -> Hapus 1 sesi (CASCADE pest_detections + robot_positions)
+    // DELETE /api.php?all=1 -> Hapus seluruh riwayat sesi
+    // ==========================================
+    if ($method === 'DELETE') {
+        if (!isLoggedIn()) {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            exit;
+        }
+        if (!hasPermission('delete_session')) {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'Forbidden: butuh permission delete_session']);
+            exit;
+        }
+
+        if (isset($_GET['all']) && $_GET['all'] == 1) {
+            if (!$conn->query("DELETE FROM daily_logs")) {
+                throw new Exception("Gagal hapus semua: " . $conn->error);
+            }
+            echo json_encode(['status' => 'success', 'deleted' => 'all']);
+            exit;
+        }
+
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id <= 0) throw new Exception('id tidak valid.');
+        $stmt = $conn->prepare("DELETE FROM daily_logs WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        if (!$stmt->execute()) throw new Exception("Gagal hapus: " . $stmt->error);
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+        echo json_encode(['status' => 'success', 'deleted' => $affected]);
+        exit;
+    }
+
+    // ==========================================
+    // POST /api.php  -> INSERT/UPDATE sesi (existing)
+    // ==========================================
     $input_data = file_get_contents("php://input");
     $data = json_decode($input_data, true);
 

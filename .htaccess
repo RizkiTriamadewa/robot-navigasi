@@ -1,0 +1,35 @@
+# ============================================================
+# Front Controller - rewrite semua request ke folder public/
+# ============================================================
+# Hasil:
+#   http://localhost/robot_dashboard/robot-navigasi/             -> public/index.php
+#   http://localhost/robot_dashboard/robot-navigasi/login.php    -> public/login.php
+#   http://localhost/robot_dashboard/robot-navigasi/api.php      -> public/api.php
+#
+# URL bersih (bagian "/public" tidak perlu diketik user).
+# ============================================================
+
+# Matikan directory listing supaya kalau rewrite gagal user dapat 403, bukan listing.
+Options -Indexes
+
+# Default file untuk root: arahkan ke public/index.php
+DirectoryIndex public/index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1) Untuk request root persis (kosong), arahkan ke public/index.php
+    RewriteRule ^$ public/index.php [L]
+
+    # 2) Untuk request lain, kalau bukan file/folder yang nyata di root,
+    #    rewrite ke public/<path>
+    RewriteCond %{REQUEST_URI} !^.*/public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.+)$ public/$1 [L,QSA]
+</IfModule>
+
+# Tutup akses ke file sensitif di root
+<FilesMatch "^(\.gitignore|\.gitattributes|README\.md|SUMMARY\.md|CARA_PAKAI\.md|db\.sql)$">
+    Require all denied
+</FilesMatch>

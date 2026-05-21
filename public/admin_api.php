@@ -1,6 +1,6 @@
 <?php
-require 'db.php';
-require 'auth.php';
+require __DIR__ . '/../src/Config/db.php';
+require __DIR__ . '/../src/Auth/auth.php';
 
 // Require login and admin permission
 requireLogin();
