@@ -125,7 +125,7 @@ docs/
 <!-- Ambil dari: http://localhost/robot_dashboard/robot-navigasi/public/login.php -->
 <!-- Tunjukin: video background full-screen, card login transparan, logo NAV-X -->
 
-![Login Page](docs/screenshots/01-login.png)
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/13ab0fd4-d7f3-422f-aaa3-568c21f7e6a8" />
 
 ---
 
@@ -135,7 +135,7 @@ docs/
 <!-- Tunjukin: minimap robot + kamera FPV + indikator battery di header -->
 <!-- Login sebagai admin/admin123 dulu biar semua widget muncul -->
 
-![Dashboard Monitoring](docs/screenshots/02-dashboard-monitoring.png)
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/e112a994-0a5c-4013-b44a-966231543bed" />
 
 ---
 
@@ -145,22 +145,22 @@ docs/
 <!-- Tab "Sensors" - tunjukin grid 11 sensor: battery, GPS, liquid level, motion, position XYZ, speed, mode, internet, dll -->
 <!-- Bisa dipecah jadi beberapa screenshot kalau panjang (3a, 3b, 3c) -->
 
-![Indikator Sensor](docs/screenshots/03-sensor-indikator.png)
+<img width="1919" height="158" alt="image" src="https://github.com/user-attachments/assets/1746e705-11ae-4b8a-9b3c-f4ba794cd7bd" />
 
 #### 3a. Detail Battery & Voltage
 <!-- Close-up widget battery saja -->
 
-![Battery Widget](docs/screenshots/03a-battery.png)
+<img width="481" height="86" alt="image" src="https://github.com/user-attachments/assets/668f0e99-5253-4712-94e8-711840f3bcff" />
 
 #### 3b. GPS Map Tracking
 <!-- Close-up peta GPS dengan path tracking -->
 
-![GPS Tracking](docs/screenshots/03b-gps.png)
+<img width="963" height="919" alt="image" src="https://github.com/user-attachments/assets/a18e9254-5e7b-400e-9e67-50130708231c" />
 
 #### 3c. Liquid Level & Motion
 <!-- Close-up tank level + status moving/idle -->
 
-![Liquid & Motion](docs/screenshots/03c-liquid-motion.png)
+<img width="483" height="179" alt="image" src="https://github.com/user-attachments/assets/7a1eed16-39af-4774-82bd-b0c0604b8ec4" />
 
 ---
 
@@ -170,7 +170,7 @@ docs/
 <!-- Tunjukin: kotak merah obstacle + warning ring kuning/merah saat robot dekat -->
 <!-- Drag-drop obstacle editor (kalau bisa, screenshot saat obstacle di-drag) -->
 
-![Minimap with Obstacles](docs/screenshots/04-minimap-obstacle.png)
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/96f4fc9e-b0ac-4250-9619-20f758c78003" />
 
 ---
 
@@ -180,17 +180,18 @@ docs/
 <!-- Tab "Riwayat" -> sub-tab Pest Detection -->
 <!-- Tunjukin: tabel dengan foto hama Wikimedia, koordinat XYZ, LU/LS, severity badge -->
 
-![Pest Detection Table](docs/screenshots/05-pest-detection.png)
+<img width="1919" height="452" alt="image" src="https://github.com/user-attachments/assets/69d76e0d-ecf3-4c47-b5ba-8066df904b00" />
 
 #### 5a. Filter & Search Pest
 <!-- Tunjukin filter aktif: search by nama, severity dropdown, date range -->
 
-![Pest Filter](docs/screenshots/05a-pest-filter.png)
+<img width="1919" height="187" alt="image" src="https://github.com/user-attachments/assets/c2a2fb3b-61f2-40b8-9e37-b284c31e485c" />
 
 #### 5b. Tombol Semprot (Trigger Auto-Save)
 <!-- Tunjukin tombol Semprot di tab Monitoring + toast confirmation setelah klik -->
 
-![Tombol Semprot](docs/screenshots/05b-semprot-action.png)
+<img width="961" height="464" alt="image" src="https://github.com/user-attachments/assets/7cff118e-4a39-4eab-844d-f188b14d3a73" />
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/5ea88357-d0d9-4625-aa39-c997401e086e" />
 
 ---
 
@@ -200,12 +201,12 @@ docs/
 <!-- Tab "Demografi" - canvas map dengan titik-titik LU/LS, dashed line urut waktu -->
 <!-- Color-coded marker per event_type -->
 
-![Demografi Map](docs/screenshots/06-demografi-map.png)
+<img width="1918" height="1079" alt="image" src="https://github.com/user-attachments/assets/a9c77d27-ccf3-4a5f-b265-40e05f9e402e" />
 
 #### 6a. Filter Per Event Type
 <!-- Dropdown filter: start / stop / respawn / pause / manual -->
 
-![Demografi Filter](docs/screenshots/06a-demografi-filter.png)
+<img width="1489" height="1000" alt="image" src="https://github.com/user-attachments/assets/10677256-dc4c-49a2-959b-71852c9e828f" />
 
 ---
 
@@ -214,7 +215,7 @@ docs/
 <!-- ini bagian screenshot logbook -->
 <!-- Tab "Logbook" - tabel realtime log aktivitas robot -->
 
-![Activity Logbook](docs/screenshots/07-logbook.png)
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/22c0f4ee-0106-49cf-b57e-6eb12b1634f9" />
 
 ---
 
@@ -224,7 +225,7 @@ docs/
 <!-- Tab "Laporan" - chart + tombol export PDF/CSV -->
 <!-- Bisa screenshot file PDF hasilnya juga sebagai bukti -->
 
-![Reports & Charts](docs/screenshots/08-laporan.png)
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/3b1a301e-cd70-4377-8634-191437075d14" />
 
 ---
 
@@ -234,7 +235,7 @@ docs/
 <!-- Tab "Admin" -> sub-tab Users -->
 <!-- Tunjukin: list user, role badge, tombol edit/delete -->
 
-![User Management](docs/screenshots/09-admin-users.png)
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/1f064ca6-dba5-4645-a893-e0d9200cae3a" />
 
 ---
 
@@ -245,12 +246,14 @@ docs/
 <!-- Tunjukin: tabel checkbox role x permission (19 permission) -->
 <!-- Highlight: row "Super Admin" yang locked + custom role baru -->
 
-![Permission Matrix](docs/screenshots/10-permission-matrix.png)
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/1eee2436-dd3e-41dd-9a61-7a0828f25983" />
+
 
 #### 10a. Create Custom Role
 <!-- Modal/form bikin role baru -->
 
-![Create Role](docs/screenshots/10a-create-role.png)
+<img width="1919" height="519" alt="image" src="https://github.com/user-attachments/assets/b4bc739d-da8c-490d-bc41-c5f361007104" />
+
 
 ---
 
@@ -260,49 +263,7 @@ docs/
 <!-- Tab "Admin" -> sub-tab Audit Logs -->
 <!-- Tunjukin: history login, perubahan role, delete action, dengan timestamp + IP -->
 
-![Audit Logs](docs/screenshots/11-audit-log.png)
-
----
-
-### 12. Database Schema (ERD / phpMyAdmin)
-
-<!-- ini bagian screenshot ERD database -->
-<!-- Bisa pakai screenshot phpMyAdmin (Designer view) atau dbdiagram.io -->
-<!-- Tunjukin relasi: users -> roles -> role_permissions, daily_logs -> pest_detections (ON DELETE CASCADE) -->
-
-![Database ERD](docs/screenshots/12-database-erd.png)
-
----
-
-### 13. Demo Video / GIF (Opsional tapi Recommended)
-
-<!-- ini bagian demo gif/video -->
-<!-- Rekam pakai ScreenToGif / OBS, max 10MB biar bisa langsung di-render GitHub -->
-<!-- Format: GIF atau MP4 (MP4 perlu di-upload ke GitHub Issue dulu, copy URL-nya) -->
-
-<!-- Contoh untuk GIF: -->
-![Demo Flow](docs/screenshots/13-demo-flow.gif)
-
-<!-- Contoh untuk MP4 (upload via GitHub Issues -> drag file -> copy embed URL): -->
-<!-- https://github.com/user-attachments/assets/xxxx-xxxx-xxxx -->
-
----
-
-### 14. Mobile / Responsive View (Opsional)
-
-<!-- ini bagian screenshot tampilan mobile -->
-<!-- Pakai Chrome DevTools (F12) -> Toggle device toolbar -> iPhone 12 / Pixel 5 -->
-
-![Mobile View](docs/screenshots/14-mobile-view.png)
-
----
-
-> **Tips capture screenshot bersih:**
-> - Tutup semua DevTools sebelum capture
-> - Pakai data dummy yang representatif (jangan kosong, jangan ngawur)
-> - Untuk Windows: `Win + Shift + S` -> area capture, paste ke Paint -> save PNG
-> - Untuk crop & annotate: pakai [ShareX](https://getsharex.com/) atau [Greenshot](https://getgreenshot.org/)
-> - Untuk GIF: pakai [ScreenToGif](https://www.screentogif.com/), durasi 5-15 detik cukup
+<img width="1919" height="652" alt="image" src="https://github.com/user-attachments/assets/7e86f957-86ff-485e-8674-b13d28fd382e" />
 
 ---
 
