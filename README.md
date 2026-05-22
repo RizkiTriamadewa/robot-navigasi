@@ -10,7 +10,7 @@
 
 **Robot Navigation Monitoring System with Custom RBAC, Pest Detection & Demografi**
 
-[Features](#features) - [Installation](#installation) - [Documentation](#documentation) - [Tech Stack](#tech-stack)
+[Features](#features) - [Screenshots](#screenshots--dokumentasi-visual) - [Installation](#installation) - [Documentation](#documentation) - [Tech Stack](#tech-stack)
 
 </div>
 
@@ -101,6 +101,208 @@ NAV-X Robot Dashboard adalah sistem monitoring dan kontrol robot navigasi berbas
 - Proximity warning ring (kuning <80px, merah <50px)
 - Drag-and-drop obstacle editor di minimap
 - **Mulai v4.3.0: map start kosong**, user tambah manual
+
+---
+
+## Screenshots & Dokumentasi Visual
+
+> Letakkan semua screenshot di folder `docs/screenshots/` lalu commit ke repository GitHub.
+> Markdown image syntax: `![alt text](docs/screenshots/nama-file.png)`
+> Rekomendasi resolusi: 1920x1080 (full page) atau 1280x720 (komponen). Format: PNG (UI) / JPG (foto/video frame). Maks ~500KB per file biar README ringan saat di-clone.
+
+```
+docs/
+└── screenshots/
+    ├── 01-login.png
+    ├── 02-dashboard-monitoring.png
+    ├── 03-sensor-indikator.png
+    ├── ...
+```
+
+### 1. Halaman Login
+
+<!-- ini bagian screenshot halaman login (video background + glassmorphism card) -->
+<!-- Ambil dari: http://localhost/robot_dashboard/robot-navigasi/public/login.php -->
+<!-- Tunjukin: video background full-screen, card login transparan, logo NAV-X -->
+
+![Login Page](docs/screenshots/01-login.png)
+
+---
+
+### 2. Dashboard Monitoring (Tab Utama)
+
+<!-- ini bagian screenshot dashboard utama tab Monitoring -->
+<!-- Tunjukin: minimap robot + kamera FPV + indikator battery di header -->
+<!-- Login sebagai admin/admin123 dulu biar semua widget muncul -->
+
+![Dashboard Monitoring](docs/screenshots/02-dashboard-monitoring.png)
+
+---
+
+### 3. Indikator Sensor (11 Sensor Realtime)
+
+<!-- ini bagian screenshot indikator sensor -->
+<!-- Tab "Sensors" - tunjukin grid 11 sensor: battery, GPS, liquid level, motion, position XYZ, speed, mode, internet, dll -->
+<!-- Bisa dipecah jadi beberapa screenshot kalau panjang (3a, 3b, 3c) -->
+
+![Indikator Sensor](docs/screenshots/03-sensor-indikator.png)
+
+#### 3a. Detail Battery & Voltage
+<!-- Close-up widget battery saja -->
+
+![Battery Widget](docs/screenshots/03a-battery.png)
+
+#### 3b. GPS Map Tracking
+<!-- Close-up peta GPS dengan path tracking -->
+
+![GPS Tracking](docs/screenshots/03b-gps.png)
+
+#### 3c. Liquid Level & Motion
+<!-- Close-up tank level + status moving/idle -->
+
+![Liquid & Motion](docs/screenshots/03c-liquid-motion.png)
+
+---
+
+### 4. Minimap & Obstacle Detection
+
+<!-- ini bagian screenshot minimap dengan obstacle -->
+<!-- Tunjukin: kotak merah obstacle + warning ring kuning/merah saat robot dekat -->
+<!-- Drag-drop obstacle editor (kalau bisa, screenshot saat obstacle di-drag) -->
+
+![Minimap with Obstacles](docs/screenshots/04-minimap-obstacle.png)
+
+---
+
+### 5. Pest Detection (Riwayat Hama)
+
+<!-- ini bagian screenshot tabel deteksi hama -->
+<!-- Tab "Riwayat" -> sub-tab Pest Detection -->
+<!-- Tunjukin: tabel dengan foto hama Wikimedia, koordinat XYZ, LU/LS, severity badge -->
+
+![Pest Detection Table](docs/screenshots/05-pest-detection.png)
+
+#### 5a. Filter & Search Pest
+<!-- Tunjukin filter aktif: search by nama, severity dropdown, date range -->
+
+![Pest Filter](docs/screenshots/05a-pest-filter.png)
+
+#### 5b. Tombol Semprot (Trigger Auto-Save)
+<!-- Tunjukin tombol Semprot di tab Monitoring + toast confirmation setelah klik -->
+
+![Tombol Semprot](docs/screenshots/05b-semprot-action.png)
+
+---
+
+### 6. Demografi Map (Canvas Plotting)
+
+<!-- ini bagian screenshot demografi map -->
+<!-- Tab "Demografi" - canvas map dengan titik-titik LU/LS, dashed line urut waktu -->
+<!-- Color-coded marker per event_type -->
+
+![Demografi Map](docs/screenshots/06-demografi-map.png)
+
+#### 6a. Filter Per Event Type
+<!-- Dropdown filter: start / stop / respawn / pause / manual -->
+
+![Demografi Filter](docs/screenshots/06a-demografi-filter.png)
+
+---
+
+### 7. Logbook & Activity Logs
+
+<!-- ini bagian screenshot logbook -->
+<!-- Tab "Logbook" - tabel realtime log aktivitas robot -->
+
+![Activity Logbook](docs/screenshots/07-logbook.png)
+
+---
+
+### 8. Laporan & Export
+
+<!-- ini bagian screenshot laporan -->
+<!-- Tab "Laporan" - chart + tombol export PDF/CSV -->
+<!-- Bisa screenshot file PDF hasilnya juga sebagai bukti -->
+
+![Reports & Charts](docs/screenshots/08-laporan.png)
+
+---
+
+### 9. Admin Panel - User Management
+
+<!-- ini bagian screenshot admin user management -->
+<!-- Tab "Admin" -> sub-tab Users -->
+<!-- Tunjukin: list user, role badge, tombol edit/delete -->
+
+![User Management](docs/screenshots/09-admin-users.png)
+
+---
+
+### 10. Admin Panel - Roles & Permission Matrix
+
+<!-- ini bagian screenshot RBAC permission matrix -->
+<!-- Tab "Admin" -> sub-tab Roles atau Permissions -->
+<!-- Tunjukin: tabel checkbox role x permission (19 permission) -->
+<!-- Highlight: row "Super Admin" yang locked + custom role baru -->
+
+![Permission Matrix](docs/screenshots/10-permission-matrix.png)
+
+#### 10a. Create Custom Role
+<!-- Modal/form bikin role baru -->
+
+![Create Role](docs/screenshots/10a-create-role.png)
+
+---
+
+### 11. Audit Log Trail
+
+<!-- ini bagian screenshot audit log -->
+<!-- Tab "Admin" -> sub-tab Audit Logs -->
+<!-- Tunjukin: history login, perubahan role, delete action, dengan timestamp + IP -->
+
+![Audit Logs](docs/screenshots/11-audit-log.png)
+
+---
+
+### 12. Database Schema (ERD / phpMyAdmin)
+
+<!-- ini bagian screenshot ERD database -->
+<!-- Bisa pakai screenshot phpMyAdmin (Designer view) atau dbdiagram.io -->
+<!-- Tunjukin relasi: users -> roles -> role_permissions, daily_logs -> pest_detections (ON DELETE CASCADE) -->
+
+![Database ERD](docs/screenshots/12-database-erd.png)
+
+---
+
+### 13. Demo Video / GIF (Opsional tapi Recommended)
+
+<!-- ini bagian demo gif/video -->
+<!-- Rekam pakai ScreenToGif / OBS, max 10MB biar bisa langsung di-render GitHub -->
+<!-- Format: GIF atau MP4 (MP4 perlu di-upload ke GitHub Issue dulu, copy URL-nya) -->
+
+<!-- Contoh untuk GIF: -->
+![Demo Flow](docs/screenshots/13-demo-flow.gif)
+
+<!-- Contoh untuk MP4 (upload via GitHub Issues -> drag file -> copy embed URL): -->
+<!-- https://github.com/user-attachments/assets/xxxx-xxxx-xxxx -->
+
+---
+
+### 14. Mobile / Responsive View (Opsional)
+
+<!-- ini bagian screenshot tampilan mobile -->
+<!-- Pakai Chrome DevTools (F12) -> Toggle device toolbar -> iPhone 12 / Pixel 5 -->
+
+![Mobile View](docs/screenshots/14-mobile-view.png)
+
+---
+
+> **Tips capture screenshot bersih:**
+> - Tutup semua DevTools sebelum capture
+> - Pakai data dummy yang representatif (jangan kosong, jangan ngawur)
+> - Untuk Windows: `Win + Shift + S` -> area capture, paste ke Paint -> save PNG
+> - Untuk crop & annotate: pakai [ShareX](https://getsharex.com/) atau [Greenshot](https://getgreenshot.org/)
+> - Untuk GIF: pakai [ScreenToGif](https://www.screentogif.com/), durasi 5-15 detik cukup
 
 ---
 
